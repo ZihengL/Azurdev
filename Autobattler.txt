@@ -1,0 +1,16 @@
+
+
+damage:
+- types of damage
+
+projectile:
+- has types of damage
+
+armor:
+- has types of protection
+
+
+
+
+
+Touchscreen/remote controller interactions
