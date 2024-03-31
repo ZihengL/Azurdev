@@ -1,12 +1,10 @@
 _.mixin(_.str.exports());
 
-$.expr[':'].icontains = function(a, i, m) {
-  return jQuery(a).text().toUpperCase()
-      .indexOf(m[3].toUpperCase()) >= 0;
+$.expr[":"].icontains = function (a, i, m) {
+  return jQuery(a).text().toUpperCase().indexOf(m[3].toUpperCase()) >= 0;
 };
 
-$(document).ready(function() {
-
+$(document).ready(function () {
   var matchBodyColor = true;
   var itemsToDraw = [];
   var itemsMeta = {};
@@ -33,7 +31,7 @@ $(document).ready(function() {
   var addedCustomAnimations = [];
 
   // on hash (url) change event, interpret and redraw
-  jHash.change(function() {
+  jHash.change(function () {
     params = jHash.val();
     interpretParams();
     redraw();
@@ -50,7 +48,7 @@ $(document).ready(function() {
   showOrHideElements();
   nextFrame();
 
-  $("input[type=radio]").attr('title', function() {
+  $("input[type=radio]").attr("title", function () {
     var name = "";
     if ($(this).data(`layer_1_${getBodyTypeName()}`)) {
       name = $(this).data(`layer_1_${getBodyTypeName()}`);
@@ -72,12 +70,15 @@ $(document).ready(function() {
   });
 
   // set params and redraw when any radio button is clicked on
-  $("input[type=radio]").each(function() {
-    $(this).click(function() {
+  $("input[type=radio]").each(function () {
+    $(this).click(function () {
       if (matchBodyColor) {
-        matchBodyColorForThisAsset = $(this).attr('matchBodyColor')
-        if (matchBodyColorForThisAsset && matchBodyColorForThisAsset != 'false') {
-          selectColorsToMatch($(this).attr('variant'));
+        matchBodyColorForThisAsset = $(this).attr("matchBodyColor");
+        if (
+          matchBodyColorForThisAsset &&
+          matchBodyColorForThisAsset != "false"
+        ) {
+          selectColorsToMatch($(this).attr("variant"));
         }
       }
       setParams();
@@ -88,90 +89,102 @@ $(document).ready(function() {
 
   // Toggle display of a list elements children when clicked
   // Again, do not multiple toggle when clicking on children
-  $("#chooser ul>li").click(function(event) {
+  $("#chooser ul>li").click(function (event) {
     $(this).children("span").toggleClass("condensed").toggleClass("expanded");
     var $ul = $(this).children("ul");
-    $ul.toggle('slow').promise().done(drawPreviews);
+    $ul.toggle("slow").promise().done(drawPreviews);
     event.stopPropagation();
   });
 
-  $("#collapse").click(function() {
-    $("#chooser>ul ul").hide('slow');
-    $("#chooser>ul span.expanded").removeClass("expanded").addClass("condensed");
+  $("#collapse").click(function () {
+    $("#chooser>ul ul").hide("slow");
+    $("#chooser>ul span.expanded")
+      .removeClass("expanded")
+      .addClass("condensed");
   });
-  $("#expand").click(function() {
-    let parents = $('input[type="radio"]:checked').parents("ul")
-    parents.prev('span').addClass("expanded")
-    parents.show().promise().done(drawPreviews)
-  })
+  $("#expand").click(function () {
+    let parents = $('input[type="radio"]:checked').parents("ul");
+    parents.prev("span").addClass("expanded");
+    parents.show().promise().done(drawPreviews);
+  });
 
   function search(e) {
-    $('.search-result').removeClass('search-result')
-    let query = $('#searchbox').val()
-    if (query != '' && query.length > 1) {
-      let results = $('#chooser span:icontains('+query+')').addClass("search-result")
-      let parents = results.parents("ul")
-      parents.prev('span').addClass("expanded").removeClass('condensed')
-      parents.show().promise().done(drawPreviews)
+    $(".search-result").removeClass("search-result");
+    let query = $("#searchbox").val();
+    if (query != "" && query.length > 1) {
+      let results = $("#chooser span:icontains(" + query + ")").addClass(
+        "search-result"
+      );
+      let parents = results.parents("ul");
+      parents.prev("span").addClass("expanded").removeClass("condensed");
+      parents.show().promise().done(drawPreviews);
     }
   }
-  $("#searchbox").on('search',search)
-  $("#search").click(search)
-  $("#customizeChar").on('submit',function(e) {
-    search()
-    e.preventDefault()
-  })
-
-  $('#displayMode-compact').click(function() {
-    $('#chooser').toggleClass('compact')
-  })
-
-  $('#match_body-color').click(function() {
-    matchBodyColor = $(this).is(":checked");
-  })
-
-  $('#scroll-to-credits').click(function(e) {
-    $('#credits')[0].scrollIntoView()
+  $("#searchbox").on("search", search);
+  $("#search").click(search);
+  $("#customizeChar").on("submit", function (e) {
+    search();
     e.preventDefault();
-  })
+  });
 
-  $("#previewFile").change(function() {
+  $("#displayMode-compact").click(function () {
+    $("#chooser").toggleClass("compact");
+  });
+
+  $("#match_body-color").click(function () {
+    matchBodyColor = $(this).is(":checked");
+  });
+
+  $("#scroll-to-credits").click(function (e) {
+    $("#credits")[0].scrollIntoView();
+    e.preventDefault();
+  });
+
+  $("#previewFile").change(function () {
     previewFile();
   });
 
-  $("#ZPOS").change(function() {
+  $("#ZPOS").change(function () {
     previewFile();
   });
 
-  $("#saveAsPNG").click(function() {
-    renameImageDownload(this, canvas, 'Download' + Math.floor(Math.random() * 100000) + '.png');
-    return true
+  $("#saveAsPNG").click(function () {
+    renameImageDownload(
+      this,
+      canvas,
+      "Download" + Math.floor(Math.random() * 100000) + ".png"
+    );
+    return true;
   });
 
-  $("#resetAll").click(function() {
-    window.setTimeout(function() {
-      document.getElementById("previewFile").value = "";
-      images["uploaded"] = null;
-      document.getElementById("ZPOS").value = 0;
-      params = {};
-      jHash.val(params);
-      interpretParams();
-      selectDefaults();
-      redraw();
-      showOrHideElements();
-    }, 0, false);
+  $("#resetAll").click(function () {
+    window.setTimeout(
+      function () {
+        document.getElementById("previewFile").value = "";
+        images["uploaded"] = null;
+        document.getElementById("ZPOS").value = 0;
+        params = {};
+        jHash.val(params);
+        interpretParams();
+        selectDefaults();
+        redraw();
+        showOrHideElements();
+      },
+      0,
+      false
+    );
   });
 
-  $(".replacePinkMask").click(function() {
+  $(".replacePinkMask").click(function () {
     var imgData = ctx.getImageData(0, 0, canvas.width, canvas.height),
-    pix = imgData.data;
+      pix = imgData.data;
 
-    for (var i = 0, n = pix.length; i <n; i += 4) {
-      const a = pix[i+3];
+    for (var i = 0, n = pix.length; i < n; i += 4) {
+      const a = pix[i + 3];
       if (a > 0) {
         const r = pix[i];
-        const g = pix[i+1];
-        const b = pix[i+2];
+        const g = pix[i + 1];
+        const b = pix[i + 2];
         if (r === 255 && g === 44 && b === 230) {
           pix[i + 3] = 0;
         }
@@ -180,9 +193,9 @@ $(document).ready(function() {
     ctx.putImageData(imgData, 0, 0);
   });
 
-  $(".generateSheetCreditsCsv").click(function() {
-    let bl = new Blob([sheetCredits.join('\n')], {
-      type: "text/html"
+  $(".generateSheetCreditsCsv").click(function () {
+    let bl = new Blob([sheetCredits.join("\n")], {
+      type: "text/html",
     });
     let a = document.createElement("a");
     a.href = URL.createObjectURL(bl);
@@ -194,16 +207,16 @@ $(document).ready(function() {
     document.removeChild(a);
   });
 
-  $(".exportToClipboard").click(function() {
+  $(".exportToClipboard").click(function () {
     var spritesheet = {};
     Object.assign(spritesheet, itemsMeta);
     spritesheet["layers"] = itemsToDraw;
     navigator.clipboard.writeText(JSON.stringify(spritesheet, null, "  "));
   });
 
-  $(".generateSheetCreditsTxt").click(function() {
+  $(".generateSheetCreditsTxt").click(function () {
     let bl = new Blob([sheetCreditsToTxt()], {
-      type: "text/html"
+      type: "text/html",
     });
     let a = document.createElement("a");
     a.href = URL.createObjectURL(bl);
@@ -215,9 +228,9 @@ $(document).ready(function() {
     document.removeChild(a);
   });
 
-  $(".generateAllCredits").click(function() {
-    let bl = new Blob([parsedCredits.join('\n')], {
-      type: "text/html"
+  $(".generateAllCredits").click(function () {
+    let bl = new Blob([parsedCredits.join("\n")], {
+      type: "text/html",
     });
     let a = document.createElement("a");
     a.href = URL.createObjectURL(bl);
@@ -229,10 +242,10 @@ $(document).ready(function() {
     document.removeChild(a);
   });
 
-  $("#whichAnim").change(function() {
+  $("#whichAnim").change(function () {
     animationItems = [];
     const selectedAnim = $("#whichAnim>:selected");
-    const selectedAnimationValue = $("#whichAnim>:selected").text()
+    const selectedAnimationValue = $("#whichAnim>:selected").text();
     const animRowFrames = parseInt(selectedAnim.data("cycle"));
     animRowStart = parseInt(selectedAnim.data("row"));
     animRowNum = parseInt(selectedAnim.data("num"));
@@ -246,16 +259,16 @@ $(document).ready(function() {
       animRowNum = selectedCustomAnimation.frames.length;
       animRowStart = 0;
       for (var i = 0; i < selectedCustomAnimation.frames[0].length; ++i) {
-        if (selectedCustomAnimation.skipFirstFrameInPreview && i === 0  ) {
+        if (selectedCustomAnimation.skipFirstFrameInPreview && i === 0) {
           continue;
         }
         animationItems.push(i);
       }
-      return
+      return;
     }
     const animRowFramesCustom = selectedAnim.data("cycle-custom");
     if (animRowFramesCustom !== undefined) {
-      animationItems = animRowFramesCustom.split('-').map(Number);
+      animationItems = animRowFramesCustom.split("-").map(Number);
       if (animationItems.length > 0) {
         return;
       }
@@ -267,20 +280,24 @@ $(document).ready(function() {
 
   function clearCustomAnimationPreviews() {
     for (var i = 0; i < addedCustomAnimations.length; ++i) {
-      $('#whichAnim').children(`option[value=${addedCustomAnimations[i]}]`).remove();
+      $("#whichAnim")
+        .children(`option[value=${addedCustomAnimations[i]}]`)
+        .remove();
     }
   }
 
   function addCustomAnimationPreviews() {
     clearCustomAnimationPreviews();
     for (var i = 0; i < addedCustomAnimations.length; ++i) {
-      $('#whichAnim').append(new Option(`${addedCustomAnimations[i]}`, `${addedCustomAnimations[i]}`))
+      $("#whichAnim").append(
+        new Option(`${addedCustomAnimations[i]}`, `${addedCustomAnimations[i]}`)
+      );
     }
   }
 
-  $("#spritesheet,#previewAnimations").on('click',function(e) {
-    $(this).toggleClass('zoomed')
-  })
+  $("#spritesheet,#previewAnimations").on("click", function (e) {
+    $(this).toggleClass("zoomed");
+  });
 
   function selectDefaults() {
     $(`#${"body-Body_color_light"}`).prop("checked", true);
@@ -290,25 +307,29 @@ $(document).ready(function() {
 
   function selectColorsToMatch(variant) {
     const colorToMatch = variant;
-    $("input[matchBodyColor^=true]:checked").each(function() {
+    $("input[matchBodyColor^=true]:checked").each(function () {
       // 1. Determine the type of asset that is selected (eg. human male)
-      const assetType = $(this).attr('parentName').replaceAll(" ", "_");
+      const assetType = $(this).attr("parentName").replaceAll(" ", "_");
       // 2. Determine the color of asset that needs to selected (eg. head-human_male_light)
-      const assetToSelect =  $(this).attr('name') + "-" + assetType + "_" + colorToMatch;
+      const assetToSelect =
+        $(this).attr("name") + "-" + assetType + "_" + colorToMatch;
       $(`#${assetToSelect}`).prop("checked", true);
-    })
+    });
     setParams();
   }
 
   function getCreditFor(fileName) {
     if (fileName !== "") {
-      let prospect = '';
-      let prospectPath = '';
-      let prospectFile = '';
+      let prospect = "";
+      let prospectPath = "";
+      let prospectFile = "";
       for (let creditEntry of parsedCredits) {
-        var creditPath = creditEntry.substring(0, creditEntry.indexOf(','));
-        if (fileName.startsWith(creditPath) && (creditPath.length > prospectPath.length)
-            && !creditEntry.startsWith(creditPath + ',,,,')) {
+        var creditPath = creditEntry.substring(0, creditEntry.indexOf(","));
+        if (
+          fileName.startsWith(creditPath) &&
+          creditPath.length > prospectPath.length &&
+          !creditEntry.startsWith(creditPath + ",,,,")
+        ) {
           prospect = creditEntry;
           prospectPath = creditPath;
           prospectFile = fileName;
@@ -316,10 +337,10 @@ $(document).ready(function() {
         if (creditEntry.startsWith(fileName)) {
           return creditEntry;
         }
-      };
+      }
 
       // Found closest match!
-      if (prospect !== '') {
+      if (prospect !== "") {
         return prospect.replace(prospectPath, prospectFile);
       }
     }
@@ -329,7 +350,10 @@ $(document).ready(function() {
     if (fileName !== "") {
       let creditEntry = getCreditFor(fileName);
       if (!creditEntry) {
-        sheetCredits.push(fileName+",!MISSING LICENSE INFORMATION! PLEASE CORRECT MANUALY AND REPORT BACK VIA A GITHUB ISSUE,,,,,,,,BAD");
+        sheetCredits.push(
+          fileName +
+            ",!MISSING LICENSE INFORMATION! PLEASE CORRECT MANUALY AND REPORT BACK VIA A GITHUB ISSUE,,,,,,,,BAD"
+        );
       } else {
         sheetCredits.push(creditEntry);
       }
@@ -338,40 +362,50 @@ $(document).ready(function() {
   }
 
   function sheetCreditsToTxt() {
-    let csv = parseCSV(sheetCredits.join('\n'))
-    let authors = csv.slice(1).map((row) => row[2].split(",").map((au) => au.trim())).flat()
-    authors = [...new Set(authors)]
+    let csv = parseCSV(sheetCredits.join("\n"));
+    let authors = csv
+      .slice(1)
+      .map((row) => row[2].split(",").map((au) => au.trim()))
+      .flat();
+    authors = [...new Set(authors)];
 
-    let out = csv.slice(1).map(function(row) {
-      let urls = row.slice(4,9)
-        .filter(function (x) { return !!x })
-        .map(function (x) { return "    - " + x})
-      return [`- ${row[0]}: by ${row[2]}. License(s): ${row[3]}. ${row[1]}`].concat(urls).join("\n")
-    })
-    return "Authors: " + authors.join(", ")+"\n\n"+out.join("\n\n")
+    let out = csv.slice(1).map(function (row) {
+      let urls = row
+        .slice(4, 9)
+        .filter(function (x) {
+          return !!x;
+        })
+        .map(function (x) {
+          return "    - " + x;
+        });
+      return [`- ${row[0]}: by ${row[2]}. License(s): ${row[3]}. ${row[1]}`]
+        .concat(urls)
+        .join("\n");
+    });
+    return "Authors: " + authors.join(", ") + "\n\n" + out.join("\n\n");
   }
 
   function displayCredits() {
     $("textarea#creditsText").val(sheetCreditsToTxt());
   }
 
-  function previewFile(){
-    var preview = document.querySelector('img'); //selects the query named img
-    var file    = document.querySelector('input[type=file]').files[0]; //sames as here
+  function previewFile() {
+    var preview = document.querySelector("img"); //selects the query named img
+    var file = document.querySelector("input[type=file]").files[0]; //sames as here
 
-    var img = new Image;
-    img.onload = function() {
+    var img = new Image();
+    img.onload = function () {
       images["uploaded"] = img;
       redraw();
       showOrHideElements();
-    }
+    };
     img.src = URL.createObjectURL(file);
   }
 
   function renameImageDownload(link, canvasItem, filename) {
     link.href = canvasItem.toDataURL();
     link.download = filename;
-  };
+  }
 
   function getBodyTypeName() {
     if ($("#sex-male").prop("checked")) {
@@ -397,19 +431,23 @@ $(document).ready(function() {
     sheetCredits = [creditColumns];
     var baseUrl = window.location.href.split("/").slice(0, -1).join("/"); // get url until last '/'
 
-    itemsMeta = {"bodyTypeName":bodyTypeName,
-                 "url":window.location.href,
-                 "spritesheets":baseUrl+"/spritesheets/",   // <- holds base URL to spritesheets (used to download them)
-                 "version":1,                               // <- to track future compatibilty breaking changes
-                 "datetime": (new Date().toLocaleString()),
-                 "credits":""}
+    itemsMeta = {
+      bodyTypeName: bodyTypeName,
+      url: window.location.href,
+      spritesheets: baseUrl + "/spritesheets/", // <- holds base URL to spritesheets (used to download them)
+      version: 1, // <- to track future compatibilty breaking changes
+      datetime: new Date().toLocaleString(),
+      credits: "",
+    };
 
     zPosition = 0;
-    $("input[type=radio]:checked").each(function(index) {
-      for (jdx =1; jdx < 10; jdx++) {
+    $("input[type=radio]:checked").each(function (index) {
+      for (jdx = 1; jdx < 10; jdx++) {
         if ($(this).data(`layer_${jdx}_${bodyTypeName}`)) {
           const zPos = $(this).data(`layer_${jdx}_zpos`);
-          const custom_animation = $(this).data(`layer_${jdx}_custom_animation`);
+          const custom_animation = $(this).data(
+            `layer_${jdx}_custom_animation`
+          );
           const fileName = $(this).data(`layer_${jdx}_${bodyTypeName}`);
           const parentName = $(this).attr(`name`);
           const name = $(this).attr(`parentName`);
@@ -420,9 +458,9 @@ $(document).ready(function() {
             itemToDraw.fileName = fileName;
             itemToDraw.zPos = zPos;
             itemToDraw.custom_animation = custom_animation;
-            itemToDraw.parentName = parentName
-            itemToDraw.name = name
-            itemToDraw.variant = variant
+            itemToDraw.parentName = parentName;
+            itemToDraw.name = name;
+            itemToDraw.variant = variant;
             addCreditFor(fileName);
             itemsToDraw.push(itemToDraw);
           }
@@ -436,12 +474,13 @@ $(document).ready(function() {
     if (images["uploaded"] != null) {
       const itemToDraw = {};
       itemToDraw.fileName = "uploaded";
-      itemToDraw.zPos = parseInt(document.getElementById("ZPOS").value) || 0;;
+      itemToDraw.zPos = parseInt(document.getElementById("ZPOS").value) || 0;
       itemsToDraw.push(itemToDraw);
     }
     drawItems(itemsToDraw);
   }
 
+  ///////////////////////////////////////// DRAWING ITEM
   function drawItems(itemsToDraw) {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
@@ -457,9 +496,14 @@ $(document).ready(function() {
         }
         addedCustomAnimations.push(customAnimationString);
         const customAnimation = customAnimations[customAnimationString];
-        const customAnimationWidth = customAnimation.frameSize * customAnimation.frames[0].length;
-        const customAnimationHeight = customAnimation.frameSize * customAnimation.frames.length;
-        requiredCanvasWidth = Math.max(requiredCanvasWidth, customAnimationWidth);
+        const customAnimationWidth =
+          customAnimation.frameSize * customAnimation.frames[0].length;
+        const customAnimationHeight =
+          customAnimation.frameSize * customAnimation.frames.length;
+        requiredCanvasWidth = Math.max(
+          requiredCanvasWidth,
+          customAnimationWidth
+        );
         requiredCanvasHeight = requiredCanvasHeight + customAnimationHeight;
       }
     }
@@ -470,7 +514,7 @@ $(document).ready(function() {
 
     var itemIdx = 0;
     var didPutUniversalForCustomAnimation = "";
-    itemsToDraw.sort(function(lhs, rhs) {
+    itemsToDraw.sort(function (lhs, rhs) {
       return parseInt(lhs.zPos) - parseInt(rhs.zPos);
     });
     for (item in itemsToDraw) {
@@ -482,29 +526,43 @@ $(document).ready(function() {
         const customAnimationDefinition = customAnimations[custom_animation];
         const frameSize = customAnimationDefinition.frameSize;
 
-        const customAnimationCanvas=document.createElement("canvas");
-        customAnimationCanvas.width=requiredCanvasWidth;
-        customAnimationCanvas.height=requiredCanvasHeight-universalSheetHeight;
-        const customAnimationContext=customAnimationCanvas.getContext("2d");
+        const customAnimationCanvas = document.createElement("canvas");
+        customAnimationCanvas.width = requiredCanvasWidth;
+        customAnimationCanvas.height =
+          requiredCanvasHeight - universalSheetHeight;
+        const customAnimationContext = customAnimationCanvas.getContext("2d");
 
         const indexInArray = addedCustomAnimations.indexOf(custom_animation);
         var offSetInAdditionToOtherCustomActions = 0;
-        for (var i = 0; i <indexInArray; ++i) {
+
+        for (var i = 0; i < indexInArray; ++i) {
           const otherCustomAction = customAnimations[addedCustomAnimations[i]];
-          offSetInAdditionToOtherCustomActions+=otherCustomAction.frameSize * otherCustomAction.frames.length
+          offSetInAdditionToOtherCustomActions +=
+            otherCustomAction.frameSize * otherCustomAction.frames.length;
         }
 
         if (didPutUniversalForCustomAnimation !== custom_animation) {
           for (var i = 0; i < customAnimationDefinition.frames.length; ++i) {
             const frames = customAnimationDefinition.frames[i];
+
             for (var j = 0; j < frames.length; ++j) {
               const frameCoordinateX = parseInt(frames[j].split(",")[1]);
               const frameCoordinateRowName = frames[j].split(",")[0];
-              const frameCoordinateY = animationRowsLayout[frameCoordinateRowName]+1;
-              const offSet = (frameSize-universalFrameSize)/2;
+              const frameCoordinateY =
+                animationRowsLayout[frameCoordinateRowName] + 1;
+              const offSet = (frameSize - universalFrameSize) / 2;
 
-              var imgDataSingleFrame = ctx.getImageData(universalFrameSize * frameCoordinateX, universalFrameSize * frameCoordinateY, universalFrameSize, universalFrameSize);
-              customAnimationContext.putImageData(imgDataSingleFrame, frameSize * j + offSet, frameSize * i + offSet + offSetInAdditionToOtherCustomActions);
+              var imgDataSingleFrame = ctx.getImageData(
+                universalFrameSize * frameCoordinateX,
+                universalFrameSize * frameCoordinateY,
+                universalFrameSize,
+                universalFrameSize
+              );
+              customAnimationContext.putImageData(
+                imgDataSingleFrame,
+                frameSize * j + offSet,
+                frameSize * i + offSet + offSetInAdditionToOtherCustomActions
+              );
             }
           }
           ctx.drawImage(customAnimationCanvas, 0, universalSheetHeight);
@@ -512,17 +570,21 @@ $(document).ready(function() {
             didPutUniversalForCustomAnimation = custom_animation;
           }
         }
-        ctx.drawImage(img, 0, universalSheetHeight+offSetInAdditionToOtherCustomActions);
+        ctx.drawImage(
+          img,
+          0,
+          universalSheetHeight + offSetInAdditionToOtherCustomActions
+        );
       } else {
         drawImage(ctx, img);
       }
-      itemIdx+=1;
+      itemIdx += 1;
     }
     addCustomAnimationPreviews();
   }
 
   function showOrHideElements() {
-    $("li").each(function(index) {
+    $("li").each(function (index) {
       if ($(this).data("required")) {
         var requiredTypes = $(this).data("required").split(",");
         if (!requiredTypes.includes(getBodyTypeName())) {
@@ -542,57 +604,84 @@ $(document).ready(function() {
   }
 
   function parseCSV(str) {
-      // https://stackoverflow.com/a/14991797/4091874
-      // Author: Trevor Dixon https://stackoverflow.com/users/711902/trevor-dixon
-      // CC-BY-SA 4.0 -> sublicensable to GPL v3
+    // https://stackoverflow.com/a/14991797/4091874
+    // Author: Trevor Dixon https://stackoverflow.com/users/711902/trevor-dixon
+    // CC-BY-SA 4.0 -> sublicensable to GPL v3
 
-      var arr = [];
-      var quote = false;  // 'true' means we're inside a quoted field
+    var arr = [];
+    var quote = false; // 'true' means we're inside a quoted field
 
-      // Iterate over each character, keep track of current row and column (of the returned array)
-      for (var row = 0, col = 0, c = 0; c < str.length; c++) {
-          var cc = str[c], nc = str[c+1];        // Current character, next character
-          arr[row] = arr[row] || [];             // Create a new row if necessary
-          arr[row][col] = arr[row][col] || '';   // Create a new column (start with empty string) if necessary
+    // Iterate over each character, keep track of current row and column (of the returned array)
+    for (var row = 0, col = 0, c = 0; c < str.length; c++) {
+      var cc = str[c],
+        nc = str[c + 1]; // Current character, next character
+      arr[row] = arr[row] || []; // Create a new row if necessary
+      arr[row][col] = arr[row][col] || ""; // Create a new column (start with empty string) if necessary
 
-          // If the current character is a quotation mark, and we're inside a
-          // quoted field, and the next character is also a quotation mark,
-          // add a quotation mark to the current column and skip the next character
-          if (cc == '"' && quote && nc == '"') { arr[row][col] += cc; ++c; continue; }
-
-          // If it's just one quotation mark, begin/end quoted field
-          if (cc == '"') { quote = !quote; continue; }
-
-          // If it's a comma and we're not in a quoted field, move on to the next column
-          if (cc == ',' && !quote) { ++col; continue; }
-
-          // If it's a newline (CRLF) and we're not in a quoted field, skip the next character
-          // and move on to the next row and move to column 0 of that new row
-          if (cc == '\r' && nc == '\n' && !quote) { ++row; col = 0; ++c; continue; }
-
-          // If it's a newline (LF or CR) and we're not in a quoted field,
-          // move on to the next row and move to column 0 of that new row
-          if (cc == '\n' && !quote) { ++row; col = 0; continue; }
-          if (cc == '\r' && !quote) { ++row; col = 0; continue; }
-
-          // Otherwise, append the current character to the current column
-          arr[row][col] += cc;
+      // If the current character is a quotation mark, and we're inside a
+      // quoted field, and the next character is also a quotation mark,
+      // add a quotation mark to the current column and skip the next character
+      if (cc == '"' && quote && nc == '"') {
+        arr[row][col] += cc;
+        ++c;
+        continue;
       }
-      return arr;
+
+      // If it's just one quotation mark, begin/end quoted field
+      if (cc == '"') {
+        quote = !quote;
+        continue;
+      }
+
+      // If it's a comma and we're not in a quoted field, move on to the next column
+      if (cc == "," && !quote) {
+        ++col;
+        continue;
+      }
+
+      // If it's a newline (CRLF) and we're not in a quoted field, skip the next character
+      // and move on to the next row and move to column 0 of that new row
+      if (cc == "\r" && nc == "\n" && !quote) {
+        ++row;
+        col = 0;
+        ++c;
+        continue;
+      }
+
+      // If it's a newline (LF or CR) and we're not in a quoted field,
+      // move on to the next row and move to column 0 of that new row
+      if (cc == "\n" && !quote) {
+        ++row;
+        col = 0;
+        continue;
+      }
+      if (cc == "\r" && !quote) {
+        ++row;
+        col = 0;
+        continue;
+      }
+
+      // Otherwise, append the current character to the current column
+      arr[row][col] += cc;
+    }
+    return arr;
   }
 
   function interpretParams() {
-    $("input[type=radio]").each(function() {
-      var words = _.words($(this).attr('id'), '-');
-      var initial = _.initial(words).join('-');
-      $(this).prop("checked", $(this).attr("checked") || params[initial] == _.last(words));
+    $("input[type=radio]").each(function () {
+      var words = _.words($(this).attr("id"), "-");
+      var initial = _.initial(words).join("-");
+      $(this).prop(
+        "checked",
+        $(this).attr("checked") || params[initial] == _.last(words)
+      );
     });
   }
 
   function setParams() {
-    $("input[type=radio]:checked").each(function() {
-      var words = _.words($(this).attr('id'), '-');
-      var initial = _.initial(words).join('-');
+    $("input[type=radio]:checked").each(function () {
+      var words = _.words($(this).attr("id"), "-");
+      var initial = _.initial(words).join("-");
       if (!$(this).attr("checked") || params[initial]) {
         params[initial] = _.last(words);
       }
@@ -601,8 +690,7 @@ $(document).ready(function() {
   }
 
   function getImage(imgRef) {
-    if (images[imgRef])
-    return images[imgRef];
+    if (images[imgRef]) return images[imgRef];
     else {
       var img = new Image();
       img.src = "spritesheets/" + imgRef;
@@ -617,10 +705,11 @@ $(document).ready(function() {
       callback(images[imgRef]);
       return images[imgRef];
     } else {
-
       var img = new Image();
       img.src = "spritesheets/" + imgRef;
-      img.onload = function() { callback(img) };
+      img.onload = function () {
+        callback(img);
+      };
       images[imgRef] = img;
       return img;
     }
@@ -630,43 +719,66 @@ $(document).ready(function() {
     try {
       ctx.drawImage(img, 0, 0);
       zPosition++;
-    } catch(err) {
+    } catch (err) {
       console.error("Error: could not find " + img.src);
     }
   }
 
   function drawPreviews() {
-    this.find("input[type=radio]").filter(function() {
-      return $(this).is(":visible");
-    }).each(function() {
-      $this = $(this)
-      if (!$this.parent().hasClass("hasPreview") && !$this.parent().hasClass("noPreview")) {
-        var prev = document.createElement("canvas");
-        prev.setAttribute("width", universalFrameSize);
-        prev.setAttribute("height", universalFrameSize);
-        var prevctx = prev.getContext("2d");
-        var img = null;
-        const previewRow = parseInt($(this).data("preview_row"));
-        var callback = function(img) {
-          try {
-            prevctx.drawImage(img, 0, previewRow * universalFrameSize, universalFrameSize, universalFrameSize, 0, 0, universalFrameSize, universalFrameSize);
-          } catch (err) {
-            console.log(err);
+    this.find("input[type=radio]")
+      .filter(function () {
+        return $(this).is(":visible");
+      })
+      .each(function () {
+        $this = $(this);
+        if (
+          !$this.parent().hasClass("hasPreview") &&
+          !$this.parent().hasClass("noPreview")
+        ) {
+          var prev = document.createElement("canvas");
+          prev.setAttribute("width", universalFrameSize);
+          prev.setAttribute("height", universalFrameSize);
+          var prevctx = prev.getContext("2d");
+          var img = null;
+          const previewRow = parseInt($(this).data("preview_row"));
+          var callback = function (img) {
+            try {
+              prevctx.drawImage(
+                img,
+                0,
+                previewRow * universalFrameSize,
+                universalFrameSize,
+                universalFrameSize,
+                0,
+                0,
+                universalFrameSize,
+                universalFrameSize
+              );
+            } catch (err) {
+              console.log(err);
+            }
+          };
+          img = getImage2(
+            $(this).data(`layer_1_${getBodyTypeName()}`),
+            callback
+          );
+          if (img != null) {
+            this.parentNode.insertBefore(prev, this);
+            $(this)
+              .parent()
+              .addClass("hasPreview")
+              .parent()
+              .addClass("hasPreview");
           }
-        };
-        img = getImage2($(this).data(`layer_1_${getBodyTypeName()}`), callback);
-        if (img != null) {
-          this.parentNode.insertBefore(prev, this);
-          $(this).parent().addClass("hasPreview").parent().addClass("hasPreview");
         }
-      }
-    });
-  };
+      });
+  }
 
   function nextFrame() {
     const animationType = $("#whichAnim>:selected").text();
     animCtx.clearRect(0, 0, anim.width, anim.height);
-    currentAnimationItemIndex = (currentAnimationItemIndex + 1) % animationItems.length;
+    currentAnimationItemIndex =
+      (currentAnimationItemIndex + 1) % animationItems.length;
     const currentFrame = animationItems[currentAnimationItemIndex];
     var frameSize = universalFrameSize;
     var offSet = 0;
@@ -675,28 +787,41 @@ $(document).ready(function() {
       frameSize = customAnimation.frameSize;
       const indexInArray = addedCustomAnimations.indexOf(activeCustomAnimation);
       offSet = universalSheetHeight;
-      for (var i = 0; i <indexInArray; ++i) {
+      for (var i = 0; i < indexInArray; ++i) {
         const otherCustomAction = customAnimations[addedCustomAnimations[i]];
-        offSet+=otherCustomAction.frameSize * otherCustomAction.frames.length
+        offSet += otherCustomAction.frameSize * otherCustomAction.frames.length;
       }
     }
     for (var i = 0; i < animRowNum; ++i) {
-      animCtx.drawImage(canvas, currentFrame * frameSize, offSet + ((animRowStart + i) * frameSize), frameSize, frameSize, i * frameSize, 0, frameSize, frameSize);
+      animCtx.drawImage(
+        canvas,
+        currentFrame * frameSize,
+        offSet + (animRowStart + i) * frameSize,
+        frameSize,
+        frameSize,
+        i * frameSize,
+        0,
+        frameSize,
+        frameSize
+      );
     }
     setTimeout(nextFrame, 1000 / 8);
   }
 });
 
 function splitCsv(str) {
-  return str.split(',').reduce((accum,curr)=>{
-    if(accum.isConcatting) {
-      accum.soFar[accum.soFar.length-1] += ','+curr
-    } else {
-      accum.soFar.push(curr)
-    }
-    if(curr.split('"').length % 2 == 0) {
-      accum.isConcatting= !accum.isConcatting
-    }
-    return accum;
-  },{soFar:[],isConcatting:false}).soFar
+  return str.split(",").reduce(
+    (accum, curr) => {
+      if (accum.isConcatting) {
+        accum.soFar[accum.soFar.length - 1] += "," + curr;
+      } else {
+        accum.soFar.push(curr);
+      }
+      if (curr.split('"').length % 2 == 0) {
+        accum.isConcatting = !accum.isConcatting;
+      }
+      return accum;
+    },
+    { soFar: [], isConcatting: false }
+  ).soFar;
 }

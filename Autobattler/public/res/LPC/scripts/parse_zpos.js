@@ -1,16 +1,17 @@
-const testFolder = 'sheet_definitions';
-const fs = require('fs');
+const testFolder = "sheet_definitions";
+const fs = require("fs");
 
 var toWrite = "json,layer,zPos,images\n";
-const possibleBodies = ["male", "female", "muscular", "pregnant","child"];
+const possibleBodies = ["male", "female", "muscular", "pregnant", "child"];
 
-fs.readdirSync(testFolder).forEach(file => {
-  if (!file.includes('.json')) {
-    return
+fs.readdirSync(testFolder).forEach((file) => {
+  if (!file.includes(".json")) {
+    return;
   }
   const json = file;
   const definition = JSON.parse(fs.readFileSync(`sheet_definitions/${file}`));
-  for (jdx =1; jdx < 10; jdx++) {
+  
+  for (jdx = 1; jdx < 10; jdx++) {
     const layerDefinition = definition[`layer_${jdx}`];
     if (layerDefinition !== undefined) {
       const layer = `layer_${jdx}`;
@@ -23,23 +24,23 @@ fs.readdirSync(testFolder).forEach(file => {
         const imageRef = layerDefinition[`${body}`];
         if (imageRef !== undefined) {
           if (!firstImage) {
-            images += " "
+            images += " ";
           }
           images += imageRef;
           firstImage = false;
         }
-        bodyIndex+=1;
+        bodyIndex += 1;
       }
-      toWrite+= `${json},${layer},${zPos},${images}\n`
+      toWrite += `${json},${layer},${zPos},${images}\n`;
     } else {
-      return
+      return;
     }
   }
 });
-fs.writeFile('sheet_definitions/z_positions.csv', toWrite, function(err) {
+fs.writeFile("sheet_definitions/z_positions.csv", toWrite, function (err) {
   if (err) {
-      return console.log(err);
+    return console.log(err);
   } else {
-      console.log('Updated!');
+    console.log("Updated!");
   }
 });

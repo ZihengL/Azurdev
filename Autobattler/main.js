@@ -5,9 +5,14 @@
 // * If you use any imported library check it by top restrictions
 
 import * as Sprites from "./public/Sprites.js";
+import { ANIM_ROWS_LAYOUT, CUSTOM_ANIMS } from "./public/custom-animations.js";
 
-const WIDTH = 800;
-const HEIGHT = 600;
+// const WIDTH = window.innerWidth;
+// const HEIGHT = window.innerHeight;
+
+const WIDTH = 832;
+const HEIGHT = 1344;
+const FRAMESIZE = 64;
 
 let canvas = document.getElementById("game_canvas");
 let ctx = canvas.getContext("2d");
@@ -15,33 +20,63 @@ let ctx = canvas.getContext("2d");
 canvas.width = WIDTH;
 canvas.height = HEIGHT;
 
+let testcanvas = document.getElementById("test_canvas");
+let testctx = testcanvas.getContext("2d");
+
+testcanvas.width = WIDTH;
+testcanvas.height = HEIGHT;
+
 const charfile = "char";
-
-const image = new Image();
-image.src = "ex1.png";
-
-// setInterval(function () {
-//   const targetWidth = 1000;
-
-//   // Calculate the aspect ratio
-//   const aspectRatio = image.naturalWidth / image.naturalHeight;
-
-//   // Calculate the target height to maintain the aspect ratio
-//   const targetHeight = targetWidth / aspectRatio;
-
-//   // Draw the image at the desired location and size
-//   ctx.drawImage(image, 100, 100, targetWidth, targetHeight);
-// }, 1);
 
 const chardata = await Sprites.getSpriteData(charfile);
 console.log(chardata);
 
-const combined = new Image()
-combined.src = await Sprites.loadCharacter(chardata.layers);
+const combined = new Image();
+combined.src = await Sprites.loadPredefined(chardata.layers);
 
+const testresult = new Image();
+testresult.src = combined.src;
+
+const thrust_anim = CUSTOM_ANIMS["thrust_oversize"];
+const custom_frames = thrust_anim.frames.map((frame) => {
+  const split = frame.map(elem => elem.split(','));
+
+  // console.log(split);
+});
+
+const thrustNorth = thrust_anim.frames[0];
+const firstFrame = thrustNorth[0].split(",");
+// console.log(thrust_anim, thrustNorth, firstFrame);
+
+const frameLocation = ANIM_ROWS_LAYOUT[firstFrame[0]] + 1;
+const startY = FRAMESIZE * frameLocation;
+// console.log("frameLocation, sY", frameLocation, startY);
+
+
+// https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/drawImage
 setInterval(function () {
-  const aspectRatio = combined.naturalWidth / combined.naturalHeight;
-  const targetHeight = canvas.height / aspectRatio;
+  canvas.width = combined.naturalWidth;
+  canvas.height = combined.naturalHeight;
+  // console.log("cv",
+  //   canvas.width,
+  //   canvas.height, "combined",
+  //   combined.naturalWidth,
+  //   combined.naturalHeight
+  // );
 
-  ctx.drawImage(combined, 100, 100, WIDTH, targetHeight);
-}, 1); 
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  ctx.drawImage(combined, 0, 0, combined.naturalWidth, combined.naturalHeight);
+
+  testctx.clearRect(0, 0, testcanvas.width, testcanvas.height);
+  testctx.drawImage(
+    testresult,
+    0,
+    startY,
+    testresult.naturalWidth,
+    FRAMESIZE,
+    0,
+    0,
+    testresult.naturalWidth,
+    64
+  );
+}, 1000);
