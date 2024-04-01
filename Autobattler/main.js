@@ -20,11 +20,17 @@ let ctx = canvas.getContext("2d");
 canvas.width = WIDTH;
 canvas.height = HEIGHT;
 
-let testcanvas = document.getElementById("test_canvas");
-let testctx = testcanvas.getContext("2d");
+let custom_canvas = document.getElementById("custom_canvas");
+let custom_ctx = custom_canvas.getContext("2d");
 
-testcanvas.width = WIDTH;
-testcanvas.height = HEIGHT;
+custom_canvas.width = WIDTH;
+custom_canvas.height = HEIGHT;
+
+// let testcanvas = document.getElementById("test_canvas");
+// let testctx = testcanvas.getContext("2d");
+
+// testcanvas.width = WIDTH;
+// testcanvas.height = HEIGHT;
 
 const charfile = "char";
 
@@ -34,49 +40,41 @@ console.log(chardata);
 const combined = new Image();
 combined.src = await Sprites.loadPredefined(chardata.layers);
 
-const testresult = new Image();
-testresult.src = combined.src;
+const custom = new Image();
+custom.src = await Sprites.loadCustom(chardata.layers);
 
-const thrust_anim = CUSTOM_ANIMS["thrust_oversize"];
-const custom_frames = thrust_anim.frames.map((frame) => {
-  const split = frame.map(elem => elem.split(','));
-
-  // console.log(split);
-});
-
-const thrustNorth = thrust_anim.frames[0];
-const firstFrame = thrustNorth[0].split(",");
-// console.log(thrust_anim, thrustNorth, firstFrame);
-
-const frameLocation = ANIM_ROWS_LAYOUT[firstFrame[0]] + 1;
-const startY = FRAMESIZE * frameLocation;
-// console.log("frameLocation, sY", frameLocation, startY);
-
+// const testresult = new Image();
+// testresult.src = combined.src;
 
 // https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/drawImage
 setInterval(function () {
   canvas.width = combined.naturalWidth;
   canvas.height = combined.naturalHeight;
-  // console.log("cv",
-  //   canvas.width,
-  //   canvas.height, "combined",
-  //   combined.naturalWidth,
-  //   combined.naturalHeight
-  // );
+  custom_canvas.width = custom.naturalWidth;
+  custom_canvas.height = custom.naturalHeight;
 
   ctx.clearRect(0, 0, canvas.width, canvas.height);
   ctx.drawImage(combined, 0, 0, combined.naturalWidth, combined.naturalHeight);
 
-  testctx.clearRect(0, 0, testcanvas.width, testcanvas.height);
-  testctx.drawImage(
-    testresult,
-    0,
-    startY,
-    testresult.naturalWidth,
-    FRAMESIZE,
+  custom_ctx.clearRect(0, 0, custom.width, custom.height);
+  custom_ctx.drawImage(
+    custom,
     0,
     0,
-    testresult.naturalWidth,
-    64
+    custom.naturalWidth,
+    custom.naturalHeight
   );
+
+  // testctx.clearRect(0, 0, testcanvas.width, testcanvas.height);
+  // testctx.drawImage(
+  //   testresult,
+  //   0,
+  //   startY,
+  //   testresult.naturalWidth,
+  //   FRAMESIZE,
+  //   0,
+  //   0,
+  //   testresult.naturalWidth,
+  //   64
+  // );
 }, 1000);

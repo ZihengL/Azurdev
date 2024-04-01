@@ -13,6 +13,11 @@
   /* background-color: #054c4b; */
 }
 
+#custom_canvas {
+  border: solid #88610c;
+  /* background-color: #054c4b; */
+}
+
 #test_canvas {
   border: solid #d3367f;
   /* background-color: #054c4b; */
