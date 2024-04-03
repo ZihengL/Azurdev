@@ -4,77 +4,58 @@
 // ! Do not use any frameworks
 // * If you use any imported library check it by top restrictions
 
-import * as Sprites from "./public/Sprites.js";
+import * as Sprites from "./public/sprites.js";
 import { ANIM_ROWS_LAYOUT, CUSTOM_ANIMS } from "./public/custom-animations.js";
 
-// const WIDTH = window.innerWidth;
-// const HEIGHT = window.innerHeight;
+// https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/drawImage
+function setOnLoad(canvas_name, projected_canvas) {
+  const canvas = document.getElementById(canvas_name);
+  const ctx = canvas.getContext("2d");
+  
+  canvas.width = projected_canvas.width;
+  canvas.height = projected_canvas.height;
 
-const WIDTH = 832;
-const HEIGHT = 1344;
-const FRAMESIZE = 64;
-
-let canvas = document.getElementById("game_canvas");
-let ctx = canvas.getContext("2d");
-
-canvas.width = WIDTH;
-canvas.height = HEIGHT;
-
-let custom_canvas = document.getElementById("custom_canvas");
-let custom_ctx = custom_canvas.getContext("2d");
-
-custom_canvas.width = WIDTH;
-custom_canvas.height = HEIGHT;
-
-// let testcanvas = document.getElementById("test_canvas");
-// let testctx = testcanvas.getContext("2d");
-
-// testcanvas.width = WIDTH;
-// testcanvas.height = HEIGHT;
+  setInterval(() => {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.drawImage(projected_canvas, 0, 0);
+  }, 1000);
+}
 
 const charfile = "char";
 
 const chardata = await Sprites.getSpriteData(charfile);
 console.log(chardata);
 
-const combined = new Image();
-combined.src = await Sprites.loadPredefined(chardata.layers);
+//
 
-const custom = new Image();
-custom.src = await Sprites.loadCustom(chardata.layers);
+// let canvas = document.getElementById("game_canvas");
+// let ctx = canvas.getContext("2d");
+const [base, custom_layers] = await Sprites.loadBase(chardata.layers);
+setOnLoad("game_canvas", base);
 
-// const testresult = new Image();
-// testresult.src = combined.src;
+// let custom_canvas = document.getElementById("custom_canvas");
+// let custom_ctx = custom_canvas.getContext("2d");
+const custom = await Sprites.loadCustom(base, custom_layers);
+setOnLoad("custom_canvas", custom);
 
-// https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/drawImage
-setInterval(function () {
-  canvas.width = combined.naturalWidth;
-  canvas.height = combined.naturalHeight;
-  custom_canvas.width = custom.naturalWidth;
-  custom_canvas.height = custom.naturalHeight;
+const [base_both, custom_both, custom2] = await Sprites.loadLayers(chardata.layers);
+setOnLoad("custom2", custom2);
 
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
-  ctx.drawImage(combined, 0, 0, combined.naturalWidth, combined.naturalHeight);
+const both_canvas = document.getElementById("both_canvas");
+const both_ctx = both_canvas.getContext("2d");
 
-  custom_ctx.clearRect(0, 0, custom.width, custom.height);
-  custom_ctx.drawImage(
-    custom,
-    0,
-    0,
-    custom.naturalWidth,
-    custom.naturalHeight
-  );
+both_canvas.width = Math.max(base_both.width, custom_both.width);
+both_canvas.height = base_both.height + custom_both.height;
+console.log("base both", base_both.height)
 
-  // testctx.clearRect(0, 0, testcanvas.width, testcanvas.height);
-  // testctx.drawImage(
-  //   testresult,
-  //   0,
-  //   startY,
-  //   testresult.naturalWidth,
-  //   FRAMESIZE,
-  //   0,
-  //   0,
-  //   testresult.naturalWidth,
-  //   64
-  // );
+setInterval(() => {
+  both_ctx.clearRect(0, 0, both_canvas.width, both_canvas.height);
+  both_ctx.drawImage(base_both, 0, 0);
+  both_ctx.drawImage(custom_both, 0, base_both.height);
 }, 1000);
+
+// let combined_canvas = document.getElementById("test_canvas");
+// let combined_ctx = combined_canvas.getContext("2d");
+const combined = await Sprites.loadAll(chardata.layers);
+setOnLoad("test_canvas", combined);
+console.log("combined", combined);
