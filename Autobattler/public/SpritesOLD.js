@@ -1,6 +1,6 @@
 import { ANIM_ROWS_LAYOUT, CUSTOM_ANIMS } from "./custom-animations.js";
 
-const ASSETS = "./public/res/";
+const ASSETS = "./public/Assets/";
 const SPRITESHEETS = ASSETS + "LPC/spritesheets/";
 
 const DEF_WIDTH = 832;
