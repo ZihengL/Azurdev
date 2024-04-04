@@ -2,11 +2,26 @@ import CONFIG from '../config.js';
 
 const SPRITES = CONFIG.SPRITES;
 const { PATH, WIDTH, HEIGHT, FRAMESIZE, LAYOUTS } = SPRITES;
-const { DIRECTIONS, ROWS_COUNT, SETS, CUSTOM } = LAYOUTS;
+const { DIRECTIONS, ROWS_COUNT, BASE_LAYOUTS, CUSTOM_LAYOUTS } = LAYOUTS;
 
 // ----------------------------------------------------------------
 //                        IMAGE LOADING UTILS
 // ----------------------------------------------------------------
+
+function imgdata(cutout, isImage = false) {
+  let canvas = document.createElement("canvas");
+  let ctx = canvas.getContext("2d");
+
+  if (isImage) {
+
+  } else {
+  canvas.width = cutout.width;
+  canvas.height = cutout.height;
+  ctx.putImageData(cutout, 0, 0);
+  }
+
+  return canvas.toDataURL();
+}
 
 export async function getSpriteData(filename) {
   return await fetch(CONFIG.ASSETS_PATH + filename + ".json")
@@ -37,122 +52,215 @@ export function createCanvas(width, height, frequent_reading = true) {
   return {
     cv:  canvas,
     ctx: canvas.getContext("2d", {
-          willReadFrequently: frequent_reading,
-          alpha: true,
+          willReadFrequently: frequent_reading
          }),
   };
 }
 
-export function parseCustomLayer(animation) {
-  const definition = LAYOUTS.CUSTOM[animation];
+export async function loadAll(layers) {
+  const base = createCanvas(WIDTH, HEIGHT);
+  let width = 0;
+  let height = 0;
+  let offsets = {};
+  let customLayers = [];
+
+  await Promise.all(
+    layers.map(async (layer) => {
+      const customLayout = layer.custom_animation;
+
+      if (customLayout === undefined) {
+        const image = await loadImage(layer.fileName);
+        base.ctx.drawImage(image, 0, 0, image.naturalWidth, image.naturalHeight);
+      } else {
+        if (!offsets.hasOwnProperty(customLayout)) {
+          const [layerWidth, layerHeight] = parseCustomLayout(customLayout);
+
+          offsets[customLayout] = HEIGHT + height;
+          width = Math.max(width, layerWidth);
+          height += layerHeight;
+        }
+
+        // layer.offset = offsets[layout];
+        customLayers.push(layer);
+      }
+    })
+  );
+
+  return [base, width, height, customLayers, offsets];
+}
+
+export function prepLayers(layers) {
+  return layers.reduce(
+    (acc, layer) => {
+      const customLayout = layer.custom_animation;
+
+      if (layer.custom_animation === undefined) {
+        acc.baseLayers.push(layer);
+      } else {
+        if (!acc.offsets.hasOwnProperty(customLayout)) {
+          const [layerWidth, layerHeight] = parseCustomLayout(customLayout);
+
+          acc.offsets[customLayout] = layerHeight + acc.height;
+          acc.width = Math.max(layerWidth, acc.width);
+          acc.height += layerHeight;
+        }
+
+        layer.offset = acc.offsets[customLayout];
+        acc.customLayers.push(layer);
+      }
+  });
+}
+
+export function parseCustomLayout(animation) {
+  const definition = CUSTOM_LAYOUTS[animation];
   const width  = definition.framesize * definition.framescount;
-  const height = definition.framesize * LAYOUTS.ROWS_COUNT;
+  const height = definition.framesize * ROWS_COUNT;
 
   return [width, height];
 }
 
-export async function parseLayers(layers) {
+export async function parseBaseLayers(layers) {
+  const base = createCanvas(WIDTH, HEIGHT);
   let width = 0;
   let height = 0;
-  let currentOffset = HEIGHT;
   let offsets = {};
-
-  let baseLayers = [];
   let customLayers = [];
 
-  layers.forEach((layer) => {
-      const animation = layer.custom_animation;
-
-      if (animation !== undefined && !offsets.hasOwnProperty(animation)) {
-        const [layerWidth, layerHeight] = parseCustomLayer(animation);
-
-        width = Math.max(width, layerWidth);
-        height += layerHeight;
-        offsets[animation] = currentOffset;
-        currentOffset += layerHeight;
-        customLayers.push(layer);
-      } else {
-        baseLayers.push(layer);
-      }
-  });
-
-  const base = await loadBase(baseLayers);
-  const custom = createCanvas(width, height);
-
-  return [base, custom, offsets];
-  // return [width, height, offsets];
-}
-
-export async function loadBase(baseLayers) {
-  const surface = createCanvas(WIDTH, HEIGHT);
-
   await Promise.all(
-    baseLayers.map(async (layer) => {
-      const image = await loadImage(layer.fileName);
-      
-      surface.ctx.drawImage(image, 0, 0, image.naturalWidth, image.naturalHeight);
+    layers.map(async (layer) => {
+      const customLayout = layer.custom_animation;
+
+      if (customLayout === undefined) {
+        const image = await loadImage(layer.fileName);
+        base.ctx.drawImage(image, 0, 0, image.naturalWidth, image.naturalHeight);
+      } else {
+        if (!offsets.hasOwnProperty(customLayout)) {
+          const [layerWidth, layerHeight] = parseCustomLayout(customLayout);
+
+          offsets[customLayout] = HEIGHT + height;
+          width = Math.max(width, layerWidth);
+          height += layerHeight;
+        }
+
+        // layer.offset = offsets[customLayout];
+        customLayers.push(layer);
+      }
     })
   );
+
+  return [base, width, height, customLayers];
+}
+
+export async function loadLayers(layers) {
+  const [base, width, height, customLayers] = await parseBaseLayers(layers);
+  const combined = createCanvas(
+    Math.max(WIDTH, width), 
+    HEIGHT + height
+  );
+  let offsets = {};
+
+  await Promise.all(
+    customLayers.map(async (layer) => {
+      const image = await loadImage(layer.fileName);
+      const transposed = transposeToCustom(base.ctx, CUSTOM_LAYOUTS[layer.custom_animation]);
+      const y = offsets[layer.custom_animation];
+
+      combined.ctx.drawImage(transposed.cv, 0, y, transposed.cv.width, transposed.cv.height);
+      combined.ctx.drawImage(image, 0, y, image.naturalWidth, image.naturalHeight);
+    })
+  );
+  combined.ctx.drawImage(base.cv, 0, 0);
+
+  return [combined.cv, offsets];
+}
+
+export function getBaseLayoutOffset(layout) {
+  return Object.keys(BASE_LAYOUTS).indexOf(layout) * ROWS_COUNT * FRAMESIZE;
+}
+
+export function transposeToCustom(ctx, customLayout) {
+  const { layout, framesize, framescount, frames } = customLayout;
+  const surface = createCanvas(framesize * framescount, framesize * frames.length);
+  const offsetY = Object.keys(BASE_LAYOUTS).indexOf(layout) * ROWS_COUNT * FRAMESIZE;
+  const frameCenter = (framesize - FRAMESIZE) / 2;
+
+  let dY = frameCenter;
+  frames.map((columns, row) => {
+    const sY = row * FRAMESIZE + offsetY;
+    let dX = frameCenter;
+
+    columns.map((column) => {
+      const sX = column * FRAMESIZE;
+      const cutout = ctx.getImageData(sX, sY, FRAMESIZE, FRAMESIZE);
+
+      // console.log(imgdata(cutout))
+      surface.ctx.putImageData(cutout, dX, dY);
+      dX += framesize;
+    });
+
+    dY += framesize;
+  });
+
+  // console.log(surface.cv.toDataURL());
 
   return surface;
 }
 
-export async function loadLayers(layers) {
-  const [width, height, offsets] = await parseLayers(layers);
-  const surface = createCanvas(width + WIDTH, height + HEIGHT);
 
-  console.log("LAYERS", layers);
-  await Promise.all(
-    layers.map(async (layer) => {
-      const image = await loadImage(layer.fileName);
-      const offset = offsets[layer.custom_animation] ?? 0;
+// export async function loadLayers(layers) {
+//   const [base, width, height, customLayers, offsets] = await parseBaseLayers(layers);
+//   const combined = createCanvas(
+//     Math.max(WIDTH, width), 
+//     HEIGHT + height
+//   );
+//   let offset = HEIGHT;
+//   // combined.ctx.globalCompositeOperation = 'source-over';
+//   await Promise.all(
+//     customLayers.map(async (layer) => {
+//       const customLayout = CUSTOM_LAYOUTS[layer.custom_animation];
+//       const {layout, framesize, frames} = CUSTOM_LAYOUTS[layer.custom_animation];
+//       const baseOffset = getBaseLayoutOffset(customLayout.layout);
+//       const isBehind = layer.fileName.includes('behind');
+//       const image = await loadImage(layer.fileName);
+//       const transposed = transposeToCustom(base.ctx, CUSTOM_LAYOUTS[layer.custom_animation]);
 
-      surface.ctx.drawImage(image, 0, offset, image.naturalWidth, image.naturalHeight);
-    })
-  );
+//       const compositeType = isBehind ? 'source-over' : 'source-over';
 
-  return {
 
-    offsets: offsets,
-    both: surface.cv
-  };
-}
+//       let front = transposed.cv;
+//       let back = image;
+//       if (isBehind) {
+//       //   combined.ctx.drawImage(image, 0, offset, image.naturalWidth, image.naturalHeight);
+//       //   combined.ctx.drawImage(transposed.cv, 0, offset, transposed.cv.width, transposed.cv.height);
+//         front = image;
+//         back = transposed.cv;
+//       } else {
+//       //   console.log(layer);
+//       //   combined.ctx.drawImage(transposed.cv, 0, offset, transposed.cv.width, transposed.cv.height);
+//       //   combined.ctx.drawImage(image, 0, offset, image.naturalWidth, image.naturalHeight);
+//       }
 
-export async function loadLayers2(layers) {
-  const [width, height, offsets] = parseLayers(layers);
-  const custom = createCanvas(width, height);
-  const base = createCanvas(WIDTH, HEIGHT);
-  const both = createCanvas(width + WIDTH, height + HEIGHT);
 
-  console.log("LAYERS", layers);
-  await Promise.all(
-    layers.map(async (layer) => {
-      const image = await loadImage(layer.fileName);
-      let ctx = base.ctx;
-      let offset = 0;
+//       // console.log(isBehind, compositeType, msg, layer.fileName)
+//       // console.log(transposed.cv.toDataURL());
 
-      if (offsets.hasOwnProperty(layer.custom_animation)) {
-          // if (customLayout[anim] === undefined) {
-          //     customLayout[anim] = offsetY;
-          //     offsetY += image.naturalHeight;
-          // }
+//       // const imageCV = createCanvas(image.naturalWidth, image.naturalHeight);
+//       // imageCV.ctx.drawImage(image, 0, 0, image.naturalWidth, image.naturalHeight);
+//       // if (!isBehind)
+//       // console.log(imageCV.cv.toDataURL());
 
-          ctx = custom.ctx;
-          offset = offsets[layer.custom_animation] + HEIGHT;
+//       combined.ctx.drawImage(transposed.cv, 0, layer.offset, transposed.cv.width, transposed.cv.height);
+//       combined.ctx.drawImage(image, 0, layer.offset, image.naturalWidth, image.naturalHeight);
+//       // combined.ctx.save();
+//       // combined.ctx.globalCompositeOperation = compositeType;
 
-          // if (layer.custom_animation === "thrust_oversize")
-            console.log(layer);
-      }
+//       // combined.ctx.restore();
+//       offset += isBehind ? transposed.cv.height : 0;
+//     })
+//   );
+//   combined.ctx.drawImage(base.cv, 0, 0);
 
-      ctx.drawImage(image, 0, offset, image.naturalWidth, image.naturalHeight);
-      both.ctx.drawImage(image, 0, offset, image.naturalWidth, image.naturalHeight);
-    })
-  );
+//   console.log(combined.cv.toDataURL())
 
-  return {
-    base: base.cv, 
-    custom: custom.cv, 
-    offsets: offsets,
-    both: both.cv
-  };
-}
+//   return [combined.cv, offsets];
+// }

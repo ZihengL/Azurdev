@@ -15,9 +15,10 @@ const ROWS_LAYOUT = {
 
 // Subset of rows
 // LHS: name - RHS: frames count
-const SETS = {
+// order denotes positioning of set
+const BASE_LAYOUTS = {
   cast: 7, 
-  thrust: 8, 
+  thrust: 8,
   walk: 9, 
   slash: 6,
   string: 13,
@@ -26,10 +27,10 @@ const SETS = {
 
 
 // Frames index = direction
-const CUSTOM = {
+const CUSTOM_LAYOUTS = {
   tool_rod: {
-    framesize: 128,
     layout: "thrust",
+    framesize: 128,
     framescount: 13,
     frames: [
       [0, 1, 2, 3, 4, 5, 4, 4, 4, 5, 4, 2, 3],
@@ -39,8 +40,8 @@ const CUSTOM = {
     ]
   },
   slash_128: {
-    framesize: 128,
     layout: "slash",
+    framesize: 128,
     framescount: 6,
     frames: [
       [0, 1, 2, 3, 4, 5],
@@ -61,8 +62,8 @@ const CUSTOM = {
     ]
   },
   slash_oversize: {
-    framesize: 192,
     layout: "slash",
+    framesize: 192,
     framescount: 6,
     frames: [
       [0, 1, 2, 3, 4, 5],
@@ -72,8 +73,8 @@ const CUSTOM = {
     ]
   },
   walk_128: {
-    framesize: 128,
     layout: "walk",
+    framesize: 128,
     framescount: 8,
     frames: [
       [1, 2, 3, 4, 5, 6, 7, 8],
@@ -83,8 +84,8 @@ const CUSTOM = {
     ]
   },
   thrust_128: {
-    framesize: 128,
     layout: "thrust",
+    framesize: 128,
     framescount: 8,
     frames: [
       [0, 1, 2, 3, 4, 5, 6, 7],
@@ -94,8 +95,8 @@ const CUSTOM = {
     ]
   },
   slash_reverse_oversize: {
-    framesize: 192,
     layout: "slash",
+    framesize: 192,
     framescount: 6,
     frames: [
       [5, 4, 3, 2, 1, 0],
@@ -105,8 +106,8 @@ const CUSTOM = {
     ]
   },
   whip_oversize: {
-    framesize: 192,
     layout: "slash",
+    framesize: 192,
     framescount: 8,
     frames: [
       [0, 1, 4, 5, 3, 2, 2, 1],
@@ -116,8 +117,8 @@ const CUSTOM = {
     ]
   },
   tool_whip: {
-    framesize: 192,
     layout: "slash",
+    framesize: 192,
     framescount: 8,
     frames: [
       [0, 1, 4, 5, 3, 2, 2, 1],
@@ -138,8 +139,8 @@ const CONFIG = {
         LAYOUTS: {
             DIRECTIONS: ["n", "w", "s", "e"],
             ROWS_COUNT: 4,
-            SETS: SETS,
-            CUSTOM: CUSTOM,
+            BASE_LAYOUTS: BASE_LAYOUTS,
+            CUSTOM_LAYOUTS: CUSTOM_LAYOUTS,
         }
     }
 };
