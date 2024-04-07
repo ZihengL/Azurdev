@@ -16,15 +16,47 @@ const ROWS_LAYOUT = {
 // Subset of rows
 // LHS: name - RHS: frames count
 // order denotes positioning of set
-const BASE_LAYOUTS = {
-  cast: 7, 
-  thrust: 8,
-  walk: 9, 
-  slash: 6,
-  string: 13,
-  death: 6, 
-}
+// const BASE_LAYOUTS = {
+//   cast: 7, 
+//   thrust: 8,
+//   walk: 9, 
+//   slash: 6,
+//   string: 13,
+//   death: 6, 
+// }
 
+const BASE_LAYOUTS = {
+  cast: {
+    offset: 0,
+    framesize: 64,
+    framescount: 7
+  }, 
+  thrust: {
+    offset: 256,
+    framesize: 64,
+    framescount: 8
+  },
+  walk: {
+    offset: 512,
+    framesize: 64,
+    framescount: 9
+  }, 
+  slash: {
+    offset: 768,
+    framesize: 64,
+    framescount: 6
+  },
+  string: {
+    offset: 1024,
+    framesize: 64,
+    framescount: 13
+  },
+  death: {
+    offset: 1280,
+    framesize: 64,
+    framescount: 6
+  }, 
+}
 
 // Frames index = direction
 const CUSTOM_LAYOUTS = {
@@ -133,14 +165,15 @@ const CONFIG = {
     ASSETS_PATH: "./public/Assets/",
     SPRITES: {
         PATH: "./public/Assets/LPC/spritesheets/",
+        FPS: 30,
         WIDTH: 832,
         HEIGHT: 1344,
-        FRAMESIZE: 64,
         LAYOUTS: {
             DIRECTIONS: ["n", "w", "s", "e"],
-            ROWS_COUNT: 4,
-            BASE_LAYOUTS: BASE_LAYOUTS,
-            CUSTOM_LAYOUTS: CUSTOM_LAYOUTS,
+            FRAMESIZE: 64,
+            ROWSCOUNT: 4,
+            BASE: BASE_LAYOUTS,
+            CUSTOM: CUSTOM_LAYOUTS,
         }
     }
 };

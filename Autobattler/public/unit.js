@@ -1,33 +1,23 @@
 import CONFIG from "../config.js";
-import * as SpriteUtils from "./sprite_utils.js";
+import * as SpriteUtils from "./spriteUtils.js";
+import SpriteHandler from "./spriteHandler.js";
 
 export default class Unit {
-  constructor(filename, canvas, offsets) {
-    this.filename = filename;
-    this.canvas = canvas;
-    this.offsets = offsets;
+  static units = { player: [], cpu: [] };
+
+  constructor(file, spriteHandler) {
+    this.file = file;
+    this.spriteHandler = spriteHandler;
   }
 
-  static async createInstance(filename) {
-    const filedata = await SpriteUtils.getSpriteData(filename);
-    const [canvas, offsets] = await SpriteUtils.loadLayers(filedata.layers);
+  static async createInstance(file) {
+    const spriteHandler = await SpriteHandler.createInstance(file);
+    const unit = new Unit(file, spriteHandler);
 
-    console.log("UNIT CV", canvas);
-
-    // SpriteUtils.baseDimensions();
-    // SpriteUtils.parseCustomLayer("thrust_oversize");
-
-    return new Unit(filename, canvas, offsets);
+    return unit;
   }
 
   updateRendering(cv) {
-    const ctx = cv.getContext("2d");
-    cv.width = this.canvas.width;
-    cv.height = this.canvas.height;
-    // console.log("CV", cv.width, cv.height);
-
-    // ctx.clearRect(0, 0, cv.width, cv.height);
-    ctx.drawImage(this.canvas, 0, 0);
-    // ctx.drawImage(this.canvasses.custom, 0, this.canvasses.base.height);
+    this.spriteHandler.update(cv);
   }
 }

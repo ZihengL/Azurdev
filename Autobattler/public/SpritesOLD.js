@@ -451,3 +451,61 @@ export async function loadPredefined(layers) {
     console.error("Error preloading and combining images:", error);
   }
 }
+
+// export async function loadLayers(layers) {
+//   const [base, width, height, customLayers, offsets] = await parseBaseLayers(layers);
+//   const combined = createCanvas(
+//     Math.max(WIDTH, width), 
+//     HEIGHT + height
+//   );
+//   let offset = HEIGHT;
+//   // combined.ctx.globalCompositeOperation = 'source-over';
+//   await Promise.all(
+//     customLayers.map(async (layer) => {
+//       const customLayout = CUSTOM_LAYOUTS[layer.custom_animation];
+//       const {layout, framesize, frames} = CUSTOM_LAYOUTS[layer.custom_animation];
+//       const baseOffset = getBaseLayoutOffset(customLayout.layout);
+//       const isBehind = layer.fileName.includes('behind');
+//       const image = await loadImage(layer.fileName);
+//       const transposed = transposeToCustom(base.ctx, CUSTOM_LAYOUTS[layer.custom_animation]);
+
+//       const compositeType = isBehind ? 'source-over' : 'source-over';
+
+
+//       let front = transposed.cv;
+//       let back = image;
+//       if (isBehind) {
+//       //   combined.ctx.drawImage(image, 0, offset, image.naturalWidth, image.naturalHeight);
+//       //   combined.ctx.drawImage(transposed.cv, 0, offset, transposed.cv.width, transposed.cv.height);
+//         front = image;
+//         back = transposed.cv;
+//       } else {
+//       //   console.log(layer);
+//       //   combined.ctx.drawImage(transposed.cv, 0, offset, transposed.cv.width, transposed.cv.height);
+//       //   combined.ctx.drawImage(image, 0, offset, image.naturalWidth, image.naturalHeight);
+//       }
+
+
+//       // console.log(isBehind, compositeType, msg, layer.fileName)
+//       // console.log(transposed.cv.toDataURL());
+
+//       // const imageCV = createCanvas(image.naturalWidth, image.naturalHeight);
+//       // imageCV.ctx.drawImage(image, 0, 0, image.naturalWidth, image.naturalHeight);
+//       // if (!isBehind)
+//       // console.log(imageCV.cv.toDataURL());
+
+//       combined.ctx.drawImage(transposed.cv, 0, layer.offset, transposed.cv.width, transposed.cv.height);
+//       combined.ctx.drawImage(image, 0, layer.offset, image.naturalWidth, image.naturalHeight);
+//       // combined.ctx.save();
+//       // combined.ctx.globalCompositeOperation = compositeType;
+
+//       // combined.ctx.restore();
+//       offset += isBehind ? transposed.cv.height : 0;
+//     })
+//   );
+//   combined.ctx.drawImage(base.cv, 0, 0);
+
+//   console.log(combined.cv.toDataURL())
+
+//   return [combined.cv, offsets];
+// }

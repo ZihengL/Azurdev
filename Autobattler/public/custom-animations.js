@@ -95,4 +95,75 @@ export const CUSTOM_ANIMS = {
       ["slash-e,0", "slash-e,1", "slash-e,5", "slash-e,4", "slash-e,3", "slash-e,3", "slash-e,3", "slash-e,2"]
     ]
   },
+  a: {
+    "bodyTypeName": "male",
+    "url": "https://sanderfrenken.github.io/Universal-LPC-Spritesheet-Character-Generator/#?body=Body_color_light&head=Human_male_light&shoes=Boots_black&shield=Shield_crusader&weapon=Katana_katana",
+    "spritesheets": "https://sanderfrenken.github.io/Universal-LPC-Spritesheet-Character-Generator/spritesheets/",
+    "version": 1,
+    "datetime": "4/5/2024, 4:48:39 PM",
+    "credits": "Authors: bluecarrot16, Benjamin K. Smith (BenCreating), Evert, Eliza Wyatt (ElizaWy), TheraHedwig, MuffinElZangano, Durrani, Johannes Sj?lund (wulax), Stephen Challener (Redshrike), Nila122, Sander Frenken (castelonia), Pierre Vigier and DCSS artists (see https://github.com/crawl/tiles/blob/master/ARTISTS.md)\n\n- body/bodies/male/universal/light.png: by bluecarrot16, Benjamin K. Smith (BenCreating), Evert, Eliza Wyatt (ElizaWy), TheraHedwig, MuffinElZangano, Durrani, Johannes Sj?lund (wulax), Stephen Challener (Redshrike). License(s): CC-BY-SA 3.0, GPL 3.0. \n    - https://opengameart.org/content/liberated-pixel-cup-lpc-base-assets-sprites-map-tiles\n    - https://opengameart.org/content/lpc-medieval-fantasy-character-sprites\n    - https://opengameart.org/content/lpc-male-jumping-animation-by-durrani\n    - https://opengameart.org/content/lpc-runcycle-and-diagonal-walkcycle\n    - https://opengameart.org/content/lpc-revised-character-basics\n\n- head/heads/human_male/universal/light.png: by bluecarrot16, Benjamin K. Smith (BenCreating), Stephen Challener (Redshrike). License(s): OGA-BY 3.0, CC-BY-SA 3.0, GPL 3.0. \n    - https://opengameart.org/content/liberated-pixel-cup-lpc-base-assets-sprites-map-tiles\n    - https://opengameart.org/content/lpc-character-bases\n\n- feet/boots/male/black.png: by bluecarrot16, Nila122. License(s): CC-BY-SA 3.0, GPL 2.0, GPL 3.0. \n    - https://opengameart.org/content/lpc-clothes-and-hair\n    - https://opengameart.org/content/lpc-santa\n    - http://opengameart.org/content/lpc-clothing-updates\n\n- shield/male/crusader.png: by bluecarrot16, Sander Frenken (castelonia). License(s): OGA-BY 3.0. \n    - https://opengameart.org/content/lpc-shields\n\n- weapon/sword/katana/walk/katana.png: by Pierre Vigier and DCSS artists (see https://github.com/crawl/tiles/blob/master/ARTISTS.md). License(s): OGA-BY 3.0. \n    - https://opengameart.org/content/lpc-dcss-swords\n\n- weapon/sword/katana/walk/behind/katana.png: by Pierre Vigier and DCSS artists (see https://github.com/crawl/tiles/blob/master/ARTISTS.md). License(s): OGA-BY 3.0. \n    - https://opengameart.org/content/lpc-dcss-swords\n\n- weapon/sword/katana/slash/katana.png: by Pierre Vigier and DCSS artists (see https://github.com/crawl/tiles/blob/master/ARTISTS.md). License(s): OGA-BY 3.0. \n    - https://opengameart.org/content/lpc-dcss-swords\n\n- weapon/sword/katana/slash/behind/katana.png: by Pierre Vigier and DCSS artists (see https://github.com/crawl/tiles/blob/master/ARTISTS.md). License(s): OGA-BY 3.0. \n    - https://opengameart.org/content/lpc-dcss-swords",
+    "layers": [
+      {
+        "fileName": "weapon/sword/katana/walk/behind/katana.png",
+        "zPos": 9,
+        "custom_animation": "walk_128",
+        "parentName": "weapon",
+        "name": "Katana",
+        "variant": "katana"
+      },
+      {
+        "fileName": "weapon/sword/katana/slash/behind/katana.png",
+        "zPos": 9,
+        "custom_animation": "slash_128",
+        "parentName": "weapon",
+        "name": "Katana",
+        "variant": "katana"
+      },
+      {
+        "fileName": "body/bodies/male/universal/light.png",
+        "zPos": 10,
+        "parentName": "body",
+        "name": "Body color",
+        "variant": "light"
+      },
+      {
+        "fileName": "feet/boots/male/black.png",
+        "zPos": 25,
+        "parentName": "shoes",
+        "name": "Boots",
+        "variant": "black"
+      },
+      {
+        "fileName": "head/heads/human_male/universal/light.png",
+        "zPos": 100,
+        "parentName": "head",
+        "name": "Human male",
+        "variant": "light"
+      },
+      {
+        "fileName": "shield/male/crusader.png",
+        "zPos": 110,
+        "parentName": "shield",
+        "name": "Shield",
+        "variant": "crusader"
+      },
+      {
+        "fileName": "weapon/sword/katana/walk/katana.png",
+        "zPos": 140,
+        "custom_animation": "walk_128",
+        "parentName": "weapon",
+        "name": "Katana",
+        "variant": "katana"
+      },
+      {
+        "fileName": "weapon/sword/katana/slash/katana.png",
+        "zPos": 140,
+        "custom_animation": "slash_128",
+        "parentName": "weapon",
+        "name": "Katana",
+        "variant": "katana"
+      }
+    ]
+  }
 }
+
