@@ -1,4 +1,4 @@
-const ROWS_LAYOUT = {
+var ROWS_LAYOUT = {
   "thrust-n": 3,
   "thrust-w": 4,
   "thrust-s": 5,
@@ -13,19 +13,15 @@ const ROWS_LAYOUT = {
   "slash-e": 14
 };
 
-// Subset of rows
-// LHS: name - RHS: frames count
-// order denotes positioning of set
-// const BASE_LAYOUTS = {
-//   cast: 7, 
-//   thrust: 8,
-//   walk: 9, 
-//   slash: 6,
-//   string: 13,
-//   death: 6, 
-// }
-
-const BASE_LAYOUTS = {
+var FRAMESIZE = 64;
+var ROWSCOUNT = 4;
+var DIRECTIONS = {
+  n: [-135, -45],
+  w: [45, -45],
+  s: [45, 135],
+  e: [-45, 45]
+};
+var BASE = {
   cast: {
     offset: 0,
     framesize: 64,
@@ -56,10 +52,8 @@ const BASE_LAYOUTS = {
     framesize: 64,
     framescount: 6
   }, 
-}
-
-// Frames index = direction
-const CUSTOM_LAYOUTS = {
+};
+var CUSTOM = {
   tool_rod: {
     layout: "thrust",
     framesize: 128,
@@ -161,21 +155,11 @@ const CUSTOM_LAYOUTS = {
   }
 }
 
-const CONFIG = {
-    ASSETS_PATH: "./public/Assets/",
-    SPRITES: {
-        PATH: "./public/Assets/LPC/spritesheets/",
-        FPS: 30,
-        WIDTH: 832,
-        HEIGHT: 1344,
-        LAYOUTS: {
-            DIRECTIONS: ["n", "w", "s", "e"],
-            FRAMESIZE: 64,
-            ROWSCOUNT: 4,
-            BASE: BASE_LAYOUTS,
-            CUSTOM: CUSTOM_LAYOUTS,
-        }
-    }
-};
+var ASSETS_PATH = "./public/Assets/";
+var PATH = "./public/Assets/LPC/spritesheets/";
+var FPS = 30;
+var WIDTH = 832;
+var HEIGHT = 1344;
+var ANIMATION_SPEED = 1000 / FPS;
 
-export default CONFIG;
+var BASE_KEYS = Object.keys(BASE);

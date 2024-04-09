@@ -1,36 +1,29 @@
-import CONFIG from '../config.js';
-
-const { PATH, WIDTH, HEIGHT, LAYOUTS } = CONFIG.SPRITES;
-const { DIRECTIONS, FRAMESIZE, ROWSCOUNT, BASE, CUSTOM } = LAYOUTS;
-
-const BASE_KEYS = Object.keys(BASE);
-
 // ----------------------------------------------------------------
 //                            OFFSETS
 // ----------------------------------------------------------------
 
-export const layoutOffset = (layout) => {
+function layoutOffset(layout) {
   return BASE_KEYS.indexOf(layout) * ROWSCOUNT * FRAMESIZE;
 }
 
-export const rowOffset = (layout, direction) => {
+function rowOffset(layout, direction) {
   return layoutOffset(layout) + DIRECTIONS.indexOf(direction) * FRAMESIZE;
 }
 
-export const layoutWidth = (layout) => {
+function layoutWidth(layout) {
   return BASE[layout] * FRAMESIZE;
 }
 
-export const layoutHeight = (layout) => {
-  return layout === 'death' ? FRAMESIZE : ROWSCOUNT * FRAMESIZE;
+function layoutHeight(layout) {
+  return layout === "death" ? FRAMESIZE : ROWSCOUNT * FRAMESIZE;
 }
 
-export const baseLayoutDimensions = (layout) => {
+function baseLayoutDimensions(layout) {
   return [layoutWidth(layout), layoutHeight(layout)];
 }
 
-export const customLayoutDimensions = (layout) => {
-  const { framesize, framescount } = CUSTOM[layout];
+function customLayoutDimensions(layout) {
+  var { framesize, framescount } = CUSTOM[layout];
 
   return [framesize * framescount, framesize * ROWSCOUNT];
 }
@@ -39,148 +32,175 @@ export const customLayoutDimensions = (layout) => {
 //                            LOADING
 // ----------------------------------------------------------------
 
-export async function loadUnit(file) {
-  const layers = await getSpriteLayers(file);
-  const [surface, offsets, customLayers] = await loadBaseLayers(layers);
-  const coordinates = Object.assign({}, BASE);
+function loadUnit(file) {
+  return getSpriteLayers(file).then(function (layers) {
+    return loadBaseLayers(layers).then(function (baseLayers) {
+      var surface = baseLayers[0],
+        customOffsets = baseLayers[1],
+        customLayers = baseLayers[2];
 
-  for (const layer of customLayers) {
-    const image = await loadImage(layer.fileName);
-    const offset = offsets[layer.custom_animation];
-    const definition = CUSTOM[layer.custom_animation];
-    const { layout, framesize, framescount } = definition;
-    
-    if (layer.fileName.includes('behind')) {
+      return processLayers(customLayers, surface, customOffsets).then(function (
+        coordinates
+      ) {
+        return { cv: surface.cv, coordinates: coordinates };
+      });
+    });
+  });
+}
+
+function processLayer(layer, surface, customOffsets, coordinates) {
+  return loadImage(layer.fileName).then(function (image) {
+    var offset = customOffsets[layer.custom_animation];
+    var definition = CUSTOM[layer.custom_animation];
+
+    var layout = definition.layout;
+    var framesize = definition.framesize;
+    var frames = definition.frames;
+    var framescount = definition.framescount;
+
+    if (layer.fileName.indexOf("behind") > -1) {
       drawToFullSize(surface, image, 0, offset);
-      blitCustomFrames(surface, offset, definition);
+      blitCustomFrames(surface, offset, layout, framesize, frames);
     } else {
-      blitCustomFrames(surface, offset, definition);
+      blitCustomFrames(surface, offset, layout, framesize, frames);
       drawToFullSize(surface, image, 0, offset);
     }
 
-    coordinates[layout] = { offset, framesize, framescount };
-  }
-
-  return [surface.cv, coordinates];
+    coordinates[layout] = {
+      offset: offset,
+      framesize: framesize,
+      framescount: framescount,
+    };
+  });
 }
 
-export async function loadBaseLayers(layers) {
-  const surface = createSurface(WIDTH, HEIGHT);
-  let oversizeWidth = WIDTH, oversizeHeight = HEIGHT;
-  let offsets = {};
-  let customLayers = [];
+function processLayers(customLayers, surface, customOffsets) {
+  var coordinates = Object.assign({}, BASE);
+  var sequence = Promise.resolve();
 
-  for (const layer of layers) {
-    const customLayout = layer.custom_animation;
+  customLayers.forEach(function (layer) {
+    sequence = sequence.then(function () {
+      return processLayer(layer, surface, customOffsets, coordinates);
+    });
+  });
+
+  return sequence.then(function () {
+    return coordinates;
+  });
+}
+
+function loadBaseLayers(layers) {
+  var surface = createSurface(WIDTH, HEIGHT);
+  var oversizeWidth = WIDTH,
+    oversizeHeight = HEIGHT;
+  var customOffsets = {};
+  var customLayers = [];
+  var promises = [];
+
+  layers.forEach(function (layer) {
+    var customLayout = layer.custom_animation;
 
     if (customLayout === undefined) {
-      const image = await loadImage(layer.fileName);
-
-      drawToFullSize(surface, image, 0, 0);
+      promises.push(
+        loadImage(layer.fileName).then(function (image) {
+          drawToFullSize(surface, image, 0, 0);
+        })
+      );
     } else {
-      if (!offsets.hasOwnProperty(customLayout)) {
-        const [width, height] = customLayoutDimensions(customLayout);
+      if (!customOffsets.hasOwnProperty(customLayout)) {
+        var dimensions = customLayoutDimensions(customLayout);
+        var customWidth = dimensions[0];
+        var customHeight = dimensions[1];
 
-        offsets[customLayout] = oversizeHeight;
-        oversizeWidth = Math.max(width, oversizeWidth);
-        oversizeHeight += height;
+        customOffsets[customLayout] = oversizeHeight;
+        oversizeWidth = Math.max(customWidth, oversizeWidth);
+        oversizeHeight += customHeight;
       }
-
       customLayers.push(layer);
     }
-  }
-  resizeSurface(surface, oversizeWidth, oversizeHeight);
+  });
 
-  return [surface, offsets, customLayers];
+  return Promise.all(promises).then(function () {
+    resizeSurface(surface, oversizeWidth, oversizeHeight);
+    return [surface, customOffsets, customLayers];
+  });
 }
 
-export function blitCustomFrames(surface, offset, definition) {
-  const { layout, framesize, frames } = definition;
-  const center = (framesize - FRAMESIZE) / 2;
-  let fromY = BASE[layout].offset;
-  let toY = offset + center;
+function blitCustomFrames(surface, offset, layout, framesize, frames) {
+  var center = (framesize - FRAMESIZE) / 2;
+  var fromY = BASE[layout].offset;
+  var toY = offset + center;
 
-  for (const columns of frames) {
-    let toX = center;
+  frames.forEach(function (columns) {
+    var toX = center;
 
-    for (const column of columns) {
-      const fromX = column * FRAMESIZE;
+    columns.forEach(function (column) {
+      var fromX = column * FRAMESIZE;
 
       blitCopyTo(surface, fromX, fromY, toX, toY, FRAMESIZE);
       toX += framesize;
-    }
+    });
 
     fromY += FRAMESIZE;
     toY += framesize;
-  }
+  });
 }
-
-// ----------------------------------------------------------------
-//                             CREATING
-// ----------------------------------------------------------------
 
 // ----------------------------------------------------------------
 //                              UTILS
 // ----------------------------------------------------------------
 
-function printImgData(img) {
-  let width, height;
-
-  if (img instanceof Image) {
-    width = img.naturalWidth;
-    height = img.naturalHeight;
-  } else {
-    width = img.width;
-    height = img.height;
-  }
-
-  const surface = createSurface(width, height);
-  surface.ctx.drawImage(img, 0, 0);
-  
-  console.log(surface.cv.toDataURL());
-  return surface;
+function getSpriteData(filename) {
+  return fetch(ASSETS_PATH + filename + ".json")
+    .then(function (response) {
+      return response.json();
+    })
+    .then(function (data) {
+      // data.layers = data.layers.sort((a, b) => a.zPos - b.zPos);
+      return data;
+    })
+    .catch(function (error) {
+      console.error("Promise rejected:", error);
+    });
 }
 
-export async function getSpriteData(filename) {
-  return await fetch(CONFIG.ASSETS_PATH + filename + ".json")
-  .then((response) => response.json())
-  .then((data) => {
-    // data.layers = data.layers.sort((a, b) => a.zPos - b.zPos);
-    return data;
-  })
-  .catch((error) => {
-    console.error("Promise rejected:", error);
+function getSpriteLayers(file) {
+  return getSpriteData(file).then(function (spriteData) {
+    return spriteData.layers;
   });
 }
 
-export async function getSpriteLayers(file) {
-  const spriteData = await getSpriteData(file);
+function loadImage(src) {
+  return new Promise(function (resolve, reject) {
+    var image = new Image();
 
-  return spriteData.layers;
-}
-
-export function loadImage(src) {
-  return new Promise((resolve, reject) => {
-    const img = new Image();
-    img.onload = () => resolve(img);
-    img.onerror = reject;
-    img.src = PATH + src;
+    image.onload = function () {
+      resolve(image);
+    };
+    image.onerror = function () {
+      reject(new Error("Failed to load image"));
+    };
+    image.src = PATH + src;
   });
 }
 
-export function createSurface(width = 0, height = 0, frequent_reading = true) {
-  const cv = document.createElement("canvas");
-  const ctx = cv.getContext("2d", {willReadFrequently: frequent_reading});
+function createSurface(width, height, frequent_reading) {
+  width = width || 0;
+  height = height || 0;
+  frequent_reading = frequent_reading || true;
+
+  var cv = document.createElement("canvas");
+  var ctx = cv.getContext("2d", { willReadFrequently: frequent_reading });
   cv.width = width;
   cv.height = height;
 
-  return { cv, ctx };
+  return { cv: cv, ctx: ctx };
 }
 
-export function resizeSurface(surface, width, height) {
-  const image = new Image();
+function resizeSurface(surface, width, height) {
+  var image = new Image();
 
-  image.onload = () => {
+  image.onload = function () {
     surface.cv.width = width;
     surface.cv.height = height;
     surface.ctx.drawImage(image, 0, 0);
@@ -188,16 +208,175 @@ export function resizeSurface(surface, width, height) {
   image.src = surface.cv.toDataURL();
 }
 
-export function drawToFullSize(surface, image, x, y) {
+function drawToFullSize(surface, image, x, y) {
   surface.ctx.drawImage(image, x, y, image.naturalWidth, image.naturalHeight);
 }
 
-export function blitCopyTo(surface, fromX, fromY, toX, toY, size) {
-  surface.ctx.drawImage(surface.cv, 
-    fromX, fromY, size, size, 
-    toX, toY, size, size);
+function blitCopyTo(surface, fromX, fromY, toX, toY, size) {
+  surface.ctx.drawImage(
+    surface.cv,
+    fromX,
+    fromY,
+    size,
+    size,
+    toX,
+    toY,
+    size,
+    size
+  );
 }
 
 // ----------------------------------------------------------------
-//                              TESTS
-// ----------------------------------------------------------------
+
+// async function loadUnit(file) {
+//   var layers = await getSpriteLayers(file);
+//   var [surface, customOffsets, customLayers] = await loadBaseLayers(layers);
+//   var coordinates = Object.assign({}, BASE);
+
+//   for (var layer of customLayers) {
+//     var image = await loadImage(layer.fileName);
+//     var offset = customOffsets[layer.custom_animation];
+//     var definition = CUSTOM[layer.custom_animation];
+//     var { layout, framesize, framescount } = definition;
+
+//     if (layer.fileName.includes('behind')) {
+//       drawToFullSize(surface, image, 0, offset);
+//       blitCustomFrames(surface, offset, definition);
+//     } else {
+//       blitCustomFrames(surface, offset, definition);
+//       drawToFullSize(surface, image, 0, offset);
+//     }
+
+//     coordinates[layout] = { offset, framesize, framescount };
+//   }
+
+//   return { cv: surface.cv, coordinates };
+// }
+
+// async function loadBaseLayers(layers) {
+//   var surface = createSurface(WIDTH, HEIGHT);
+//   var oversizeWidth = WIDTH, oversizeHeight = HEIGHT;
+//   var customOffsets = {};
+//   var customLayers = [];
+
+//   for (var layer of layers) {
+//     var customLayout = layer.custom_animation;
+
+//     if (customLayout === undefined) {
+//       var image = await loadImage(layer.fileName);
+
+//       drawToFullSize(surface, image, 0, 0);
+//     } else {
+//       if (!customOffsets.hasOwnProperty(customLayout)) {
+//         var [customWidth, customHeight] = customLayoutDimensions(customLayout);
+
+//         customOffsets[customLayout] = oversizeHeight;
+//         oversizeWidth = Math.max(customWidth, oversizeWidth);
+//         oversizeHeight += customHeight;
+//       }
+
+//       customLayers.push(layer);
+//     }
+//   }
+//   resizeSurface(surface, oversizeWidth, oversizeHeight);
+
+//   return [surface, customOffsets, customLayers];
+// }
+
+// function blitCustomFrames(surface, offset, definition) {
+//   var { layout, framesize, frames } = definition;
+//   var center = (framesize - FRAMESIZE) / 2;
+
+//   var fromY = BASE[layout].offset;
+//   var toY = offset + center;
+
+//   frames.forEach(function(columns) {
+//     var toX = center;
+
+//     // for (var column of columns) {
+//     columns.forEach(function(column) {
+//       var fromX = column * FRAMESIZE;
+
+//       blitCopyTo(surface, fromX, fromY, toX, toY, FRAMESIZE);
+//       toX += framesize;
+//     });
+
+//     fromY += FRAMESIZE;
+//     toY += framesize;
+//   });
+// }
+
+// function printImgData(img) {
+//   var width, height;
+
+//   if (img instanceof Image) {
+//     width = img.naturalWidth;
+//     height = img.naturalHeight;
+//   } else {
+//     width = img.width;
+//     height = img.height;
+//   }
+
+//   var surface = createSurface(width, height);
+//   surface.ctx.drawImage(img, 0, 0);
+
+//   console.log(surface.cv.toDataURL());
+//   return surface;
+// }
+
+// async function getSpriteData(filename) {
+//   return await fetch(CONFIG.ASSETS_PATH + filename + ".json")
+//   .then((response) => response.json())
+//   .then((data) => {
+//     // data.layers = data.layers.sort((a, b) => a.zPos - b.zPos);
+//     return data;
+//   })
+//   .catch((error) => {
+//     console.error("Promise rejected:", error);
+//   });
+// }
+
+// async function getSpriteLayers(file) {
+//   var spriteData = await getSpriteData(file);
+
+//   return spriteData.layers;
+// }
+
+// function loadImage(src) {
+//   return new Promise((resolve, reject) => {
+//     var img = new Image();
+//     img.onload = () => resolve(img);
+//     img.onerror = reject;
+//     img.src = PATH + src;
+//   });
+// }
+
+// function createSurface(width = 0, height = 0, frequent_reading = true) {
+//   var cv = document.createElement("canvas");
+//   var ctx = cv.getContext("2d", {willReadFrequently: frequent_reading});
+//   cv.width = width;
+//   cv.height = height;
+
+//   return { cv, ctx };
+// }
+
+// function resizeSurface(surface, width, height) {
+//   var image = new Image();
+
+//   image.onload = () => {
+//     surface.cv.width = width;
+//     surface.cv.height = height;
+//     surface.ctx.drawImage(image, 0, 0);
+//   };
+//   image.src = surface.cv.toDataURL();
+// }
+
+// function drawToFullSize(surface, image, x, y) {
+//   surface.ctx.drawImage(image, x, y, image.naturalWidth, image.naturalHeight);
+// }
+
+// function blitCopyTo(surface, fromX, fromY, toX, toY, size) {
+//   surface.ctx.drawImage(surface.cv,
+//     fromX, fromY, size, size,
+//     toX, toY, size, size);
+// }
