@@ -25,7 +25,7 @@ function baseLayoutDimensions(layout) {
 function customLayoutDimensions(layout) {
   var { framesize, framescount } = CUSTOM[layout];
 
-  return [framesize * framescount, framesize * ROWSCOUNT];
+  return { w: framesize * framescount, h: framesize * ROWSCOUNT };
 }
 
 // ----------------------------------------------------------------
@@ -34,10 +34,10 @@ function customLayoutDimensions(layout) {
 
 function loadUnit(file) {
   return getSpriteLayers(file).then(function (layers) {
-    return loadBaseLayers(layers).then(function (baseLayers) {
-      var surface = baseLayers[0],
-        customOffsets = baseLayers[1],
-        customLayers = baseLayers[2];
+    return loadBaseLayers(layers).then(function (result) {
+      var surface = result.surface;
+      var customOffsets = result.customOffsets;
+      var customLayers = result.customLayers;
 
       return processLayers(customLayers, surface, customOffsets).then(function (
         coordinates
@@ -50,13 +50,13 @@ function loadUnit(file) {
 
 function processLayer(layer, surface, customOffsets, coordinates) {
   return loadImage(layer.fileName).then(function (image) {
-    var offset = customOffsets[layer.custom_animation];
-    var definition = CUSTOM[layer.custom_animation];
+    var def = CUSTOM[layer.custom_animation];
 
-    var layout = definition.layout;
-    var framesize = definition.framesize;
-    var frames = definition.frames;
-    var framescount = definition.framescount;
+    var offset = customOffsets[layer.custom_animation];
+    var layout = def.layout;
+    var framesize = def.framesize;
+    var frames = def.frames;
+    var framescount = def.framescount;
 
     if (layer.fileName.indexOf("behind") > -1) {
       drawToFullSize(surface, image, 0, offset);
@@ -91,38 +91,39 @@ function processLayers(customLayers, surface, customOffsets) {
 
 function loadBaseLayers(layers) {
   var surface = createSurface(WIDTH, HEIGHT);
-  var oversizeWidth = WIDTH,
-    oversizeHeight = HEIGHT;
+  var oversizeWidth = WIDTH;
+  var oversizeHeight = HEIGHT;
   var customOffsets = {};
   var customLayers = [];
   var promises = [];
 
   layers.forEach(function (layer) {
-    var customLayout = layer.custom_animation;
+    var layout = layer.custom_animation;
 
-    if (customLayout === undefined) {
+    if (layout === undefined) {
       promises.push(
         loadImage(layer.fileName).then(function (image) {
           drawToFullSize(surface, image, 0, 0);
         })
       );
     } else {
-      if (!customOffsets.hasOwnProperty(customLayout)) {
-        var dimensions = customLayoutDimensions(customLayout);
-        var customWidth = dimensions[0];
-        var customHeight = dimensions[1];
+      if (!customOffsets.hasOwnProperty(layout)) {
+        var def = CUSTOM[layout];
+        var width = def.framesize * def.framescount;
+        var height = def.framesize * ROWSCOUNT;
 
-        customOffsets[customLayout] = oversizeHeight;
-        oversizeWidth = Math.max(customWidth, oversizeWidth);
-        oversizeHeight += customHeight;
+        customOffsets[layout] = oversizeHeight;
+        oversizeWidth = Math.max(width, oversizeWidth);
+        oversizeHeight += height;
       }
+
       customLayers.push(layer);
     }
   });
 
   return Promise.all(promises).then(function () {
     resizeSurface(surface, oversizeWidth, oversizeHeight);
-    return [surface, customOffsets, customLayers];
+    return { surface, customOffsets, customLayers };
   });
 }
 

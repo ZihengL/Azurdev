@@ -156,7 +156,7 @@ var CUSTOM = {
 }
 
 var ASSETS_PATH = "./public/Assets/";
-var PATH = "./public/Assets/LPC/spritesheets/";
+var PATH = "./public/Assets/characters/spritesheets/";
 var FPS = 30;
 var WIDTH = 832;
 var HEIGHT = 1344;

@@ -1,10 +1,6 @@
-function General(spawnpoint, enemyDirection) {
-  var playerSpawn = new Vector2D(100, 100);
-  var cpuSpawn = new Vector2D(900, 900);
-
-  this.lastFrameTime = performance.now();
-  this.player = new General(playerSpawn, cpuSpawn);
-  this.cpu = new General(cpuSpawn, playerSpawn);
+function General(spawnpoint) {
+  this.spawnpoint = spawnpoint;
+  this.units = [];
 }
 
 General.prototype.update = function (deltaTime) {
@@ -19,20 +15,10 @@ General.prototype.render = function (ctx) {
   });
 };
 
-// class General {
-//   constructor(spawnpoint, enemyDirection) {
-//     this.units = [];
-//     this.spawnpoint = spawnpoint;
-//     this.enemyDirection = enemyDirection;
-//   }
+General.prototype.spawnUnit = function (file) {
+  var unit = Unit.createInstance(file);
 
-//   update(deltaTime) {
-//     this.units.forEach((unit) => unit.update(deltaTime));
-//   }
+  this.units.push(unit);
+};
 
-//   render(ctx) {
-//     this.units.forEach((unit) => unit.render(ctx));
-//   }
 
-//   async spawnUnit(file) {}
-// }

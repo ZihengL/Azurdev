@@ -31,19 +31,6 @@ function setOnLoad(canvas_name, projected_canvas) {
 
 //------------------------------------------------------
 
-// SpriteHandler.surface = surface;
-// unit.update(performance.now());
-
-// var testSurface = {};
-// testSurface.cv = document.getElementById("test_canvas");
-// testSurface.ctx = testSurface.cv.getContext("2d");
-
-// var sheet = unit.spriteHandler.cv;
-// testSurface.cv.width = sheet.width;
-// testSurface.cv.height = sheet.height;
-
-// testSurface.ctx.drawImage(sheet, 0, 0);
-
 // var posX = 0;
 // var squareSize = 50;
 // var speed = 2;
@@ -71,19 +58,6 @@ function setOnLoad(canvas_name, projected_canvas) {
 
 // -----------------------
 
-var charfile = "char";
-
-var unit = Unit.createInstance(charfile);
-var handler = SpriteHandler.createInstance(charfile);
-
-var position = new Vector2D(100, 100);
-var velocity = new Vector2D(0, 0);
-var speed = 10;
-
-var targetPosition = new Vector2D(900, 100);
-
-var lastUpdate = performance.now();
-
 function gameLoop(currentTime) {
   // Calculate deltaTime in seconds
   // deltaTime = time passed between last and current update
@@ -108,6 +82,19 @@ function gameLoop(currentTime) {
   requestAnimationFrame(gameLoop);
 }
 
+var charfile = "char";
+
+var unit = Unit.createInstance(charfile);
+var handler = SpriteHandler.createInstance(charfile);
+
+var position = new Vector2D(100, 100);
+var velocity = new Vector2D(0, 0);
+var speed = 10;
+
+var targetPosition = new Vector2D(900, 100);
+
+var lastUpdate = performance.now();
+
 // Start the animation
 // requestAnimationFrame(gameLoop);
 
@@ -115,7 +102,7 @@ var pos = new Vector2D(100, 100);
 var target = new Vector2D(100, -100);
 var direction = pos.direction(target);
 
-console.log("normalized", direction, pos.toPolarDirection(target));
+console.log("normalized", pos.subtract(target), pos.toPolarDirection(target));
 pos.render(surface.ctx, "blue");
 target.render(surface.ctx);
 pos.join(surface.ctx, target);
