@@ -40,15 +40,15 @@ function loadUnit(file) {
       var customLayers = result.customLayers;
 
       return processLayers(customLayers, surface, customOffsets).then(function (
-        coordinates
+        layouts
       ) {
-        return { cv: surface.cv, coordinates: coordinates };
+        return { cv: surface.cv, layouts: layouts };
       });
     });
   });
 }
 
-function processLayer(layer, surface, customOffsets, coordinates) {
+function processLayer(layer, surface, customOffsets, layouts) {
   return loadImage(layer.fileName).then(function (image) {
     var def = CUSTOM[layer.custom_animation];
 
@@ -66,7 +66,7 @@ function processLayer(layer, surface, customOffsets, coordinates) {
       drawToFullSize(surface, image, 0, offset);
     }
 
-    coordinates[layout] = {
+    layouts[layout] = {
       offset: offset,
       framesize: framesize,
       framescount: framescount,
@@ -75,17 +75,17 @@ function processLayer(layer, surface, customOffsets, coordinates) {
 }
 
 function processLayers(customLayers, surface, customOffsets) {
-  var coordinates = Object.assign({}, BASE);
+  var layouts = Object.assign({}, BASE);
   var sequence = Promise.resolve();
 
   customLayers.forEach(function (layer) {
     sequence = sequence.then(function () {
-      return processLayer(layer, surface, customOffsets, coordinates);
+      return processLayer(layer, surface, customOffsets, layouts);
     });
   });
 
   return sequence.then(function () {
-    return coordinates;
+    return layouts;
   });
 }
 
@@ -95,35 +95,39 @@ function loadBaseLayers(layers) {
   var oversizeHeight = HEIGHT;
   var customOffsets = {};
   var customLayers = [];
-  var promises = [];
 
-  layers.forEach(function (layer) {
-    var layout = layer.custom_animation;
+  var sequence = layers.reduce(function (promise, layer) {
+    return promise.then(function () {
+      var layout = layer.custom_animation;
 
-    if (layout === undefined) {
-      promises.push(
-        loadImage(layer.fileName).then(function (image) {
+      if (layout === undefined) {
+        return loadImage(layer.fileName).then(function (image) {
           drawToFullSize(surface, image, 0, 0);
-        })
-      );
-    } else {
-      if (!customOffsets.hasOwnProperty(layout)) {
-        var def = CUSTOM[layout];
-        var width = def.framesize * def.framescount;
-        var height = def.framesize * ROWSCOUNT;
+        });
+      } else {
+        if (!customOffsets.hasOwnProperty(layout)) {
+          var def = CUSTOM[layout];
+          var width = def.framesize * def.framescount;
+          var height = def.framesize * ROWSCOUNT;
 
-        customOffsets[layout] = oversizeHeight;
-        oversizeWidth = Math.max(width, oversizeWidth);
-        oversizeHeight += height;
+          customOffsets[layout] = oversizeHeight;
+          oversizeWidth = Math.max(width, oversizeWidth);
+          oversizeHeight += height;
+        }
+
+        customLayers.push(layer);
+        return Promise.resolve();
       }
+    });
+  }, Promise.resolve());
 
-      customLayers.push(layer);
-    }
-  });
-
-  return Promise.all(promises).then(function () {
+  return sequence.then(function () {
     resizeSurface(surface, oversizeWidth, oversizeHeight);
-    return { surface, customOffsets, customLayers };
+    return {
+      surface: surface,
+      customOffsets: customOffsets,
+      customLayers: customLayers,
+    };
   });
 }
 

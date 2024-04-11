@@ -1,12 +1,15 @@
+function SpriteHandler(file, currentTime) {
+  var resources = SpriteHandler.loaded[file];
 
-
-function SpriteHandler(resources) {
   this.cv = resources.cv;
-  this.layouts = resources.coordinates;
+  this.layouts = resources.layouts;
 
-  this.layout = this.layouts.walk;
   this.frame = 0;
+  this.layout = this.layouts.walk;
+  this.direction = DIRECTIONS.e.index;
   this.coordinates = new Vector2D(0, this.layout.offset);
+
+  this.lastUpdate = 0;
 }
 SpriteHandler.debug = false;
 SpriteHandler.loaded = {};
@@ -15,35 +18,54 @@ SpriteHandler.loaded = {};
 
 SpriteHandler.createInstance = function (file) {
   if (!SpriteHandler.loaded.hasOwnProperty(file)) {
-    SpriteHandler.loaded[file] = loadUnit(file);
+    loadUnit(file).then(function (resources) {
+      SpriteHandler.loaded[file] = resources;
+    });
   }
 
-  return SpriteHandler.loaded[file].then(function (loaded) {
-    return new SpriteHandler(loaded);
+  return SpriteHandler.loaded[file].then(function (resources) {
+    return new SpriteHandler(resources);
   });
 };
 
 SpriteHandler.preloadResources = function (files) {
-  files.forEach(function (file) {
-    if (!SpriteHandler.loaded.hasOwnProperty(file)) {
-      SpriteHandler.loaded[file] = loadUnit(file);
-    }
+  var promises = files.map(function (file) {
+    return loadUnit(file).then(function (resources) {
+      SpriteHandler.loaded[file] = resources;
+    });
   });
+
+
+  return Promise.all(promises);
 };
 
 // =============================== INSTANCE
 
-SpriteHandler.prototype.getCurrentFrameCoordinates = function () {
-  var { framesize, offset } = this.layout;
-  var x = this.frame * framesize;
-  var y = DIRECTIONS.indexOf(this.currentDirection) * framesize + offset;
+// SpriteHandler.prototype.updateCoordinates = function (direction) {
+//   var angle = (Math.atan2(direction.y, direction.x) * 180) / Math.PI;
 
-  return [x, y, framesize];
-};
+//   for (var key in DIRECTIONS) {
+//     var polarDirection = DIRECTIONS[key];
+//     var intervals = polarDirection.intervals;
+//     var min = intervals[0], max = intervals[1];
 
-SpriteHandler.prototype.update = function (deltaTime, direction) {
-  if (deltaTime >= ANIMATION_SPEED) {
-    if (++this.frame >= this.layout.framescount) {
+//     if (angle >= min && angle < max) {
+//       this.coordinates.y = this.layout.offset + FRAMESIZE * polarDirection.index;
+//     }
+//   }
+// }
+
+SpriteHandler.prototype.update = function (deltaTime, velocity, action) {
+  this.lastUpdate += deltaTime;
+
+  if (this.lastUpdate >= ANIMATION_SPEED) {
+    this.lastUpdate = 0;
+
+    if (velocity && this.direction !== velocity) {
+      this.coordinates.y = this.layout.offset + FRAMESIZE * velocity.toPolarDirection();
+    }
+    
+    if (this.frame + 1 >= this.layout.framescount) {
       this.frame = 0;
       this.coordinates.x = 0;
     } else {

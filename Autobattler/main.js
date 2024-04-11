@@ -31,78 +31,41 @@ function setOnLoad(canvas_name, projected_canvas) {
 
 //------------------------------------------------------
 
-// var posX = 0;
-// var squareSize = 50;
-// var speed = 2;
+var files = ["char"];
+var file = "char";
 
-// // Function to update the animation
-// function gameLoop2() {
-//   // Clear the canvas
-//   surface.ctx.clearRect(0, 0, surface.cv.width, surface.cv.height);
+var target = new Vector2D(800, 300);
 
-//   // Draw the square at the new position
-//   surface.ctx.fillStyle = 'blue';
-//   surface.ctx.fillRect(posX, 100, squareSize, squareSize);
+Battle.createInstance(files).then(function (battle) {
+  function gameLoop(currentTime) {
+    var deltaTime = (currentTime - lastUpdate) / 1000;
+    lastUpdate = currentTime;
+    // console.log(lastUpdate)
 
-//   // Move the square
-//   posX += speed;
+    battle.update(deltaTime);
 
-//   // Loop the square's position
-//   if (posX > surface.cv.width) {
-//       posX = -squareSize;
-//   }
+    surface.ctx.clearRect(0, 0, surface.cv.width, surface.cv.height);
+    battle.render(surface);
 
-//   // Request the next frame of the animation
-//   requestAnimationFrame(gameLoop2);
-// }
+    requestAnimationFrame(gameLoop);
+  }
 
-// -----------------------
+  var lastUpdate = performance.now();
 
-function gameLoop(currentTime) {
-  // Calculate deltaTime in seconds
-  // deltaTime = time passed between last and current update
-  var deltaTime = (currentTime - lastUpdate) / 1000;
-  lastUpdate = currentTime;
+  battle.player.spawnUnit(file, lastUpdate);
+  // battle.cpu.spawnUnit(file, lastUpdate);
 
-  // Update game logic
-  // battle.update(deltaTime);
-
-  // Render the game
-  // battle.render();
-
-  position.x += speed * deltaTime;
-  var direction = targetPosition.subtract(position);
-
-  handler.update(deltaTime, direction.normalize());
-
-  surface.ctx.clearRect(0, 0, surface.cv.width, surface.cv.height);
-  handler.render(surface, position);
-
-  // Request the next frame
   requestAnimationFrame(gameLoop);
-}
+});
 
-var charfile = "char";
+// var targetPosition = new Vector2D(900, 100);
+// var lastUpdate = performance.now();
 
-var unit = Unit.createInstance(charfile);
-var handler = SpriteHandler.createInstance(charfile);
+// var pos = new Vector2D(100, 100);
+// var target = new Vector2D(900, 200);
+// var direction = pos.direction(target);
 
-var position = new Vector2D(100, 100);
-var velocity = new Vector2D(0, 0);
-var speed = 10;
-
-var targetPosition = new Vector2D(900, 100);
-
-var lastUpdate = performance.now();
-
-// Start the animation
-// requestAnimationFrame(gameLoop);
-
-var pos = new Vector2D(100, 100);
-var target = new Vector2D(100, -100);
-var direction = pos.direction(target);
-
-console.log("normalized", pos.subtract(target), pos.toPolarDirection(target));
-pos.render(surface.ctx, "blue");
-target.render(surface.ctx);
-pos.join(surface.ctx, target);
+// console.log("normalized", pos.subtract(target), pos.toPolarDirection(target));
+// pos.render(surface.ctx, "blue");
+// target.render(surface.ctx);
+// pos.join(surface.ctx, target);

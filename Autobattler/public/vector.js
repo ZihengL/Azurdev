@@ -36,18 +36,31 @@ Vector2D.prototype.direction = function (target) {
   return target.subtract(this).normalize();
 };
 
+Vector2D.prototype.deltaX = function (target) {
+  return target.x - this.x;
+}
+
+Vector2D.prototype.deltaY = function (target) {
+  return target.y - this.y;
+}
+
+Vector2D.prototype.isEqual = function (target) {
+  return this.deltaX(target) === 0 &&
+    this.deltaY(target) === 0;
+}
+
 Vector2D.prototype.toPolarDirection = function (target) {
-  var normalized = this.direction(target);
-  var angle = (Math.atan2(normalized.y, normalized.x) * 180) / Math.PI;
+  // var normalized = this.direction(target);
+  var angle = (Math.atan2(this.y, this.x) * 180) / Math.PI;
 
-  var directions = Object.keys(DIRECTIONS);
-  for (var i = 0; i < directions.length; i++) {
-    var direction = directions[i];
-    var intervals = DIRECTIONS[direction];
-    var minInterval = intervals[0];
-    var maxInterval = intervals[1];
+  for (var key in DIRECTIONS) {
+    var direction = DIRECTIONS[key];
+    var intervals = direction.intervals;
+    var min = intervals[0], max = intervals[1];
 
-    if (angle >= minInterval && angle < maxInterval) return direction;
+    if (angle >= min && angle < max) {
+      return direction.index;
+    }
   }
 };
 

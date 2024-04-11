@@ -15,12 +15,26 @@ var ROWS_LAYOUT = {
 
 var FRAMESIZE = 64;
 var ROWSCOUNT = 4;
+
 var DIRECTIONS = {
-  n: [-135, -45],
-  w: [45, -45],
-  s: [45, 135],
-  e: [-45, 45]
+  n: { 
+    index: 0,
+    intervals: [-135, -45],
+   },
+  w: { 
+    index: 1,
+    intervals: [45, -45],
+   },
+  s: { 
+    index: 2,
+    intervals: [45, 135],
+   },
+  e: { 
+    index: 3,
+    intervals: [-45, 45],
+   }
 };
+
 var BASE = {
   cast: {
     offset: 0,
@@ -157,9 +171,17 @@ var CUSTOM = {
 
 var ASSETS_PATH = "./public/Assets/";
 var PATH = "./public/Assets/characters/spritesheets/";
+var SAVED = "./public/Assets/saved/";
+
 var FPS = 30;
 var WIDTH = 832;
 var HEIGHT = 1344;
-var ANIMATION_SPEED = 1000 / FPS;
+var ANIMATION_SPEED = 0.1;
 
+var POLAR_DIRECTIONS = Object.keys(DIRECTIONS);
 var BASE_KEYS = Object.keys(BASE);
+
+var MAP_BOUNDS = {
+  x: [0, 1000],
+  y: [500, 1500],
+}

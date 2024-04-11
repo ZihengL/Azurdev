@@ -1,5 +1,6 @@
-function General(spawnpoint) {
+function General(spawnpoint, opponentspawn) {
   this.spawnpoint = spawnpoint;
+  this.opponentspawn = opponentspawn;
   this.units = [];
 }
 
@@ -9,14 +10,15 @@ General.prototype.update = function (deltaTime) {
   });
 };
 
-General.prototype.render = function (ctx) {
+General.prototype.render = function (surface) {
   this.units.forEach(function (unit) {
-    unit.render(ctx);
+    unit.render(surface);
   });
 };
 
-General.prototype.spawnUnit = function (file) {
-  var unit = Unit.createInstance(file);
+General.prototype.spawnUnit = function (file, currentTime) {
+  var unit = new Unit(file, this.spawnpoint, currentTime);
+  unit.target = this.opponentspawn;
 
   this.units.push(unit);
 };
