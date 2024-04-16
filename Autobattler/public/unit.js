@@ -3,6 +3,7 @@ function Unit(file, spawnpoint, currentTime) {
 
   this.health = 100;
   this.speed = 50;
+  this.range = 20;
 
   this.position = new Vector2D(spawnpoint.x, spawnpoint.y);
   this.velocity = new Vector2D(0, 0);
@@ -25,6 +26,9 @@ Unit.prototype.update = function (deltaTime) {
   if (this.target) {
     var direction = this.position.direction(this.target);
     this.velocity = direction.multiply(this.speed);
+
+
+    // console.log(direction, this.position, this.velocity);
 
     var displacement = this.velocity.multiply(deltaTime);
     this.position = this.position.add(displacement);

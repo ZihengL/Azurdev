@@ -3,6 +3,7 @@ function SpriteHandler(file, currentTime) {
 
   this.cv = resources.cv;
   this.layouts = resources.layouts;
+  this.type = resources.type;
 
   this.frame = 0;
   this.layout = this.layouts.walk;
@@ -28,13 +29,12 @@ SpriteHandler.createInstance = function (file) {
   });
 };
 
-SpriteHandler.preloadResources = function (files) {
+SpriteHandler.preloadResources = function (file) {
   var promises = files.map(function (file) {
     return loadUnit(file).then(function (resources) {
       SpriteHandler.loaded[file] = resources;
     });
   });
-
 
   return Promise.all(promises);
 };
@@ -58,14 +58,16 @@ SpriteHandler.preloadResources = function (files) {
 SpriteHandler.prototype.update = function (deltaTime, velocity, action) {
   this.lastUpdate += deltaTime;
 
+  console.log("ASDSADASvsdvsd", this.cv.toDataURL());
+
   if (this.lastUpdate >= ANIMATION_SPEED) {
     this.lastUpdate = 0;
 
-    if (velocity && this.direction !== velocity) {
+    if (this.direction !== velocity) {
       this.coordinates.y = this.layout.offset + FRAMESIZE * velocity.toPolarDirection();
     }
     
-    if (this.frame + 1 >= this.layout.framescount) {
+    if (this.isInStasis(velocity) || this.frame + 1 >= this.layout.framescount) {
       this.frame = 0;
       this.coordinates.x = 0;
     } else {
@@ -89,4 +91,10 @@ SpriteHandler.prototype.render = function (surface, position) {
     framesize,
     framesize
   );
+};
+
+SpriteHandler.prototype.isInStasis = function (velocity) {
+  console.log("TYPE", velocity, TYPES[this.type].stats.range)
+
+  return velocity <= TYPES[this.type].stats.range;
 };

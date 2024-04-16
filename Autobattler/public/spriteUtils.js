@@ -33,8 +33,10 @@ function customLayoutDimensions(layout) {
 // ----------------------------------------------------------------
 
 function loadUnit(file) {
-  return getSpriteLayers(file).then(function (layers) {
-    return loadBaseLayers(layers).then(function (result) {
+  return getSpriteData(file).then(function (data) {
+    var type = data.type
+
+    return loadBaseLayers(data.layers).then(function (result) {
       var surface = result.surface;
       var customOffsets = result.customOffsets;
       var customLayers = result.customLayers;
@@ -42,7 +44,7 @@ function loadUnit(file) {
       return processLayers(customLayers, surface, customOffsets).then(function (
         layouts
       ) {
-        return { cv: surface.cv, layouts: layouts };
+        return { cv: surface.cv, layouts: layouts, type: type };
       });
     });
   });
@@ -96,38 +98,34 @@ function loadBaseLayers(layers) {
   var customOffsets = {};
   var customLayers = [];
 
-  var sequence = layers.reduce(function (promise, layer) {
-    return promise.then(function () {
-      var layout = layer.custom_animation;
+  var sequence = layers.reduce(function(promise, layer) {
+      return promise.then(function() {
+          var layout = layer.custom_animation;
 
-      if (layout === undefined) {
-        return loadImage(layer.fileName).then(function (image) {
-          drawToFullSize(surface, image, 0, 0);
-        });
-      } else {
-        if (!customOffsets.hasOwnProperty(layout)) {
-          var def = CUSTOM[layout];
-          var width = def.framesize * def.framescount;
-          var height = def.framesize * ROWSCOUNT;
+          if (layout === undefined) {
+              return loadImage(layer.fileName).then(function(image) {
+                  drawToFullSize(surface, image, 0, 0);
+              });
+          } else {
+              if (!customOffsets.hasOwnProperty(layout)) {
+                  var def = CUSTOM[layout];
+                  var width = def.framesize * def.framescount;
+                  var height = def.framesize * ROWSCOUNT;
 
-          customOffsets[layout] = oversizeHeight;
-          oversizeWidth = Math.max(width, oversizeWidth);
-          oversizeHeight += height;
-        }
+                  customOffsets[layout] = oversizeHeight;
+                  oversizeWidth = Math.max(width, oversizeWidth);
+                  oversizeHeight += height;
+              }
 
-        customLayers.push(layer);
-        return Promise.resolve();
-      }
-    });
+              customLayers.push(layer);
+              return Promise.resolve();
+          }
+      });
   }, Promise.resolve());
 
-  return sequence.then(function () {
-    resizeSurface(surface, oversizeWidth, oversizeHeight);
-    return {
-      surface: surface,
-      customOffsets: customOffsets,
-      customLayers: customLayers,
-    };
+  return sequence.then(function() {
+      resizeSurface(surface, oversizeWidth, oversizeHeight);
+      return { surface: surface, customOffsets: customOffsets, customLayers: customLayers };
   });
 }
 
@@ -156,7 +154,7 @@ function blitCustomFrames(surface, offset, layout, framesize, frames) {
 // ----------------------------------------------------------------
 
 function getSpriteData(filename) {
-  return fetch(ASSETS_PATH + filename + ".json")
+  return fetch(SAVED + filename + ".json")
     .then(function (response) {
       return response.json();
     })

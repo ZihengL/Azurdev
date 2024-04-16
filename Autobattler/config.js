@@ -185,3 +185,29 @@ var MAP_BOUNDS = {
   x: [0, 1000],
   y: [500, 1500],
 }
+
+var TYPES = {
+    MELEE: {
+      stats: {
+        health: 100,
+        moveSpeed: 20,
+        attackSpeed: 2,
+        range: 20,
+        power: 25,
+        armor: 10,
+        critical: 5,
+      },
+      animations: {
+        
+    }
+  },
+    RANGED: {
+      health: 50,
+      moveSpeed: 15,
+      attackSpeed: 1,
+      range: 50,
+      power: 15,
+      armor: 0,
+      critical: 2,
+    }
+};

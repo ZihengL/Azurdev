@@ -9,6 +9,14 @@ function Battle() {
 // =============================== STATIC
 
 Battle.createInstance = function (files) {
+    // fetch(SAVED)
+    // .then(function (response) {
+    //     return response.json();
+    // })
+    // .then(function (data) {
+    //     console.log(data);
+    // })
+
   return SpriteHandler.preloadResources(files).then(function () {
     return new Battle();
   });
