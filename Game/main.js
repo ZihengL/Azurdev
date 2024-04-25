@@ -13,24 +13,31 @@
 
 // UPLOAD TO HOST
 
-var offset = 0;
-var player = new Player();
-var bot = new Bot();
-player.enemies.push(bot);
+// var offset = 0;
+// var player = new Player();
+// var mob = new Mob();
+// player.enemies.push(mob);
 
-loadBackgrounds().then(function (backgrounds) {
-  function gameloop(currentTime) {
-    const deltaTime = (currentTime - lastUpdate) / 1000;
-    lastUpdate = currentTime;
-    offset = renderWithParallax(surface, backgrounds, offset);
-    player.update(deltaTime);
-    player.render();
+// loadBackgrounds().then(function (backgrounds) {
+//   function gameloop(currentTime) {
+//     const deltaTime = (currentTime - lastUpdate) / 1000;
+//     lastUpdate = currentTime;
+//     offset = renderWithParallax(surface, backgrounds, offset);
+//     player.update(deltaTime);
+//     player.render();
 
-    console.log("UPDATE", player, player.skills, player.enemies);
+//     // console.log("UPDATE", player, player.skills, player.enemies);
 
-    requestAnimationFrame(gameloop);
-  }
+//     requestAnimationFrame(gameloop);
+//   }
 
-  var lastUpdate = performance.now();
-  requestAnimationFrame(gameloop);
-});
+//   var lastUpdate = performance.now();
+//   requestAnimationFrame(gameloop);
+// });
+
+const keymap = KEYMAPS.PC;
+
+var currentLevel = LEVELS[0];
+const level = new Level(currentLevel, KEYMAPS.PC);
+
+level.play();

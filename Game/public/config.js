@@ -12,6 +12,9 @@ const surface = {
 
 const BACKGROUNDS = {
   images: ["near", "middle", "far"],
+  max_width: surface.width,
+  max_height: surface.height,
+  increment: 3,
   near: 0.5,
   middle: 0.2,
   far: 0,
@@ -23,6 +26,7 @@ const PLAYER = {
     mana: 100,
   },
   fx: {
+    images: "",
     color: "green",
     position: new Vector2D(200, surface.height - 800),
     size: new Vector2D(300, 800),
@@ -31,11 +35,38 @@ const PLAYER = {
   },
 };
 
-const PROJECTILES = {
+const KEYMAPS = {
+  PC: {
+    casting: {
+      w: "A",
+      a: "B",
+      s: "C",
+      d: "D",
+    },
+  },
+};
+
+const SKILLS2 = {
+  fire_weak: {
+    sequence: ["A", "A", "A"],
+  },
+  water_weak: {
+    sequence: ["B", "B", "B"],
+  },
+  earth_weak: {
+    sequence: ["C", "C", "C"],
+  },
+  air_weak: {
+    sequence: ["D", "D", "D"],
+  },
+};
+
+const SKILLS = {
   fire_weak: {
     name: { en: "Weak Fireball", fr: "Boule de feu faible" },
+    sequence: ["A", "A", "A"],
     stats: {
-      element: "fire",
+      affinity: "fire",
       damage: 5,
       mana: 5,
     },
@@ -47,26 +78,20 @@ const PROJECTILES = {
   },
 };
 
-const BOT = {
-  fx: {
-    color: "purple",
-    position: new Vector2D(surface.width, surface.height - 800),
-    size: new Vector2D(300, 800),
-    speed: 5,
-    max: surface.width - 500,
-  },
-};
-
 const SHIELDS = {
   name: { en: "Weak Shield", fr: "Bouclier faible" },
   damage: 5,
 };
 
-const ENEMIES = {
+const MOBS = {
   orc_weak: {
     name: { en: "Weak orc", fr: "l'Orc faible" },
-    health: 50,
-    projectiles: ["fire_weak"],
+    stats: {
+      affinity: "fire",
+      weight: 3,
+      health: 50,
+      projectiles: ["fire_weak"],
+    },
     fx: {
       color: "purple",
       position: new Vector2D(surface.width, surface.height - 800),
@@ -77,9 +102,13 @@ const ENEMIES = {
   },
   orc_strong: {
     name: { en: "Strong orc", fr: "l'Orc fort" },
-    health: 50,
-    projectiles: ["fire_weak"],
+    stats: {
+      weight: 1,
+      health: 50,
+      projectiles: ["fire_weak"],
+    },
     fx: {
+      images: "",
       color: "purple",
       position: new Vector2D(surface.width, surface.height - 800),
       size: new Vector2D(300, 800),

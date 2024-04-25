@@ -1,17 +1,3 @@
-function loadImage(src) {
-  return new Promise(function (resolve, reject) {
-    var image = new Image();
-
-    image.onload = function () {
-      resolve(image);
-    };
-    image.onerror = function () {
-      reject(new Error("Failed to load image"));
-    };
-    image.src = src;
-  });
-}
-
 function loadBackgrounds() {
   var sequence = Promise.resolve([]);
   var backgrounds = {};
@@ -29,6 +15,7 @@ function loadBackgrounds() {
         ctx.drawImage(img, 0, 0);
         backgrounds[imageName] = {
           cv: cv,
+          position: 0,
           speed: BACKGROUNDS[imageName],
         };
       });
@@ -73,3 +60,50 @@ function renderWithParallax(surface, backgrounds, offset) {
   offset += 3;
   return offset > backgrounds.far.width ? 0 : offset;
 }
+
+function Background(layers) {
+  this.layers = Object.assign({}, layers);
+  this.offset = 0;
+  this.skyColor = "aqua";
+}
+
+Background.prototype.update = function () {
+  for (var key in this.layers) {
+    const layer = this.layers[key];
+
+    layer.position = (this.offset * layer.speed) % layer.cv.width;
+  }
+
+  this.offset += BACKGROUNDS.increment;
+  if (this.offset > BACKGROUNDS.max_width) {
+    this.offset = 0;
+  }
+};
+
+Background.prototype.render = function () {
+  surface.ctx.fillStyle = this.skyColor;
+  surface.ctx.fillRect(0, 0, surface.width, surface.height);
+
+  for (var key in this.layers) {
+    const layer = this.layers[key];
+
+    this.drawLayer(layer.cv, layer.position);
+    if (layer.position > 0) {
+      this.drawLayer(layer.cv, layer.position - surface.width);
+    }
+  }
+};
+
+Background.prototype.drawLayer = function (layer, position) {
+  surface.ctx.drawImage(
+    layer,
+    position,
+    0,
+    surface.width,
+    surface.height,
+    0,
+    0,
+    surface.width,
+    surface.height
+  );
+};

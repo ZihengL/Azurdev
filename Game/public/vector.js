@@ -28,6 +28,13 @@ Vector2D.prototype.normalize = function () {
   return new Vector2D(this.x / mag, this.y / mag);
 };
 
+Vector2D.prototype.distance = function (vector) {
+  const dx = x2 - x1;
+  const dy = y2 - y1;
+
+  return vector.subtract(this).magnitude();
+};
+
 Vector2D.prototype.dot = function (vector) {
   return this.x * vector.x + this.y * vector.y;
 };

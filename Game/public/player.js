@@ -12,41 +12,35 @@ function createButton(buttonText, onClickFunction) {
 //     });
 // });
 
-function Player() {
-  const fx = PLAYER.fx;
-  this.pos = fx.position;
-  this.size = fx.size;
-
+function Player(skills, level) {
   const stats = Object.assign({}, PLAYER.stats);
   this.health = stats.health;
   this.mana = stats.mana;
 
   this.skills = [];
-  this.enemies = [];
+  for (var key in skills) {
+    const skill = new Skill(key, this, null);
 
-  this.addSkills();
+    this.skills.push(skill);
+  }
+
+  const fx = PLAYER.fx;
+  this.pos = fx.position;
+  this.size = fx.size;
+
+  this.level = level;
 }
 
-Player.prototype.addSkills = function () {
-  const proj = Object.keys(PROJECTILES);
-  const player = this;
-  var offsetX = 0;
-
-  proj.forEach(function (config, index) {
-    const skill = new Skill(player, config, index);
-
-    player.skills.push(skill);
-    offsetX += skill.button.width;
-  });
-};
-
-Player.prototype.update = function (deltaTime) {
+Player.prototype.update = function (deltaTime, lastKeyPressed) {
   this.skills.forEach(function (skill) {
-    skill.update(deltaTime);
-  });
+    if (lastKeyPressed && skill.inputSequence(lastKeyPressed)) {
+      const affinity = skill.stats.affinity;
+      const target = this.level.getTargetMob(affinity);
 
-  this.enemies.forEach(function (enemy) {
-    enemy.update();
+      skill.cast(target);
+    }
+
+    skill.update(deltaTime);
   });
 };
 
@@ -54,15 +48,36 @@ Player.prototype.render = function () {
   surface.ctx.fillStyle = PLAYER.fx.color;
   surface.ctx.fillRect(this.pos.x, this.pos.y, this.size.x, this.size.y);
 
-  this.enemies.forEach(function (enemy) {
-    enemy.render();
-  });
-
   this.skills.forEach(function (skill) {
     skill.render();
   });
+};
 
-  this.renderResources();
+Player.prototype.addSkills = function () {
+  const projectiles = Object.keys(SKILLS);
+  var offsetX = 0;
+
+  projectiles.forEach(
+    function (config, index) {
+      const skill = new Skill(this, config, index);
+
+      this.skills.push(skill);
+      offsetX += skill.button.width;
+    }.bind(this)
+  );
+};
+
+Player.prototype.cast = function (target) {
+  const projectiles = Object.keys(SKILLS);
+  const player = this;
+  var offsetX = 0;
+
+  projectiles.forEach(function (config, index) {
+    const skill = new Skill(player, config, index);
+
+    player.skills.push(skill);
+    offsetX += skill.button.width;
+  });
 };
 
 Player.prototype.renderResources = function () {
@@ -79,3 +94,5 @@ Player.prototype.renderResources = function () {
   surface.ctx.fillStyle = "blue";
   surface.ctx.fillRect(centerX(mana_w), y, mana_w, bar_h);
 };
+
+
