@@ -52,7 +52,7 @@ Level.prototype.setLevel = function (index) {
 };
 
 Level.prototype.play = function () {
-  loadBackgrounds().then(
+  Background.loadLayers().then(
     function (layers) {
       this.background = new Background(layers);
       this.lastUpdate = performance.now();

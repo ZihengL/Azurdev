@@ -11,12 +11,10 @@ const surface = {
 };
 
 const BACKGROUNDS = {
-  images: ["near", "middle", "far"],
-  max_width: surface.width,
-  max_height: surface.height,
+  images: ["far", "middle", "near"],
   increment: 3,
-  near: 0.5,
-  middle: 0.2,
+  near: 6,
+  middle: 2,
   far: 0,
 };
 
