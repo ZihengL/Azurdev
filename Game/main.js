@@ -6,6 +6,7 @@
 
 // CHROMIUM V38 broswerling.com - 000webhost.org
 // Inspect >
+// ZiGameAzur - Autobattler!23
 
 // 6 MAX SPELLS
 // ENEMY VULNERABILITIES
@@ -13,31 +14,16 @@
 
 // UPLOAD TO HOST
 
-// var offset = 0;
-// var player = new Player();
-// var mob = new Mob();
-// player.enemies.push(mob);
-
-// loadBackgrounds().then(function (backgrounds) {
-//   function gameloop(currentTime) {
-//     const deltaTime = (currentTime - lastUpdate) / 1000;
-//     lastUpdate = currentTime;
-//     offset = renderWithParallax(surface, backgrounds, offset);
-//     player.update(deltaTime);
-//     player.render();
-
-//     // console.log("UPDATE", player, player.skills, player.enemies);
-
-//     requestAnimationFrame(gameloop);
-//   }
-
-//   var lastUpdate = performance.now();
-//   requestAnimationFrame(gameloop);
-// });
-
 const keymap = KEYMAPS.PC;
 
 var currentLevel = LEVELS[0];
-const level = new Level(currentLevel, KEYMAPS.PC);
 
-level.play();
+Level.load()
+  .then(function () {
+    const level = new Level(currentLevel, KEYMAPS.PC);
+
+    level.gameloop(performance.now());
+  })
+  .catch(function (error) {
+    console.error("Failed to load level:", error);
+  });

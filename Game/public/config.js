@@ -8,14 +8,30 @@ const surface = {
   ctx: game_ctx,
   width: game_cv.width,
   height: game_cv.height,
+  center_x: game_cv.width / 2,
+  center_y: game_cv.height / 2,
 };
 
 const BACKGROUNDS = {
   images: ["far", "middle", "near"],
   increment: 3,
-  near: 6,
-  middle: 2,
+  near: 20,
+  middle: 6,
   far: 0,
+};
+
+const UI = {
+  win: {},
+  lose: {},
+  killcount: {
+    x: 100,
+    y: 100,
+    value: "Score: ",
+    font: "24px Arial",
+    fillStyle: "black",
+    textAlign: "center",
+    textBaseline: "middle",
+  },
 };
 
 const PLAYER = {
@@ -44,28 +60,34 @@ const KEYMAPS = {
   },
 };
 
-const SKILLS2 = {
-  fire_weak: {
-    sequence: ["A", "A", "A"],
+const AFFINITIES = {
+  fire: {
+    weakness: "ice",
+    color: "red",
   },
-  water_weak: {
-    sequence: ["B", "B", "B"],
+  ice: {
+    weakness: "fire",
+    color: "blue",
   },
-  earth_weak: {
-    sequence: ["C", "C", "C"],
+  earth: {
+    weakness: "air",
+    color: "brown",
   },
-  air_weak: {
-    sequence: ["D", "D", "D"],
+  air: {
+    weakness: "earth",
+    color: "beige",
   },
 };
 
 const SKILLS = {
   fire_weak: {
     name: { en: "Weak Fireball", fr: "Boule de feu faible" },
-    sequence: ["A", "A", "A"],
     stats: {
+      sequence: ["B", "B", "D"],
       affinity: "fire",
-      damage: 5,
+      cooldown: 1,
+      speed: 1000,
+      damage: 1,
       mana: 5,
     },
     fx: {
@@ -74,11 +96,30 @@ const SKILLS = {
       speed: 1000,
     },
   },
+  ice_weak: {
+    name: { en: "Weak Icicle", fr: "Boule de feu faible" },
+    stats: {
+      sequence: ["A", "A", "C"],
+      affinity: "ice",
+      cooldown: 1,
+      speed: 1000,
+      damage: 1,
+      mana: 5,
+    },
+    fx: {
+      color: "blue",
+      size: 15,
+      speed: 1000,
+    },
+  },
 };
 
 const SHIELDS = {
-  name: { en: "Weak Shield", fr: "Bouclier faible" },
-  damage: 5,
+  shield_weak: {
+    name: { en: "Weak Shield", fr: "Bouclier faible" },
+    stats: {},
+    fx: {},
+  },
 };
 
 const MOBS = {
@@ -87,11 +128,13 @@ const MOBS = {
     stats: {
       affinity: "fire",
       weight: 3,
-      health: 50,
-      projectiles: ["fire_weak"],
+      health: 1,
+      cooldown: 3,
+      attack: "fire_weak",
     },
     fx: {
-      color: "purple",
+      images: "",
+      color: "orange",
       position: new Vector2D(surface.width, surface.height - 800),
       size: new Vector2D(300, 800),
       speed: 5,
@@ -101,13 +144,15 @@ const MOBS = {
   orc_strong: {
     name: { en: "Strong orc", fr: "l'Orc fort" },
     stats: {
+      affinity: "ice",
       weight: 1,
-      health: 50,
-      projectiles: ["fire_weak"],
+      health: 3,
+      cooldown: 2,
+      attack: "ice_weak",
     },
     fx: {
       images: "",
-      color: "purple",
+      color: "blue",
       position: new Vector2D(surface.width, surface.height - 800),
       size: new Vector2D(300, 800),
       speed: 5,

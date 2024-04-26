@@ -1,6 +1,7 @@
 function Projectile(position, target, fx) {
   this.pos = position;
   this.target = target;
+
   this.velocity = new Vector2D(0, 0);
   this.color = fx.color;
   this.size = fx.size;

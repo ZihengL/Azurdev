@@ -9,32 +9,49 @@
 
 const LEVELS = [
   {
-    mobs_count: 5,
     mob_types: ["orc_weak", "orc_strong"],
+    mobs_count: 5,
+    mob_cd: 2,
+  },
+  {
+    mob_types: ["orc_strong"],
+    mobs_count: 2,
+    mob_cd: 2,
   },
 ];
 
-function Level(index, keymap) {
+function Level(levelIdx, keymap) {
   this.keymap = keymap;
   this.lastUpdate = null;
   this.lastKeyPressed = null;
 
+  this.levelIdx = levelIdx;
   this.level = null;
+  this.spawnTimer = 0;
   this.totalWeight = 0;
-  this.background = null;
 
-  this.player = new Player(SKILLS, this);
+  this.background = new Background(Level.res.background);
   this.mobs = [];
+  this.player = new Player(this, SKILLS);
+  this.killcount = 0;
 
-  this.setLevel(index);
+  this.setLevel(levelIdx);
 }
+Level.res = {};
+
+Level.load = function () {
+  return Background.loadLayers().then(function (layers) {
+    Level.res.background = layers;
+  });
+};
 
 Level.prototype.setLevel = function (index) {
   this.level = LEVELS[index] || LEVELS[0];
-  this.totalWeight = this.level.mob_types.reduce((sum, config) => {
-    const weight = (MOBS[config] || MOBS.orc_weak).stats.weight;
+  var sum = 0;
+  this.totalWeight = this.level.mob_types.reduce((config) => {
+    const mob = MOBS[config] || MOBS.orc_weak;
 
-    sum += weight;
+    return sum + mob.stats.weight;
   });
 
   document.addEventListener(
@@ -42,21 +59,9 @@ Level.prototype.setLevel = function (index) {
     function (event) {
       const key = this.keymap.casting[event.key];
 
-      console.log(event.key, key);
-
       if (key) {
         this.lastKeyPressed = key;
       }
-    }.bind(this)
-  );
-};
-
-Level.prototype.play = function () {
-  Background.loadLayers().then(
-    function (layers) {
-      this.background = new Background(layers);
-      this.lastUpdate = performance.now();
-      this.gameloop(this.lastUpdate);
     }.bind(this)
   );
 };
@@ -71,19 +76,23 @@ Level.prototype.gameloop = function (currentTime) {
   requestAnimationFrame(this.gameloop.bind(this));
 };
 
+// -------------- BASIC UPDATE & RENDER
+
 Level.prototype.update = function (deltaTime) {
-  this.background.update();
-
-  this.player.update(deltaTime, this.lastKeyPressed);
-  this.mobs.forEach(function (mob) {
-    mob.update(deltaTime);
-  });
-
-  if (this.mobs.length === 0) {
-    this.spawnMob();
+  if (!this.isInCombat()) {
+    this.background.update();
   }
 
-  this.lastKeyPressed = null;
+  if (this.isWon()) {
+    if (this.updateOnWin()) {
+      // SET LEVEL HERE.
+    }
+  } else if (this.isLost()) {
+  } else {
+    this.player.update(deltaTime, this.lastKeyPressed);
+    this.updateMobs(deltaTime);
+    this.lastKeyPressed = null;
+  }
 };
 
 Level.prototype.render = function () {
@@ -93,33 +102,60 @@ Level.prototype.render = function () {
     mob.render();
   });
   this.player.render();
-
   this.renderUI();
 };
 
-Level.prototype.renderUI = function () {
-  const bar_w = PLAYER.fx.bar_width;
-  const bar_h = PLAYER.fx.bar_height;
+Level.prototype.updateMobs = function (deltaTime) {
+  this.mobs = this.mobs.filter(
+    function (mob) {
+      if (!mob.isDead()) {
+        mob.update(deltaTime);
+        return true;
+      }
 
-  const hp_w = bar_w * this.player.health;
-  var y = 200;
-  surface.ctx.fillStyle = "red";
-  surface.ctx.fillRect(centerX(hp_w), y, hp_w, bar_h);
+      this.killcount++;
+      return false;
+    }.bind(this)
+  );
 
-  const mana_w = bar_w * this.player.mana;
-  y += bar_h * 2;
-  surface.ctx.fillStyle = "blue";
-  surface.ctx.fillRect(centerX(mana_w), y, mana_w, bar_h);
+  if (this.checkMobSpawn(deltaTime)) {
+    this.spawnMob();
+  }
 };
 
-Level.prototype.isWon = function () {
-  return true;
+// CREATE A CLASS TO MANAGE UI
+Level.prototype.renderUI = function () {
+  const ctx = surface.ctx;
+  const settings = UI.killcount;
+  const value = settings.value + this.killcount;
+  const x = settings.x;
+  const y = settings.y;
+
+  ctx.font = settings.font;
+  ctx.fillStyle = settings.fillStyle;
+  ctx.textAlign = settings.textAlign;
+  ctx.textBaseline = settings.textBaseline;
+  ctx.fillText(value, x, y);
+};
+
+// -------------- OTHER
+
+Level.prototype.checkMobSpawn = function (deltaTime) {
+  if (!this.isMobPresent() && !this.isWon()) {
+    if (this.spawnTimer > 0) {
+      this.spawnTimer = Math.max(this.spawnTimer - deltaTime, 0);
+      return false;
+    }
+
+    return true;
+  }
 };
 
 Level.prototype.spawnMob = function () {
   const mob = this.getRandomMob();
 
   this.mobs.push(mob);
+  this.spawnTimer = this.level.mob_cd;
 };
 
 Level.prototype.getRandomMob = function () {
@@ -130,10 +166,41 @@ Level.prototype.getRandomMob = function () {
     const mob = MOBS[mob_types[i]];
 
     random -= mob.stats.weight;
+    console.log(random, mob.stats.weight);
     if (random < 0) {
       return new Mob(mob_types[i]);
     }
   }
 
   return new Mob();
+};
+
+Level.prototype.isMobPresent = function () {
+  return this.mobs.length > 0;
+};
+
+Level.prototype.isInCombat = function () {
+  const mob = this.mobs[0];
+
+  return mob && mob.isCombatReady();
+};
+
+// -------------- WIN & LOSE
+
+Level.prototype.isWon = function () {
+  return this.killcount >= this.level.mobs_count;
+};
+
+Level.prototype.updateOnWin = function () {
+  if (this.player.pos.x < surface.width) {
+    this.player.pos.x += 5;
+
+    return false;
+  }
+
+  return true;
+};
+
+Level.prototype.isLost = function () {
+  return this.player.health === 0;
 };
