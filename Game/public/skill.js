@@ -1,4 +1,4 @@
-function Skill(config, player) {
+function Skill(config, caster) {
   const skill = SKILLS[config];
 
   this.name = config;
@@ -6,33 +6,32 @@ function Skill(config, player) {
   this.stats = skill.stats;
   this.fx = skill.fx;
 
-  this.player = player;
-  // this.sequencing = [];
+  this.caster = caster;
   this.sequenceIdx = 0;
   this.cooldown = 0;
-
   this.projectiles = [];
 }
 
 // -------------- UPDATE & RENDER
 
 Skill.prototype.update = function (deltaTime) {
+  const self = this;
+
   this.projectiles = this.projectiles.filter(
     function (projectile) {
       projectile.update(deltaTime);
 
-      if (projectile.isOnTarget()) {
-        projectile.target.applyEffect(this.stats);
+      if (projectile.isWithinRange()) {
+        projectile.target.applyEffect(self.stats);
         return false;
       }
 
-      return true;
+      return !projectile.target.isDead();
     }.bind(this)
   );
 
   if (this.isOnCD()) {
     this.cooldown -= deltaTime;
-    // this.cooldown = Math.max(0, this.cooldown);
   }
 };
 
@@ -44,25 +43,29 @@ Skill.prototype.render = function () {
   );
 };
 
-Skill.prototype.renderUI = function (pos) {
-  const size = 100;
+Skill.prototype.renderUI = function (x, y) {
+  const size = 25;
 
-  surface.ctx.fillStyle = this.fx.color;
-  surface.ctx.fillRect(pos, 320, size, size);
+  // surface.ctx.fillStyle = this.fx.color;
+  // surface.ctx.fillRect(x, y, size, size);
+
+  surface.fillTo("ui", this.fx.color, x, y, size, size);
 
   if (this.isOnCD()) {
     const cdSize = size - this.cooldown * size;
-    surface.ctx.fillRect(pos, 320, cdSize, size);
+    // surface.ctx.fillRect(x, y, cdSize, size);
+
+    surface.fillTo("ui", "black", x, y, cdSize, size);
   }
 };
 
 // -------------- OTHER
 
-Skill.prototype.inputSequence = function (inputArcane) {
-  if (!this.isOnCD()) {
-    const currentArcane = this.sequence[this.sequenceIdx];
+Skill.prototype.inputSequence = function (inputValue) {
+  if (inputValue && !this.isOnCD()) {
+    const currentValue = this.sequence[this.sequenceIdx];
 
-    if (inputArcane === currentArcane) {
+    if (inputValue === currentValue) {
       this.sequenceIdx++;
     } else {
       if (this.sequenceIdx > 0) {
@@ -70,24 +73,41 @@ Skill.prototype.inputSequence = function (inputArcane) {
         this.cooldown = this.stats.cooldown;
       }
     }
-    console.log(this.name, inputArcane, currentArcane, this.sequenceIdx);
-    
+
+    console.log(
+      this.name,
+      "\nIN",
+      inputValue,
+      "CURR",
+      currentValue,
+      "IDX",
+      this.sequenceIdx
+    );
     return this.sequenceIdx > this.sequence.length - 1;
   }
+
+  return false;
 };
 
 Skill.prototype.isOnCD = function () {
   return this.cooldown > 0;
 };
 
-Skill.prototype.getTarget = function (mobs) {
-  return mobs[0];
+Skill.prototype.cast = function () {
+  const casterCenter = this.caster.bodyCenter();
+  const projectile = new Projectile(
+    casterCenter,
+    this.caster.opponent,
+    this.fx
+  );
+
+  this.projectiles.push(projectile);
+  this.sequenceIdx = 0;
 };
 
-Skill.prototype.cast = function (mobs) {
-  const playerCenter = this.player.pos.center(this.player.size);
-  const target = this.getTarget(mobs);
-  const projectile = new Projectile(playerCenter, target, this.fx);
+Skill.prototype.applyEffect = function (target) {
+  const casterCenter = this.caster.pos.center(this.caster.size);
+  const projectile = new Projectile(casterCenter, target, this.fx);
 
   this.projectiles.push(projectile);
   this.cooldown = this.stats.cooldown / 2;

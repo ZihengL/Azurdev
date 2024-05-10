@@ -8,18 +8,48 @@
     <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
-    <canvas id="game_cv"></canvas>
+    <div id="game">
+      <div id="level">
+        <div id="game_viewport">
+          <canvas id="backgrounds"></canvas>
+          <canvas id="actors"></canvas>
+          <canvas id="effects"></canvas>
+          <canvas id="ui"></canvas>
+        </div>
+        <button id="btn_quitgame">Quit</button>
+      </div>
+
+      <div id="main_menu">
+        <button id="btn_newgame">New Game</button>
+
+        <button id="btn_map">Map</button>
+        <button id="btn_continue">Continue</button>
+      </div>
+
+      <div id="map_menu">
+        <div id="level_selection"></div>
+
+        <button id="btn_continue">Continue</button>
+      </div>
+    </div>
 
     <script src="./localstorage.js"></script>
+    <script src="./config.js"></script>
     <script src="./public/utils.js"></script>
     <script src="./public/vector.js"></script>
-    <script src="./public/config.js"></script>
+    <script src="./public/surface.js"></script>
+    <script src="./public/backgrounds.js"></script>
+    <script src="./public/sprites.js"></script>
     <script src="./public/projectile.js"></script>
     <script src="./public/skill.js"></script>
-    <script src="./public/backgrounds.js"></script>
-    <script src="./public/mob.js"></script>
+    <script src="./public/caster.js"></script>
+    <!-- <script src="./public/mob.js"></script> -->
+    <script src="./public/opponent.js"></script>
     <script src="./public/player.js"></script>
     <script src="./public/level.js"></script>
+    <script src="./public/mainmenu.js"></script>
+    <script src="./public/mapmenu.js"></script>
+    <script src="./public/game.js"></script>
     <script src="./main.js"></script>
 
     <script>

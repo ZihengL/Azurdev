@@ -13,6 +13,18 @@ function center(width, height) {
   };
 }
 
+function getScreenScalarX(scalar) {
+  return surface.width * scalar;
+}
+
+function getScreenScalarY(scalar) {
+  return surface.height * scalar;
+}
+
+function getScreenScalar(scalarX, scalarY) {
+  return new Vector2D(surface.width * scalarX, surface.height * scalarY);
+}
+
 function loadImage(src) {
   return new Promise(function (resolve, reject) {
     var image = new Image();
@@ -25,4 +37,8 @@ function loadImage(src) {
     };
     image.src = src;
   });
+}
+
+function isEmpty(obj) {
+  return JSON.stringify(obj) === "{}";
 }

@@ -28,16 +28,23 @@ Vector2D.prototype.normalize = function () {
   return new Vector2D(this.x / mag, this.y / mag);
 };
 
-Vector2D.prototype.distance = function (vector) {
-  const dx = x2 - x1;
-  const dy = y2 - y1;
-
-  return vector.subtract(this).magnitude();
-};
-
 Vector2D.prototype.dot = function (vector) {
   return this.x * vector.x + this.y * vector.y;
 };
+
+Vector2D.prototype.distance = function (vector) {
+  const difference = vector.subtract(this);
+
+  return difference.magnitude();
+};
+
+Vector2D.prototype.difference = function (vector) {
+  const x = Math.max(this.x, vector.x) - Math.min(this.x, vector.x);
+  const y = Math.max(this.y, vector.y) - Math.min(this.y, vector.y);
+
+  return new Vector2D(x, y);
+};
+
 
 Vector2D.prototype.direction = function (target) {
   return target.subtract(this).normalize();
@@ -45,16 +52,6 @@ Vector2D.prototype.direction = function (target) {
 
 Vector2D.prototype.center = function (size) {
   return this.add(size.divide(2));
-}
-
-Vector2D.prototype.isWithinRange = function (range) {
-  const minX = this.x - range;
-  const maxX = this.x + range;
-  const minY = this.y - range;
-  const maxY = this.y + range;
-
-  return this.x <= minX && this.x >= maxX &&
-    this.y <= minY && this.y >= maxY;
 }
 
 Vector2D.prototype.deltaX = function (target) {
@@ -73,8 +70,6 @@ Vector2D.prototype.isEqual = function (target) {
 Vector2D.prototype.copy = function () {
   return new Vector2D(this.x, this.y);
 }
-
-
 
 Vector2D.prototype.toPolarDirection = function (target) {
   // var normalized = this.direction(target);
@@ -133,3 +128,8 @@ Vector2D.prototype.render = function (ctx, fillstyle = "red") {
   ctx.arc(this.x, this.y, 3, 0, 2 * Math.PI);
   ctx.fill();
 };
+
+Vector2D.prototype.str = function () {
+  return "x: " + this.x + " - y: " + this.y;
+};
+

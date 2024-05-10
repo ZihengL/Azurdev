@@ -1,122 +1,67 @@
-function Player(level, skills) {
+function Player(image, saved, opponent, level) {
+  Caster.call(this, image, saved.stats, PLAYER.fx, saved.skills, opponent);
   this.level = level;
 
-  const stats = PLAYER.stats;
-  this.health = stats.health;
-  this.mana = stats.mana;
-
-  this.skills = [];
-  for (var key in skills) {
-    const skill = new Skill(key, this, null);
-
-    this.skills.push(skill);
-  }
-
-  const fx = PLAYER.fx;
-  this.pos = fx.position;
-  this.size = fx.size;
+  this.mana = this.stats.mana;
+  this.velocity = 0;
+  this.endPos = surface.ratioPosition(PLAYER.fx.position.end);
 }
+Player.prototype = Object.create(Caster.prototype);
+Player.prototype.constructor = Player;
 
-// -------------- UPDATE & RENDER
-
-Player.prototype.update = function (deltaTime, inputArcane) {
-  this.skills.forEach(
-    function (skill) {
-      if (inputArcane && skill.inputSequence(inputArcane)) {
-        if (this.level.isMobPresent()) {
-          skill.cast(this.level.mobs);
-        }
-      }
-
-      skill.update(deltaTime);
-    }.bind(this)
-  );
-};
-
-Player.prototype.render = function () {
-  surface.ctx.fillStyle = PLAYER.fx.color;
-  surface.ctx.fillRect(this.pos.x, this.pos.y, this.size.x, this.size.y);
-
-  const bar_w = PLAYER.fx.bar_width;
-  const bar_h = PLAYER.fx.bar_height;
-
-  const hp_w = bar_w * this.health;
-  var y = 200;
-  surface.ctx.fillStyle = "red";
-  surface.ctx.fillRect(centerX(hp_w), y, hp_w, bar_h);
-
-  const mana_w = bar_w * this.mana;
-  y += bar_h * 2;
-  surface.ctx.fillStyle = "blue";
-  surface.ctx.fillRect(centerX(mana_w), y, mana_w, bar_h);
-
-  this.skills.forEach(function (skill, increment) {
-    skill.render();
-    skill.renderUI(centerX(mana_w) + increment * 150);
+Player.load = function () {
+  return loadImage(PLAYER.fx.spritesheet).then(function (image) {
+    return image;
   });
 };
 
-Player.prototype.renderUI = function () {
-  const bar_w = PLAYER.fx.bar_width;
-  const bar_h = PLAYER.fx.bar_height;
+Player.prototype.update = function (deltaTime) {
+  var state = this.spriteHandler.state;
 
-  const hp_w = bar_w * this.health;
-  var y = 200;
-  surface.ctx.fillStyle = "red";
-  surface.ctx.fillRect(centerX(hp_w), y, hp_w, bar_h);
+  if (this.isOnTargetPos() && this.opponent.isOnTargetPos()) {
+    if (!this.isDead()) {
+      if (this.updateSkills(deltaTime)) {
+        state = STATES.CAST;
+      } else {
+        state = STATES.IDLE;
+      }
+    } else {
+      state = STATES.DEATH;
+    }
+  } else {
+    state = STATES.RUN;
+  }
 
-  const mana_w = bar_w * this.mana;
-  y += bar_h * 2;
-  surface.ctx.fillStyle = "blue";
-  surface.ctx.fillRect(centerX(mana_w), y, mana_w, bar_h);
+  this.mana = Math.min(this.mana + this.stats.mana_regen, this.stats.mana);
+  // this.spriteHandler.updatePosition();
+  this.spriteHandler.update(deltaTime, state);
+
+  // console.log(this.spriteHandler.state, state);
 };
 
-// -------------- OTHER
+Player.prototype.updateSkills = function (deltaTime) {
+  const inputValue = this.level.lastKeyPressed;
+  var casted = false;
 
-Player.prototype.applyEffect = function (damage) {
-  this.health -= damage;
+  this.skills.forEach(
+    function (skill) {
+      if (skill.inputSequence(inputValue) && this.hasEnoughMana(skill)) {
+        skill.cast(this.opponent);
+        this.mana -= skill.stats.mana_cost;
+        // this.spriteHandler.updateState(STATES.CAST);
+        casted = true;
+      }
+      skill.update(deltaTime);
+    }.bind(this)
+  );
 
-  return this.health <= 0;
+  // console.log(this.spriteHandler.state, casted || this.spriteHandler.isNotAtEndofAnim(STATES.CAST));
+
+  return casted || this.spriteHandler.isNotAtEndofAnim(STATES.CAST);
 };
 
-// Player.prototype.addSkills = function () {
-//   const projectiles = Object.keys(SKILLS);
-//   var offsetX = 0;
+Player.prototype.hasEnoughMana = function (skill) {
+  return this.mana >= skill.stats.mana_cost;
+};
 
-//   projectiles.forEach(
-//     function (config, index) {
-//       const skill = new Skill(this, config, index);
-
-//       this.skills.push(skill);
-//       offsetX += skill.button.width;
-//     }.bind(this)
-//   );
-// };
-
-// Player.prototype.cast = function (target) {
-//   const projectiles = Object.keys(SKILLS);
-//   const player = this;
-//   var offsetX = 0;
-
-//   projectiles.forEach(function (config, index) {
-//     const skill = new Skill(player, config, index);
-
-//     player.skills.push(skill);
-//     offsetX += skill.button.width;
-//   });
-// };
-
-// Player.prototype.renderResources = function () {
-//   const bar_w = PLAYER.fx.bar_width;
-//   const bar_h = PLAYER.fx.bar_height;
-
-//   const hp_w = bar_w * this.health;
-//   var y = 200;
-//   surface.ctx.fillStyle = "red";
-//   surface.ctx.fillRect(centerX(hp_w), y, hp_w, bar_h);
-
-//   const mana_w = bar_w * this.mana;
-//   y += bar_h * 2;
-//   surface.ctx.fillStyle = "blue";
-//   surface.ctx.fillRect(centerX(mana_w), y, mana_w, bar_h);
-// };
+Player.prototype.toSaveFormat = function () {};

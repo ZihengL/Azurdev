@@ -1,38 +1,24 @@
 function Background(layers) {
   this.skyColor = "aqua";
-
-  this.layers = {};
-  for (var key in layers) {
-    const layer = layers[key];
-
-    this.layers[key] = {
-      cv: layer.cv,
-      width: layer.cv.width,
-      speed: BACKGROUNDS[key],
-      pos: 0,
-    };
-  }
+  this.layers = layers;
 }
+Background.id = "backgrounds";
 
-Background.loadLayers = function () {
+Background.load = function () {
   const layers = {};
-  var sequence = Promise.resolve([]);
+  var sequence = Promise.resolve();
 
   BACKGROUNDS.images.forEach(function (imageName) {
-    const path = './public/Assets/backgrounds/' + imageName + '.png';
+    const path = "./public/Assets/backgrounds/" + imageName + ".png";
 
     sequence = sequence.then(function () {
-      return loadImage(path).then(function (img) {
-        var cv = document.createElement("canvas");
-        cv.width = img.naturalWidth;
-        cv.height = img.naturalHeight;
-
-        var ctx = cv.getContext("2d");
-        ctx.drawImage(img, 0, 0);
+      return loadImage(path).then(function (image) {
         layers[imageName] = {
-          cv: cv,
-          // width: cv.width,
-          // pos: 0,
+          image: image,
+          width: image.naturalWidth,
+          height: image.naturalHeight,
+          speed: BACKGROUNDS[imageName],
+          pos: 0,
         };
       });
     });
@@ -43,41 +29,46 @@ Background.loadLayers = function () {
   });
 };
 
-Background.prototype.update = function () {
+Background.prototype.update = function (velocity) {
   for (const key in this.layers) {
     const layer = this.layers[key];
 
-    layer.pos += layer.speed;
-    if (layer.pos >= layer.width) {
+    if (key === "near") {
+      
+    }
+
+    layer.pos -= layer.speed * velocity;
+    if (layer.pos <= -surface.width) {
       layer.pos = 0;
     }
   }
 };
 
 Background.prototype.render = function () {
-  surface.ctx.fillStyle = this.skyColor;
-  surface.ctx.fillRect(0, 0, surface.width, surface.height);
+  surface.fillTo(Background.id, this.skyColor);
 
   for (const key in this.layers) {
     const layer = this.layers[key];
 
-    this.drawLayer(layer.cv, layer.pos);
-    if (layer.pos > 0) {
-      this.drawLayer(layer.cv, layer.pos - layer.width);
+    surface.drawTo(Background.id, layer.image, layer.pos, 0);
+    if (layer.pos !== 0) {
+      surface.drawTo(Background.id, layer.image, layer.pos + surface.width, 0);
     }
   }
 };
 
-Background.prototype.drawLayer = function (cv, position) {
-  surface.ctx.drawImage(
-    cv,
-    position,
-    0,
-    cv.width,
-    cv.height,
-    0,
-    0,
-    surface.width,
-    surface.height
-  );
+Background.prototype.drawLayer = function (layer, shift) {
+  surface.drawTo(Background.id, layer.image, layer.pos - shift);
+
+  // surfaceLayer.ctx.drawImage(
+  //   layer.image,
+  //   layer.pos - shift,
+  //   0,
+  //   layer.width,
+  //   layer.height,
+  //   0,
+  //   0,
+  //   surface.width,
+  //   surface.height
+  // );
 };

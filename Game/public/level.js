@@ -9,50 +9,56 @@
 
 const LEVELS = [
   {
-    mob_types: ["orc_weak", "orc_strong"],
-    mobs_count: 5,
+    types: ["orc_weak", "orc_strong"],
+    count: 5,
     mob_cd: 2,
   },
   {
-    mob_types: ["orc_strong"],
-    mobs_count: 2,
+    types: ["orc_strong"],
+    count: 2,
     mob_cd: 2,
   },
 ];
 
-function Level(levelIdx, keymap) {
+function Level(res, saved, keymap, game) {
+  this.res = res;
+  this.save = saved;
   this.keymap = keymap;
+  this.game = game;
   this.lastUpdate = null;
   this.lastKeyPressed = null;
 
-  this.levelIdx = levelIdx;
-  this.level = null;
-  this.spawnTimer = 0;
-  this.totalWeight = 0;
-
-  this.background = new Background(Level.res.background);
-  this.mobs = [];
-  this.player = new Player(this, SKILLS);
+  this.levelIdx = saved.level_progress;
   this.killcount = 0;
+  this.opponents = [];
+  this.opponent = null;
+  this.player = new Player(res.player, saved, this.opponent, this);
 
-  this.setLevel(levelIdx);
+  this.background = new Background(this.res.background);
+  this.setLevel(saved.level_progress);
 }
+Level.div = "level";
+Level.STOPPED = false;
 Level.res = {};
 
 Level.load = function () {
-  return Background.loadLayers().then(function (layers) {
+  return Background.load().then(function (layers) {
     Level.res.background = layers;
   });
 };
 
 Level.prototype.setLevel = function (index) {
-  this.level = LEVELS[index] || LEVELS[0];
-  var sum = 0;
-  this.totalWeight = this.level.mob_types.reduce((config) => {
-    const mob = MOBS[config] || MOBS.orc_weak;
-
-    return sum + mob.stats.weight;
-  });
+  // this.opponents = LEVELS[index] || LEVELS[0];
+  // this.killcount = 0;
+  // this.opponent = this.getRandomOpponent();
+  // this.player.opponent = this.opponent;
+  index = index <= this.levelIdx ? index : this.save.level_progress;
+  this.opponents = LEVELS[index] || LEVELS[0];
+  this.killcount = 0;
+  this.player = new Player(this.res.player, this.save, null, this);
+  this.opponent = this.getRandomOpponent();
+  this.player.opponent = this.opponent;
+  this.background = new Background(this.res.background);
 
   document.addEventListener(
     "keydown",
@@ -67,63 +73,107 @@ Level.prototype.setLevel = function (index) {
 };
 
 Level.prototype.gameloop = function (currentTime) {
-  const deltaTime = (currentTime - this.lastUpdate) / 1000;
-  this.lastUpdate = currentTime;
+  if (!Level.STOPPED) {
+    switch (true) {
+      case this.isWon():
+        this.save.level_progress += Math.min(
+          this.save.level_progress + 1,
+          LEVELS.length - 1
+        );
+      case this.isWon():
+      case this.isLost():
+        this.game.save = this.save;
+        this.game.saveProfile();
+        this.game.switchToMapMenu();
+        break;
+      default:
+        const deltaTime = (currentTime - this.lastUpdate) / 1000;
+        this.lastUpdate = currentTime;
 
-  this.update(deltaTime);
-  this.render();
-
-  requestAnimationFrame(this.gameloop.bind(this));
+        this.update(deltaTime);
+        this.render();
+        requestAnimationFrame(this.gameloop.bind(this));
+    }
+  } else {
+    console.log("Level.STOPPED =", Level.STOPPED);
+  }
 };
 
 // -------------- BASIC UPDATE & RENDER
 
+Level.prototype.init = function () {
+  this.opponents = LEVELS[this.levelIdx] || LEVELS[0];
+  this.killcount = 0;
+  this.player = new Player(this.res.player, this.save, null, this);
+  this.opponent = this.getRandomOpponent();
+  this.player.opponent = this.opponent;
+
+  document.addEventListener(
+    "keydown",
+    function (event) {
+      const key = this.keymap.casting[event.key];
+
+      if (key) {
+        this.lastKeyPressed = key;
+      }
+    }.bind(this)
+  );
+};
+
+Level.prototype.exit = function () {};
+
 Level.prototype.update = function (deltaTime) {
-  if (!this.isInCombat()) {
-    this.background.update();
+  // if (this.updatePositions(deltaTime)) {
+  this.player.update(deltaTime);
+  this.opponent.update(deltaTime);
+  // }
+  console.log(this.isWon(), this.opponents.count, this.killcount);
+  if (this.opponent.isRemovable()) {
+    this.killcount++;
+    if (!this.isWon()) {
+      this.opponent = this.getRandomOpponent();
+      this.player.opponent = this.opponent;
+    }
   }
 
-  if (this.isWon()) {
-    if (this.updateOnWin()) {
-      // SET LEVEL HERE.
-    }
-  } else if (this.isLost()) {
-  } else {
-    this.player.update(deltaTime, this.lastKeyPressed);
-    this.updateMobs(deltaTime);
-    this.lastKeyPressed = null;
+  if (this.player.getState() === STATES.RUN) {
+    this.background.update(SPRITES.velocity);
   }
+
+  this.lastKeyPressed = null;
 };
 
 Level.prototype.render = function () {
+  surface.clear();
   this.background.render();
-
-  this.mobs.forEach(function (mob) {
-    mob.render();
-  });
+  this.opponent.render();
   this.player.render();
-  this.renderUI();
+  // this.renderUI();
 };
 
-Level.prototype.updateMobs = function (deltaTime) {
-  this.mobs = this.mobs.filter(
-    function (mob) {
-      if (!mob.isDead()) {
-        mob.update(deltaTime);
-        return true;
-      }
-
-      this.killcount++;
+Level.prototype.updatePositions = function (deltaTime) {
+  switch (true) {
+    case !this.player.isOnTargetPos():
+      this.player.spriteHandler.updatePosition();
+      this.player.spriteHandler.update(deltaTime, STATES.RUN);
       return false;
-    }.bind(this)
-  );
-
-  if (this.checkMobSpawn(deltaTime)) {
-    this.spawnMob();
+    case !this.opponent.isOnTargetPos():
+      this.opponent.spriteHandler.updatePosition();
+      this.opponent.update(deltaTime, STATES.RUN);
+      this.player.spriteHandler.update(deltaTime, STATES.RUN);
+      return false;
+    default:
+      return true;
   }
 };
 
-// CREATE A CLASS TO MANAGE UI
+Level.prototype.setOpponent = function () {
+  if (!this.opponent || this.opponent.isRemovable()) {
+    this.opponent = this.getRandomOpponent();
+    this.player.opponent = this.opponent;
+  }
+};
+
 Level.prototype.renderUI = function () {
   const ctx = surface.ctx;
   const settings = UI.killcount;
@@ -140,61 +190,56 @@ Level.prototype.renderUI = function () {
 
 // -------------- OTHER
 
-Level.prototype.checkMobSpawn = function (deltaTime) {
-  if (!this.isMobPresent() && !this.isWon()) {
+Level.prototype.checkOpponentSpawn = function (deltaTime) {
+  if (!this.player.isOnTargetPos() && !this.opponent) {
     if (this.spawnTimer > 0) {
-      this.spawnTimer = Math.max(this.spawnTimer - deltaTime, 0);
+      this.spawnTimer -= deltaTime;
       return false;
     }
-
-    return true;
-  }
-};
-
-Level.prototype.spawnMob = function () {
-  const mob = this.getRandomMob();
-
-  this.mobs.push(mob);
-  this.spawnTimer = this.level.mob_cd;
-};
-
-Level.prototype.getRandomMob = function () {
-  const mob_types = this.level.mob_types;
-  var random = Math.random() * this.totalWeight;
-
-  for (var i = 0; i < mob_types.length; i++) {
-    const mob = MOBS[mob_types[i]];
-
-    random -= mob.stats.weight;
-    console.log(random, mob.stats.weight);
-    if (random < 0) {
-      return new Mob(mob_types[i]);
-    }
   }
 
-  return new Mob();
+  return true;
 };
 
-Level.prototype.isMobPresent = function () {
-  return this.mobs.length > 0;
+// Level.prototype.spawnMob = function () {
+//   const mob = this.getRandomOpponent();
+
+//   this.opponent.push(mob);
+//   this.spawnTimer = this.opponents.mob_cd;
+// };
+
+Level.prototype.getRandomOpponent = function () {
+  const rand = Math.floor(Math.random() * this.opponents.types.length);
+  const name = this.opponents.types[rand];
+
+  const opp = MOBS[name];
+  return new Opponent(
+    this.res.opponent,
+    opp.stats,
+    opp.fx,
+    opp.stats.skills,
+    this.player,
+    this
+  );
 };
 
-Level.prototype.isInCombat = function () {
-  const mob = this.mobs[0];
+// Level.prototype.isMobPresent = function () {
+//   return this.opponent.length > 0;
+// };
 
-  return mob && mob.isCombatReady();
+Level.prototype.areOnTargetPos = function () {
+  return this.player.isOnTargetPos() && this.opponent.isOnTargetPos();
 };
 
 // -------------- WIN & LOSE
 
 Level.prototype.isWon = function () {
-  return this.killcount >= this.level.mobs_count;
+  return this.killcount >= this.opponents.count;
 };
 
 Level.prototype.updateOnWin = function () {
   if (this.player.pos.x < surface.width) {
-    this.player.pos.x += 5;
-
+    this.player.pos.x += player.fx.speed;
     return false;
   }
 
