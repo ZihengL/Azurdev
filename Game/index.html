@@ -8,31 +8,85 @@
     <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
-    <div id="game">
-      <div id="level">
-        <div id="game_viewport">
-          <canvas id="backgrounds"></canvas>
-          <canvas id="actors"></canvas>
-          <canvas id="effects"></canvas>
-          <canvas id="ui"></canvas>
+    <div id="viewport">
+      <!-- -----------------------  MAIN  ----------------------- -->
+      <div id="screen_main" class="screen">
+        <button id="btn_lang" onclick="changeLanguage();"></button>
+
+        <ul id="profile_resources"></ul>
+
+        <ul id="profile_stats">
+          <li id="health"></li>
+          <li id="mana"></li>
+          <li id="mana_regen"></li>
+        </ul>
+
+        <div id="main_menu_bottom">
+          <button id="btn_newgame" onclick="newProfile();"></button>
+          <button id="btn_map" onclick="setToScreen(SCREENS.MAP);"></button>
         </div>
-        <button id="btn_quitgame">Quit</button>
       </div>
 
-      <div id="main_menu">
-        <button id="btn_newgame">New Game</button>
-
-        <button id="btn_map">Map</button>
-        <button id="btn_continue">Continue</button>
-      </div>
-
-      <div id="map_menu">
+      <!-- -----------------------  MAP  ----------------------- -->
+      <div id="screen_map" class="screen">
+        <h1 id="selected_level"></h1>
         <div id="level_selection"></div>
 
-        <button id="btn_continue">Continue</button>
+        <button id="btn_play" onclick="setToScreen(SCREENS.GAME);"></button>
+        <button id="btn_back" onclick="setToScreen(SCREENS.MAIN);"></button>
       </div>
+    <!-- </div> -->
+
+    <!-- -----------------------  GAME  ----------------------- -->
+    <div id="screen_game" class="screen">
+      <div id="o_ui">
+        <div id="o_health_container" class="o-fill-con">
+          <div id="o_health_fill" class="health o-fill"></div>
+        </div>
+
+        <div id="o_cooldown_container" class="o-fill-con">
+          <div id="o_cooldown_fill" class="cooldown o-fill"></div>
+        </div>
+      </div>
+
+      <div id="game_status" class="game-ui">
+        <h2 id="game_status_message"></h2>
+        <button id="btn_map" onclick="setToScreen(SCREENS.MAP)"></button>
+      </div>
+
+      <canvas id="backgrounds" class="game-canvas"></canvas>
+      <canvas id="actors" class="game-canvas"></canvas>
+      <canvas id="effects" class="game-canvas"></canvas>
+      <canvas id="ui" class="game-canvas"></canvas>
+
+      <div id="p_ui" class="player-ui">
+        <div id="p_health_container" class="p-fill-con">
+          <!-- <img src="" alt="health"> -->
+          <div id="p_health_fill" class="p-fill health"></div>
+        </div>
+
+        <div id="p_skill_container">
+          <button id="A" class="skill">
+            <img src="./public/Assets/effects/fire.png" class="skill-img">
+          </button>
+          <button id="B" class="skill">
+            <img src="./public/Assets/effects/fire.png" class="skill-img">
+          </button>
+          <button id="C" class="skill">
+            <img src="./public/Assets/effects/fire.png" class="skill-img">
+          </button>
+          <button id="D" class="skill">
+            <img src="./public/Assets/effects/fire.png" class="skill-img">
+          </button>
+        </div>
+
+        <div id="p_mana_container" class="p-fill-con">
+          <div id="p_mana_fill" class="p-fill mana"></div>
+        </div>
+      <!-- <button id="btn_quitLevel" onclick="setToScreen(SCREENS.MAP);"></button> -->
     </div>
 
+    <!-- -----------------------  JS  ----------------------- -->
     <script src="./localstorage.js"></script>
     <script src="./config.js"></script>
     <script src="./public/utils.js"></script>
@@ -41,22 +95,12 @@
     <script src="./public/backgrounds.js"></script>
     <script src="./public/sprites.js"></script>
     <script src="./public/projectile.js"></script>
+    <script src="./public/effects.js"></script>
     <script src="./public/skill.js"></script>
     <script src="./public/caster.js"></script>
-    <!-- <script src="./public/mob.js"></script> -->
     <script src="./public/opponent.js"></script>
     <script src="./public/player.js"></script>
     <script src="./public/level.js"></script>
-    <script src="./public/mainmenu.js"></script>
-    <script src="./public/mapmenu.js"></script>
-    <script src="./public/game.js"></script>
     <script src="./main.js"></script>
-
-    <script>
-      window.addEventListener("load", function () {
-        // lang = 1;
-        // gameLoop();
-      });
-    </script>
   </body>
 </html>

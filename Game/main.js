@@ -17,58 +17,84 @@
 // UPGRADES, GET MONEY FROM LEVEL ()
 
 // Remove continue, just a map
+// Draw ground for sprites
+// Gameloop as interval, interval time based on config
+// Spell effect, middle of screen
+// Keyboard arrows = tv remote arrows, Enter = enter
+// EXIT: 461, backspace, lg: 1001, 1009, ESC computer
 
-function setToScreen(screenId) {
-  const screens = [MainMenu.div, MapMenu.div, Level.div];
+// MAP NUMBER BUTTONS TO MAIN MENU
 
-  screens.forEach(function (id) {
-    const screen = document.getElementById(id);
-
-    if (screen) {
-      if (screenId === id) {
-        screen.style.visibility = "visible";
-      } else {
-        screen.style.visibility = "hidden";
-      }
-    }
-  });
-}
-
-// document.addEventListener("DOMContentLoaded", function () {
-//   showScreen("main_menu");
-// });
+// TODO: LAYERED BACKGROUNDS
 
 const keymap = KEYMAPS.PC;
+const surface = new Surface();
 
-var currentLevel = LEVELS[0];
-var playerConfig = {};
+const fps = SCREEN.fps[1];
+const tickrate = 1000 / fps;
 
-Game.load().then(function () {
-  const game = new Game(keymap);
+var lang;
+var profile = loadProfile();
+var currentScreen = SCREENS.MAIN;
+var selectedLevel = profile.level_progress;
 
-  game.loadProfile();
+Level.load().then(function () {
+  const level = Level.setInstance(lang, profile, selectedLevel);
 
-  document
-    .getElementById("btn_quitgame")
-    .addEventListener("click", function () {
-      Level.STOPPED = true;
-      game.switchToMapMenu();
-    });
+  // MAIN MENU
 
-  document.getElementById("btn_newgame").addEventListener("click", function () {
-    game.newProfile();
-    game.switchToMapMenu();
+  // MAP MENU
+  const container = document.getElementById("level_selection");
+  for (var i = 0; i < LEVELS.length; i++) {
+    const levelBtn = document.createElement("button");
+
+    levelBtn.id = i;
+    levelBtn.textContent = i + 1;
+
+    levelBtn.onclick = (function (levelIndex) {
+      return function () {
+        updateLevelSelection(levelIndex);
+      };
+    })(i);
+
+    container.appendChild(levelBtn);
+  }
+  updateLevelSelection(profile.level_progress);
+  // updateMap();
+
+  document.getElementById("btn_play").onclick = function () {
+    setToScreen(SCREENS.GAME);
+    level.play(tickrate);
+  };
+
+  // LEVEL
+  document.addEventListener("keydown", function (event) {
+    const value = KEYMAPS[event.key];
+
+    console.log(event.key, value);
+
+    switch (value) {
+      case "A":
+      case "B":
+      case "C":
+      case "D":
+        if (!Level.STOPPED) {
+          level.lastKeyPressed = value;
+        }
+        break;
+      case "PAUSE":
+        Level.PAUSE = !Level.PAUSE;
+        console.log("Pause", Level.PAUSE);
+        break;
+      case "EXIT":
+        setToPreviousScreen(currentScreen);
+        Level.STOPPED = true;
+        break;
+      default:
+        console.log("Key '" + event.key + "' not mapped to command.");
+    }
   });
 
-  document.getElementById("btn_map").addEventListener("click", function () {
-    game.switchToMapMenu();
-  });
-
-  document
-    .getElementById("btn_continue")
-    .addEventListener("click", function () {
-      game.switchToGame(game.save.level_progress);
-    });
-
-  // game.level.gameloop(performance.now());
+  changeLanguage();
+  setToScreen(currentScreen);
 });

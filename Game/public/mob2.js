@@ -1,5 +1,5 @@
 function Mob(config, player) {
-  const mob = MOBS[config] || MOBS.orc_weak;
+  const mob = OPPONENTS[config] || OPPONENTS.orc_weak;
   this.name = mob.name.en;
 
   this.stats = mob.stats;
@@ -132,7 +132,6 @@ Mob.prototype.isRemovable = function () {
 Mob.prototype.isInCombatPos = function () {
   return this.pos.isEqual(this.targetPos);
 };
-
 
 Mob.prototype.applyEffect = function (stats) {
   const affinity = stats.affinity;

@@ -1,10 +1,10 @@
-function SpriteHandler(fx, image, caster) {
+function SpriteHandler(fx, image, pos, targetPos) {
   this.fx = fx;
   this.image = image;
 
   this.size = surface.ratioSizing(this.fx.sprites.frame);
-  this.pos = surface.ratioPosition(this.fx.position.start);
-  this.targetPos = surface.ratioPosition(this.fx.position.combat);
+  this.pos = pos;
+  this.targetPos = targetPos;
 
   this.state = STATES.IDLE;
   this.index = 0;
@@ -28,19 +28,22 @@ SpriteHandler.prototype.update = function (deltaTime, state) {
 SpriteHandler.prototype.updateState = function (state) {
   const max = this.fx.sprites.rows[this.state] - 1;
 
-  if (this.index < max && this.isStateEqual(state)) {
-    // this.index = Math.min(this.index + 1, max);
-    this.index++;
+  if (this.isStateEqual(STATES.DEATH)) {
+    this.index = Math.min(this.index + 1, max);
   } else {
-    this.state = state;
-    if (this.state === STATES.RUN || this.state === STATES.IDLE) {
+    if (
+      (this.isStateEqual(state) || this.isStateEqual(STATES.CAST)) &&
+      this.index < max
+    ) {
+      this.index++;
+    } else {
+      this.state = state;
       this.index = 0;
     }
-    // }
   }
 };
 
-SpriteHandler.prototype.updatePosition = function (deltaTime) {
+SpriteHandler.prototype.updatePosition = function () {
   const velocity = SPRITES.velocity;
 
   if (this.pos.x > this.targetPos.x) {

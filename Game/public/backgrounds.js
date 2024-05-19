@@ -1,74 +1,83 @@
 function Background(layers) {
   this.skyColor = "aqua";
   this.layers = layers;
+  this.generate();
 }
 Background.id = "backgrounds";
+
+// -------------- STATIC
 
 Background.load = function () {
   const layers = {};
   var sequence = Promise.resolve();
 
-  BACKGROUNDS.images.forEach(function (imageName) {
-    const path = "./public/Assets/backgrounds/" + imageName + ".png";
+  for (const key in BACKGROUNDS.layers) {
+    const layer = BACKGROUNDS.layers[key];
+    layers[key] = [];
 
-    sequence = sequence.then(function () {
-      return loadImage(path).then(function (image) {
-        layers[imageName] = {
-          image: image,
-          width: image.naturalWidth,
-          height: image.naturalHeight,
-          speed: BACKGROUNDS[imageName],
-          pos: 0,
-        };
+    layer.images.forEach(function (imgfile) {
+      sequence = sequence.then(function () {
+        return loadImage(BACKGROUNDS.path + imgfile).then(function (image) {
+          layers[key].push(image);
+        });
       });
     });
-  });
+  }
 
   return sequence.then(function () {
     return layers;
   });
 };
 
-Background.prototype.update = function (velocity) {
-  for (const key in this.layers) {
-    const layer = this.layers[key];
+// -------------- UPDATE
 
-    if (key === "near") {
-      
-    }
+Background.prototype.update = function (state) {
+  const velocity = SPRITES.velocity;
 
-    layer.pos -= layer.speed * velocity;
-    if (layer.pos <= -surface.width) {
-      layer.pos = 0;
+  for (const key in this.current) {
+    const layer = this.current[key];
+    const pos = layer.position;
+
+    if (state === STATES.RUN || !layer.grounded) {
+      pos.x -= layer.multiplier * velocity;
+
+      if (pos.x <= -surface.width) {
+        pos.x = 0;
+      }
     }
   }
 };
+
+// -------------- RENDER
 
 Background.prototype.render = function () {
   surface.fillTo(Background.id, this.skyColor);
 
-  for (const key in this.layers) {
-    const layer = this.layers[key];
+  for (const key in this.current) {
+    const layer = this.current[key];
+    const pos = layer.position;
 
-    surface.drawTo(Background.id, layer.image, layer.pos, 0);
-    if (layer.pos !== 0) {
-      surface.drawTo(Background.id, layer.image, layer.pos + surface.width, 0);
+    surface.drawTo(Background.id, layer.image, pos.x, 0);
+    if (layer.position.x < 0) {
+      surface.drawTo(Background.id, layer.image, pos.x + surface.width, 0);
     }
   }
 };
 
-Background.prototype.drawLayer = function (layer, shift) {
-  surface.drawTo(Background.id, layer.image, layer.pos - shift);
+// -------------- OTHER
 
-  // surfaceLayer.ctx.drawImage(
-  //   layer.image,
-  //   layer.pos - shift,
-  //   0,
-  //   layer.width,
-  //   layer.height,
-  //   0,
-  //   0,
-  //   surface.width,
-  //   surface.height
-  // );
+Background.prototype.generate = function () {
+  this.current = {};
+
+  for (const key in this.layers) {
+    const options = BACKGROUNDS.layers[key];
+    const image = getRandomValue(this.layers[key]);
+
+    this.current[key] = {
+      image: image,
+      multiplier: options.multiplier,
+      grounded: options.grounded,
+      position: surface.ratioPosition(options.position),
+    };
+  }
 };

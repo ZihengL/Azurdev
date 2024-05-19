@@ -12,6 +12,28 @@ function Skill(config, caster) {
   this.projectiles = [];
 }
 
+Skill.load = function () {
+  const skills = {};
+  var sequence = Promise.resolve();
+
+  for (var key in AFFINITIES) {
+    const affinity = AFFINITIES[key];
+    const path = affinity.effect.cast;
+
+    sequence = sequence.then(function () {
+      return loadImage(path).then(function (image) {
+        skills[key] = {
+          effect: image,
+        };
+      });
+    });
+  }
+
+  return sequence.then(function () {
+    return skills;
+  });
+};
+
 // -------------- UPDATE & RENDER
 
 Skill.prototype.update = function (deltaTime) {
@@ -35,12 +57,49 @@ Skill.prototype.update = function (deltaTime) {
   }
 };
 
+Skill.prototype.updateCastEffect = function (deltaTime) {
+  if (this.castEffect) {
+    const increments = EFFECTS.cast_effect;
+    var delay = this.castEffect.delay;
+    var opacity = this.castEffect.opacity;
+    var angle = this.castEffect.angle;
+
+    if (this.sequenceIdx > 0) {
+      delay = increments.delay;
+      opacity = Math.min(opacity + increments.opacity, 1);
+    } else if (delay > 0) {
+      delay -= deltaTime;
+    } else {
+      opacity = Math.max(opacity - increments.opacity, 0);
+    }
+
+    angle += increments.angle;
+    if (this.castEffect.angle > 2) {
+      angle = 0;
+    }
+
+    this.castEffect.delay = delay;
+    this.castEffect.opacity = opacity;
+    this.castEffect.angle = angle;
+  }
+};
+
 Skill.prototype.render = function () {
   this.projectiles.forEach(
     function (projectile) {
       projectile.render();
     }.bind(this)
   );
+};
+
+Skill.prototype.renderCastEffect = function () {
+  if (this.castEffect && this.castEffect.opacity > 0) {
+    surface.drawCastEffect(
+      this.castEffect.image,
+      this.castEffect,
+      this.sequenceIdx
+    );
+  }
 };
 
 Skill.prototype.renderUI = function (x, y) {
@@ -61,6 +120,20 @@ Skill.prototype.renderUI = function (x, y) {
 
 // -------------- OTHER
 
+Skill.prototype.setCastEffect = function (image) {
+  const effect = AFFINITIES[this.stats.affinity].effect;
+
+  this.castEffect = {
+    image: image,
+    width: effect.width,
+    height: effect.height,
+    delay: 0,
+    opacity: 0,
+    scale: 0,
+    angle: 0,
+  };
+};
+
 Skill.prototype.inputSequence = function (inputValue) {
   if (inputValue && !this.isOnCD()) {
     const currentValue = this.sequence[this.sequenceIdx];
@@ -68,25 +141,19 @@ Skill.prototype.inputSequence = function (inputValue) {
     if (inputValue === currentValue) {
       this.sequenceIdx++;
     } else {
-      if (this.sequenceIdx > 0) {
-        this.sequenceIdx = 0;
-        this.cooldown = this.stats.cooldown;
-      }
+      this.sequenceIdx = 0;
+      // this.cooldown = this.stats.cooldown;
+      // }
     }
 
-    console.log(
-      this.name,
-      "\nIN",
-      inputValue,
-      "CURR",
-      currentValue,
-      "IDX",
-      this.sequenceIdx
-    );
     return this.sequenceIdx > this.sequence.length - 1;
   }
 
   return false;
+};
+
+Skill.prototype.isCorrectInput = function (index, inputValue) {
+  return this.sequence[index] === inputValue;
 };
 
 Skill.prototype.isOnCD = function () {

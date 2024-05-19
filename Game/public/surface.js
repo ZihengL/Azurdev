@@ -1,7 +1,6 @@
 function Surface() {
   this.width = SCREEN.width;
   this.height = SCREEN.height;
-  // this.visibility = 'hidden';
 
   this.layers = {};
   SCREEN.layers.forEach(
@@ -20,7 +19,6 @@ function Surface() {
 
   this.res = {};
 }
-const surface = new Surface();
 
 Surface.prototype.resetRes = function () {
   this.res = {};
@@ -45,11 +43,11 @@ Surface.prototype.clear = function () {
 // -------------- SIZING, PROPORTIONS, ETC..
 
 Surface.prototype.centerX = function (width) {
-  return (this.width - width) / 2;
+  return (this.width - (width || 0)) / 2;
 };
 
 Surface.prototype.centerY = function (height) {
-  return (this.height - height) / 2;
+  return (this.height - (height || 0)) / 2;
 };
 
 Surface.prototype.center = function () {
@@ -92,6 +90,14 @@ Surface.prototype.fillVectorTo = function (id, color, pos, size) {
   this.fillTo(id, color, pos.x, pos.y, size.x, size.y);
 };
 
+Surface.prototype.fillToUI = function (color, x, y, width, height) {
+  this.fillTo("ui", color, x, y, width, height);
+};
+
+Surface.prototype.fillVectorToUI = function (color, pos, size) {
+  this.fillTo("ui", color, pos.x, pos.y, size.x, size.y);
+};
+
 Surface.prototype.drawTo = function (id, image, x, y, scale, width, height) {
   const layer = this.layers[id];
   scale = scale || 1;
@@ -118,17 +124,20 @@ Surface.prototype.drawActor = function (image, sPos, dPos, size, bleed) {
   );
 };
 
-Surface.prototype.drawEffect = function (image, x, y, scale) {
+Surface.prototype.drawCastEffect = function (img, options, shift) {
   const layer = this.layers.effects;
-  scale = scale || 1;
+  const opacity = options.opacity || 1;
+  const angle = Math.PI * (options.angle || 1);
+  const w = options.width;
+  const h = options.height;
 
-  layer.ctx.drawImage(
-    image,
-    x,
-    y,
-    image.naturalWidth * scale,
-    image.naturalHeight * scale
-  );
+  layer.ctx.save();
+  layer.ctx.globalAlpha = opacity;
+  layer.ctx.translate(this.width / 2, this.height / 2);
+  layer.ctx.rotate(angle);
+
+  layer.ctx.drawImage(img, shift * w, 0, w, h, -w / 2, -w / 2, w, h);
+  layer.ctx.restore();
 };
 
 Surface.prototype.drawUI = function (image, x, y, scale) {
@@ -143,19 +152,3 @@ Surface.prototype.drawUI = function (image, x, y, scale) {
     image.naturalHeight * scale
   );
 };
-
-Surface.prototype.toggleVisibility = function () {
-  const toVisible = this.visibility === 'hidden';
-
-  this.setVisibility(toVisible);
-}
-
-Surface.prototype.setVisibility = function (toVisible) {
-  this.visibility = toVisible ? 'visible' : 'hidden';
-
-  for (key in this.layers) {
-    layer = this.layers[key];
-
-    layer.cv.style.visibility = this.visibility;
-  }
-}
