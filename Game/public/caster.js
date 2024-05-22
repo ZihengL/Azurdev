@@ -12,9 +12,9 @@ function Caster(image, stats, fx, skills, opponent, ui, skillEffects) {
     function (skillname) {
       const skill = new Skill(skillname, this);
 
-      if (skillEffects) {
-        skill.setCastEffect(skillEffects[skill.stats.affinity]);
-      }
+      // if (skillEffects) {
+      //   skill.setCastEffect(skillEffects[skill.stats.affinity]);
+      // }
 
       this.skills.push(skill);
     }.bind(this)
@@ -34,22 +34,22 @@ function Caster(image, stats, fx, skills, opponent, ui, skillEffects) {
   );
 
   // UI
-  this.ui = {
-    nameplate: Object.assign({}, ui.nameplate),
-  };
-  this.ui.nameplate.start = surface.ratioPosition(this.ui.nameplate.start);
-  for (const key in ui.status_bars) {
-    const options = ui.status_bars[key];
-    const start = surface.ratioPosition(options.start);
-    const end = surface.ratioPosition(options.end);
+  // this.ui = {
+  //   nameplate: Object.assign({}, ui.nameplate),
+  // };
+  // this.ui.nameplate.start = surface.ratioPosition(this.ui.nameplate.start);
+  // for (const key in ui.status_bars) {
+  //   const options = ui.status_bars[key];
+  //   const start = surface.ratioPosition(options.start);
+  //   const end = surface.ratioPosition(options.end);
 
-    this.ui[key] = {
-      color: options.color,
-      missing: options.missing,
-      pos: start,
-      size: end.subtract(start),
-    };
-  }
+  //   this.ui[key] = {
+  //     color: options.color,
+  //     missing: options.missing,
+  //     pos: start,
+  //     size: end.subtract(start),
+  //   };
+  // }
 }
 
 // -------------- UPDATE

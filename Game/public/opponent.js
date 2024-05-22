@@ -5,8 +5,7 @@ function Opponent(image, options, opponent, level) {
     options.stats,
     options.fx,
     options.stats.skills,
-    opponent,
-    UI.actors.opponent
+    opponent
   );
 
   this.level = level;
@@ -15,6 +14,7 @@ function Opponent(image, options, opponent, level) {
   this.nextSkill = this.getRandomSkill();
 
   this.name = Opponent.generatedName(this.level.lang, options);
+  document.getElementById("o_name").textContent = this.name.toUpperCase();
 }
 Opponent.prototype = Object.create(Caster.prototype);
 Opponent.prototype.constructor = Opponent;
@@ -27,9 +27,7 @@ Opponent.load = function () {
   });
 };
 
-Opponent.generateInstance = function (minStr, maxStr, opponents) {
-  
-};
+Opponent.generateInstance = function (minStr, maxStr, opponents) {};
 
 Opponent.generatedName = function (lang, options) {
   const adjective = getRandomValue(OPPONENT_NAMES.adjective[lang]);
@@ -95,8 +93,14 @@ Opponent.prototype.updateSkills = function (deltaTime) {
 // -------------- RENDER
 
 Opponent.prototype.renderUI = function () {
-  Caster.prototype.renderUI.call(this);
-  this.renderStatusBar(this.ui.cooldown, this.stats.cooldown, this.cooldown);
+  // Caster.prototype.renderUI.call(this);
+  // this.renderStatusBar(this.ui.cooldown, this.stats.cooldown, this.cooldown);
+
+  const hpfill = document.getElementById("o_health_fill");
+  hpfill.style.width = percentage(this.health, this.stats.health) + "%";
+
+  const cdfill = document.getElementById("o_cooldown_fill");
+  cdfill.style.width = percentage(this.cooldown, this.stats.cooldown) + "%";
 };
 
 // -------------- OTHER

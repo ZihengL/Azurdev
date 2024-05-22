@@ -30,16 +30,30 @@
       <!-- -----------------------  MAP  ----------------------- -->
       <div id="screen_map" class="screen">
         <h1 id="selected_level"></h1>
-        <div id="level_selection"></div>
+        <div id="level_select_btns"></div>
 
-        <button id="btn_play" onclick="setToScreen(SCREENS.GAME);"></button>
-        <button id="btn_back" onclick="setToScreen(SCREENS.MAIN);"></button>
+        <div id="map_screen_btns">
+          <button id="btn_play" onclick="setToScreen(SCREENS.GAME);"></button>
+          <button id="btn_back" onclick="setToScreen(SCREENS.MAIN);"></button>
+        </div>
       </div>
     <!-- </div> -->
 
     <!-- -----------------------  GAME  ----------------------- -->
     <div id="screen_game" class="screen">
+      <canvas id="backgrounds" class="game-canvas"></canvas>
+      <canvas id="actors" class="game-canvas"></canvas>
+      <canvas id="effects" class="game-canvas"></canvas>
+      <canvas id="ui" class="game-canvas"></canvas>
+
+      <div id="game_screen_btns">
+        <button id="btn_quitLevel" class="level-btns" onclick="Level.quitInstance();"></button>
+        <button id="btn_pauseLevel" class="level-btns" onclick="Level.pauseInstance();"></button>
+      </div>
+
       <div id="o_ui">
+        <h2 id="o_name"></h2>
+
         <div id="o_health_container" class="o-fill-con">
           <div id="o_health_fill" class="health o-fill"></div>
         </div>
@@ -50,18 +64,25 @@
       </div>
 
       <div id="game_status" class="game-ui">
-        <h2 id="game_status_message"></h2>
-        <button id="btn_map" onclick="setToScreen(SCREENS.MAP)"></button>
+        <h2 id="status_paused" class="game-status paused"></h2>
+        <h2 id="status_victory" class="game-status victory"></h2>
+        <h2 id="status_defeat" class="game-status defeat"></h2>
       </div>
 
-      <canvas id="backgrounds" class="game-canvas"></canvas>
-      <canvas id="actors" class="game-canvas"></canvas>
-      <canvas id="effects" class="game-canvas"></canvas>
-      <canvas id="ui" class="game-canvas"></canvas>
+      <div id="cast_effects" class="game-ui">
+        <img src="./public/Assets/effects/fire1.png" id="cast_fire" class="cast-effect"></img>
+        <!-- <img src="" id="cast_ice" class="game-status cast"></img>
+        <img src="" id="cast_poison" class="game-status cast"></img>
+        <img src="" id="cast_shock" class="game-status cast"></img> -->
+      </div>
+
+      <div id="p_counters" class="">
+        <h5 id="counter_gold" class=""></h5>
+        <h5 id="counter_killcount" class=""></h5>
+      </div>
 
       <div id="p_ui" class="player-ui">
         <div id="p_health_container" class="p-fill-con">
-          <!-- <img src="" alt="health"> -->
           <div id="p_health_fill" class="p-fill health"></div>
         </div>
 

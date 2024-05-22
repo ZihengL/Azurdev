@@ -9,13 +9,12 @@
 
 function Level(lang, profile) {
   this.lang = lang || LANGS[0];
-  // this.keymap = keymap;
   this.profile = profile;
 
   this.lastUpdate = null;
   this.lastKeyPressed = null;
 
-  this.killcount = 0;
+  // this.killcount = 0;
   this.opponents = [];
   this.opponent = null;
   this.player = new Player(this.profile, this.opponent, this);
@@ -42,9 +41,9 @@ Level.load = function () {
       return Opponent.load().then(function (res) {
         Level.res.opponent = res;
 
-        return Skill.load().then(function (res) {
-          Level.res.skills = res;
-        });
+        // return Skill.load().then(function (res) {
+        //   Level.res.skills = res;
+        // });
       });
     });
   });
@@ -64,9 +63,35 @@ Level.setInstance = function (lang, profile, level) {
   }
 };
 
+Level.quitInstance = function () {
+  const instance = Level.instance;
+
+  if (instance) {
+    Level.STOPPED = true;
+    setToScreen(SCREENS.MAP);
+  }
+};
+
+Level.pauseInstance = function () {
+  if (Level.instance) {
+    Level.setPause(!Level.PAUSED);
+  }
+};
+
 Level.setLevel = function (level) {
   Level.selectedLevel = level;
   Level.instance.setLevel(level);
+};
+
+Level.setPause = function (toPause) {
+  Level.PAUSED = toPause || !Level.PAUSED;
+
+  setVisibility(document.getElementById("status_paused"), Level.PAUSED);
+  console.log(Level.PAUSED);
+};
+
+Level.setStop = function (toStop) {
+  Level.STOPPED = toStop || !Level.STOPPED;
 };
 
 // -------------- SETUP
@@ -79,14 +104,14 @@ Level.prototype.setLevel = function (level) {
   this.opponent = this.getRandomOpponent();
   this.player.opponent = this.opponent;
 
+  this.endDelay = null;
   this.background.generate();
-
-  this.paused = false;
-  this.stopped = false;
 };
 
 Level.prototype.play = function (tickrate) {
   Level.STOPPED = false;
+  Level.PAUSED = false;
+  this.setStatus();
   this.lastUpdate = Date.now();
   this.gameloop(tickrate);
 };
@@ -94,7 +119,7 @@ Level.prototype.play = function (tickrate) {
 Level.prototype.gameloop = function (tickrate) {
   const self = this;
 
-  setInterval(function () {
+  var gameID = setInterval(function () {
     var now = Date.now();
     var deltaTime = (now - self.lastUpdate) / 1000;
     self.lastUpdate = now;
@@ -103,34 +128,43 @@ Level.prototype.gameloop = function (tickrate) {
     // TODO: END LEVEL UPDATES
     if (self.isWon()) {
       if (!self.player.isMovingToEndPos()) {
-        self.player.spriteHandler.targetPos = self.player.positions.end;
-        this.statusMessage = {};
-      }
-
-      if (self.player.isOnTargetPos()) {
+        self.player.setDestination(self.player.positions.end);
+        self.setStatus("status_victory");
         self.profile.level_progress = Math.min(
           self.profile.level_progress + 1,
           LEVELS.length - 1
         );
+      }
+
+      console.log(self.player.isOnTargetPos())
+      
+      if (self.player.isOnTargetPos()) {
         Level.STOPPED = true;
       }
+      // Level.STOPPED = self.player.isOnTargetPos();
     }
 
     // ON LOSE
     if (self.isLost()) {
-      if (!this.statusMessage) {
-        this.statusMessage = {};
+      if (!self.endDelay) {
+        self.endDelay = DISPLAY.other.delays.end_delay;
+        self.setStatus("status_defeat");
+      } else {
+        self.endDelay -= deltaTime;
       }
+
+      Level.STOPPED = self.endDelay <= 0;
     }
 
-    if (!self.isLevelComplete()) {
+    if (!Level.STOPPED) {
       if (!Level.PAUSED) {
         self.update(deltaTime);
       }
       self.render();
     } else {
+      clearInterval(gameID);
       saveProfile(self.profile);
-      updateMap();
+      // updateMap();
       setToScreen(SCREENS.MAP);
     }
   }, tickrate);
@@ -204,9 +238,15 @@ Level.prototype.areOnTargetPos = function () {
   return this.player.isOnTargetPos() && this.opponent.isOnTargetPos();
 };
 
-Level.prototype.setStatusMessage = function (message, color) {
-  this.statusMessage = message;
+Level.prototype.setStatus = function (elemId) {
+  for (key in DISPLAY.other.game_status) {
+    const element = document.getElementById(key);
+
+    setVisibility(element, element.id === elemId);
+  }
 };
+
+Level.prototype.pauseGame = function () {};
 
 // Level.prototype.gameloop = function (currentTime) {
 //   if (this.isLevelComplete()) {

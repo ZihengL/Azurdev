@@ -98,19 +98,28 @@ function changeLanguage() {
 
   console.log("Switching language to", LANGS[lang]);
 
-  for (const key in DISPLAY) {
-    const subkeys = DISPLAY[key];
-    const screen = document.getElementById(key);
+  for (const key in DISPLAY.buttons) {
+    const subkeys = DISPLAY.buttons[key];
+    const container = document.getElementById(key);
 
-    if (screen) {
+    if (container) {
       for (const subkey in subkeys) {
         const values = subkeys[subkey];
-        const element = getFromContainer(screen, subkey);
+        const element = getFromContainer(container, subkey);
 
         if (element) {
           element.textContent = values[lang];
         }
       }
+    }
+  }
+
+  for (key in DISPLAY.other.game_status) {
+    const values = DISPLAY.other.game_status[key];
+    const element = document.getElementById(key);
+
+    if (element) {
+      element.textContent = values[lang];
     }
   }
 }
@@ -124,19 +133,37 @@ function setToScreen(screenId) {
 
   console.log("Current screen", currentScreen);
   console.log("Setting", screenId, "to visible");
-
+  currentScreen = screenId;
   for (var i = 0; i < screens.length; i++) {
     const screen = screens[i];
 
-    if (screen.id === screenId) {
-      screen.style.display = "block";
-      currentScreen = screen.id;
-    } else {
-      screen.style.display = "none";
-    }
+    setVisibility(screen, screen.id === screenId);
   }
 
   updateScreen(screenId);
+}
+
+function updateScreen(screenId) {
+  const screen = document.getElementById(screenId);
+
+  switch (screenId) {
+    case SCREENS.MAIN:
+      break;
+    case SCREENS.MAP:
+      for (var i = 0; i < LEVELS.length; i++) {
+        const levelBtn = getFromContainer(screen, "btn_" + i);
+        const availability = isWithinPlayerProgress(i) ? 1 : 0;
+
+        // levelBtn.className = MAPMENU.buttons.lvl_class + availability;
+        levelBtn.disabled = !availability;
+      }
+      break;
+    default:
+      Level.STOPPED = false;
+      Level.PAUSED = false;
+      Level.instance.setLevel(selectedLevel);
+      Level.instance.play();
+  }
 }
 
 function setToPreviousScreen(current) {
@@ -154,27 +181,6 @@ function setToPreviousScreen(current) {
   setToScreen(previous);
 }
 
-function updateScreen(screenId) {
-  const screen = document.getElementById(screenId);
-
-  switch (screenId) {
-    case SCREENS.GAME:
-      Level.STOPPED = false;
-      Level.PAUSED = false;
-      Level.instance.play();
-      break;
-    case SCREENS.MAP:
-      for (var i = 0; i < LEVELS.length; i++) {
-        const levelBtn = getFromContainer(screen, i);
-        const availability = isWithinPlayerProgress(i) ? 1 : 0;
-
-        levelBtn.className = MAPMENU.buttons.lvl_class + availability;
-        levelBtn.disabled = !availability;
-      }
-    default:
-  }
-}
-
 function updateMap() {
   const container = document.getElementById("level_selection");
 
@@ -182,14 +188,14 @@ function updateMap() {
     const levelBtn = getFromContainer(container, i);
     const availability = isWithinPlayerProgress(i) ? 1 : 0;
 
-    levelBtn.className = MAPMENU.buttons.lvl_class + availability;
+    // levelBtn.className = MAPMENU.buttons.lvl_class + availability;
     levelBtn.disabled = !availability;
   }
 }
 
 function updateLevelSelection(level) {
   if (isWithinPlayerProgress(level)) {
-    const displayText = getInLang(DISPLAY.screen_map.selected_level);
+    const displayText = getInLang(DISPLAY.buttons.screen_map.selected_level);
 
     document.getElementById("selected_level").textContent =
       displayText + ": " + (level + 1);
@@ -201,10 +207,29 @@ function isWithinPlayerProgress(level) {
   return level <= profile.level_progress;
 }
 
+// HTML
+
 function getFromContainer(container, id) {
   return container.querySelector("#" + id);
 }
 
+function setVisibility(element, toVisible) {
+  element.style.display = toVisible ? "block" : "none";
+}
+
 function addListener(id, trigger, action) {
   document.getElementById(id).addEventListener(trigger, action);
+}
+
+
+// EFFECTS
+
+function triggerFlashFX(affinity) {
+  const id = AFFINITIES[affinity].cast_effect;
+  const element = document.getElementById(id);
+
+  element.classList.add("flash");
+  setTimeout(function() {
+    element.classList.remove("flash");
+  }, 1000);
 }

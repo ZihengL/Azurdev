@@ -16,18 +16,6 @@ const LOCALSTORAGE = {
 };
 
 const KEYMAPS = {
-  PC: {
-    casting: {
-      w: "A",
-      a: "B",
-      s: "C",
-      d: "D",
-      ArrowUp: "A",
-      ArrowLeft: "B",
-      ArrowDown: "C",
-      ArrowRight: "D",
-    },
-  },
   Escape: "EXIT",
   p: "PAUSE",
   w: "A",
@@ -41,6 +29,8 @@ const KEYMAPS = {
 };
 
 // -------------- MENUS
+
+const LANGS = [0, 1];
 
 const SCREEN = {
   layers: ["backgrounds", "actors", "effects", "ui"],
@@ -56,24 +46,33 @@ const SCREENS = {
 };
 
 const DISPLAY = {
-  screen_main: {
-    btn_lang: ["FR", "EN"],
-    btn_map: ["Map", "Carte"],
-    btn_newgame: ["New game", "Nouveau profil"],
+  buttons: {
+    screen_main: {
+      btn_lang: ["FR", "EN"],
+      btn_map: ["Map", "Carte"],
+      btn_newgame: ["New game", "Nouveau profil"],
+    },
+    screen_map: {
+      selected_level: ["Choose your adventure", "Choisissez votre aventure"],
+      btn_play: ["Play", "Jouer"],
+      btn_back: ["Back", "Retour"],
+    },
+    screen_game: {
+      btn_quitLevel: ["Back", "Retour"],
+      btn_pauseLevel: ["Pause", "Pause"],
+    },
   },
-  screen_map: {
-    selected_level: ["Choose your adventure", "Choisissez votre aventure"],
-    btn_play: ["Play", "Jouer"],
-    btn_back: ["Back", "Retour"],
-    // selected_level: ["Level", "Niveau"],
-  },
-  screen_game: {
-    btn_quitLevel: ["Back", "Retour"],
+  other: {
+    game_status: {
+      status_paused: ["PAUSED", "PAUSE"],
+      status_victory: ["VICTORY", "VICTOIRE"],
+      status_defeat: ["DEFEAT", "DÉFAITE"],
+    },
+    delays: {
+      end_delay: 10,
+    },
   },
 };
-
-// const LANGS = ["en", "fr"];
-const LANGS = [0, 1];
 
 // -------------- BACKGROUNDS & UI
 
@@ -113,105 +112,6 @@ const BACKGROUNDS = {
   },
 };
 
-const UI = {
-  actors: {
-    player: {
-      nameplate: {
-        font: "48px serif",
-        fillStyle: "blue",
-        textAlign: "left",
-        textBaseline: "middle",
-        shadowColor: "rgba(0, 0, 0, 0.5)",
-        shadowBlur: 4,
-        shadowOffsetX: 20,
-        shadowOffsetY: 5,
-        start: { x: 0.05, y: 0.1 },
-      },
-      status_bars: {
-        health: {
-          color: "#A91D3A",
-          missing: "#FCF5ED",
-          start: { x: 0.05, y: 0.2 },
-          end: { x: 0.4, y: 0.23 },
-        },
-        mana: {
-          color: "#2C4E80",
-          missing: "#C4E4FF",
-          start: { x: 0.05, y: 0.24 },
-          end: { x: 0.4, y: 0.245 },
-        },
-      },
-    },
-    opponent: {
-      nameplate: {
-        font: "48px serif",
-        fillStyle: "red",
-        textAlign: "right",
-        textBaseline: "middle",
-        shadowColor: "rgba(0, 0, 0, 0.5)",
-        shadowBlur: 4,
-        shadowOffsetX: 5,
-        shadowOffsetY: 5,
-        start: { x: 0.95, y: 0.1 },
-      },
-      status_bars: {
-        health: {
-          color: "#A91D3A",
-          missing: "#C4E4FF",
-          start: { x: 0.6, y: 0.2 },
-          end: { x: 0.95, y: 0.23 },
-        },
-        cooldown: {
-          color: "#FCF5ED",
-          missing: "#00224D",
-          start: { x: 0.6, y: 0.24 },
-          end: { x: 0.95, y: 0.245 },
-        },
-      },
-    },
-  },
-  skills: {},
-  status: {
-    win: {
-      value: ["VICTORY", "VICTOIRE"],
-      delay: 0,
-      font: "82px serif",
-      fontSize: 0.26,
-      fillStyle: "green",
-      textAlign: "center",
-      textBaseline: "middle",
-      start: { x: 0.5, y: 0.5 },
-    },
-    lose: {
-      value: ["DEFEAT", "DÉFAITE"],
-      delay: 1,
-      font: "82px serif",
-      fillStyle: "red",
-      textAlign: "center",
-      textBaseline: "middle",
-      start: { x: 0.5, y: 0.5 },
-    },
-    pause: {
-      value: ["PAUSED", "PAUSE"],
-      delay: 1,
-      font: "82px serif",
-      fillStyle: "red",
-      textAlign: "center",
-      textBaseline: "middle",
-      start: { x: 0.5, y: 0.5 },
-    },
-  },
-  killcount: {
-    x: 100,
-    y: 100,
-    value: "Score: ",
-    font: "24px Arial",
-    fillStyle: "black",
-    textAlign: "center",
-    textBaseline: "middle",
-  },
-};
-
 // -------------- SKILLS & EFFECTS
 
 const AFFINITIES = {
@@ -219,41 +119,30 @@ const AFFINITIES = {
     name: ["fire", "feux"],
     weakness: "ice",
     color: "red",
-    effect: {
-      cast: "./public/Assets/effects/fire.png",
-      width: 340,
-      height: 340,
-    },
+    cast_effect: "cast_fire",
+    // effect: {
+    //   cast: "./public/Assets/effects/fire.png",
+    //   width: 340,
+    //   height: 340,
+    // },
   },
   ice: {
     name: ["ice", "glace"],
     weakness: "fire",
     color: "blue",
-    effect: {
-      cast: "./public/Assets/effects/fire.png",
-      width: 340,
-      height: 340,
-    },
+    cast_effect: "cast_ice",
   },
   poison: {
     name: ["poison", "poison"],
     weakness: "shock",
     color: "green",
-    effect: {
-      cast: "./public/Assets/effects/fire.png",
-      width: 340,
-      height: 340,
-    },
+    cast_effect: "cast_poison",
   },
   shock: {
     name: ["shock", "électrique"],
     weakness: "poison",
     color: "blue",
-    effect: {
-      cast: "./public/Assets/effects/fire.png",
-      width: 340,
-      height: 340,
-    },
+    cast_effect: "cast_shock",
   },
 };
 
@@ -281,15 +170,15 @@ const SKILL_LEVELS = {
   },
 };
 
-const EFFECTS = {
-  cast_timer: 2,
-  cast_effect: {
-    delay: 2,
-    opacity: 0.1,
-    scale: 0.2,
-    angle: 0.01,
-  },
-};
+// const EFFECTS = {
+//   cast_timer: 2,
+//   cast_effect: {
+//     delay: 2,
+//     opacity: 0.1,
+//     scale: 0.2,
+//     angle: 0.01,
+//   },
+// };
 
 const SKILLS = {
   fire_weak: {
@@ -342,7 +231,7 @@ const SHIELDS = {
 // -------------- ACTORS
 
 const SPRITES = {
-  velocity: 10,
+  velocity: 2.5,
   animation_speed: 0.25,
 };
 
@@ -473,18 +362,6 @@ const OPPONENTS = {
 };
 
 const OPPONENT_NAMES = {
-  // strength: {
-  //   en: ["weak", "medium", "strong"],
-  //   fr: ["faible", "moyen", "puissant"],
-  // },
-  // adjective: {
-  //   en: ["Vile", "Ugly", "Stinky"],
-  //   fr: ["Dégoutant", "Laide", "Nocif"],
-  // },
-  // prefix: {
-  //   en: "of",
-  //   fr: "de",
-  // },
   strength: [
     ["weak", "medium", "strong"],
     ["faible", "moyen", "puissant"],

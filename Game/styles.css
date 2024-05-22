@@ -52,12 +52,6 @@ body {
 
 /* GAME */
 
-.game-canvas {
-  position: absolute;
-  top: 0;
-  left: 0;
-}
-
 #screen_game {
 }
 
@@ -69,7 +63,105 @@ body {
   transition: opacity 0.3s ease;
 }
 
-/* UNIVERSAL */
+/* UNIVERSAL OR LEVEL SCREEN BUTTONS */
+
+#game_screen_btns {
+  display: flex;
+  flex-direction: row;
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
+.level-btns {
+  display: inline-block;
+  margin: 5px;
+  padding: 10px 20px;
+  border-radius: 10px;
+  background-color: #7997b8;
+  color: white;
+  border: none;
+  cursor: pointer;
+}
+
+/* SKILLS */
+
+@keyframes flash {
+  0% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0;
+    transform: scale(1.1);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+#cast_effects {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+  border: thick double red;
+}
+
+.cast-effect {
+  width: 100px;
+  height: auto;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  opacity: 0;
+}
+
+.cast-effect.flash {
+  animation: flash 1s ease-in-out;
+  opacity: 1;
+}
+
+#game_status {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+}
+
+.game-status {
+  position: absolute;
+  display: none;
+}
+
+.game-status.paused {
+  color: yellow;
+}
+
+.game-status.victory {
+  color: green;
+}
+
+.game-status.defeat {
+  color: red;
+}
+
+.game-canvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+}
 
 .health {
   background-color: red;
@@ -80,7 +172,7 @@ body {
 }
 
 .cooldown {
-  background-color: darkgray;
+  background-color: rgb(175, 177, 99);
 }
 
 /* PLAYER */
@@ -89,22 +181,20 @@ body {
   width: 100%;
   height: 8vw;
   position: absolute;
-  /* background-color: rgba(233, 228, 159, 0.5); */
   left: 0;
   bottom: 0;
   text-align: center;
 }
 
 .p-fill-con {
-  width: 8vw;
-  height: 8vw;
+  width: 6vw;
+  height: 6vw;
   background-color: rgba(255, 255, 255, 0.3);
   border-radius: 50%;
   position: absolute;
   bottom: 1vw;
   overflow: hidden;
   border: 5px solid transparent;
-
 }
 
 .p-fill {
@@ -125,7 +215,6 @@ body {
 
 #p_skill_container {
   width: 100%;
-
   display: flex;
   justify-content: center;
   gap: 10px;
@@ -134,33 +223,64 @@ body {
 }
 
 .skill {
-  width: 9vw;
-  height: 9vw;
+  width: 6vw;
+  height: 6vw;
   border: none;
   background-color: transparent;
-  bottom: 1vw;
+  bottom: 2vw;
   display: flex;
   justify-content: center;
   align-items: center;
 }
 
 .skill-img {
-  /* max-width: 100%;
-  max-height: 100%; */
-  width: 7vw;
-  height: 7vw;
+  width: 4vw;
+  height: 4vw;
   display: block;
 }
 
 /* OPPONENT */
 
-.o-fill-con {
-  width: 10vw;
-  height: 2vw;
-  background-color: rgba(255, 255, 255, 0.3);
-  border-radius: 5%;
+#o_ui {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
   position: absolute;
   top: 0;
+  width: 100%;
+  padding-top: 10px;
+}
+
+#o_name {
+  font-size: 24px;
+  text-align: center;
+}
+
+#o_health_container {
+  width: 40%;
+  height: 20%;
+  background-color: rgba(196, 129, 129, 0.5);
+  margin: 0 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  top: 4.5vw;
+}
+
+#o_cooldown_container {
+  width: 20%;
+  height: 40%;
+  background-color: rgba(255, 255, 255, 0.5);
+  margin: 0 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  top: 6vw;
+}
+
+.o-fill-con {
+  border-radius: 25px;
+  position: absolute;
   transition: width 0.3s ease;
   overflow: hidden;
   text-align: center;
@@ -170,8 +290,15 @@ body {
   height: 100%;
   position: absolute;
   top: 0;
-  transition: width 0.3s ease;
+  transition: width ease;
   overflow: hidden;
+}
+
+/* MAIN */
+
+#btn_map {
+  display: block;
+  margin: 0 auto;
 }
 
 /* MAIN */
@@ -192,6 +319,30 @@ body {
 
 #screen_map {
   text-align: center;
+}
+
+#level_select_btns {
+  position: absolute;
+  text-align: center;
+  transform: translate(50%, 50%);
+  background-color: rgba(255, 255, 255, 0.3);
+}
+
+#map_screen_btns {
+  width: 100%;
+  height: 20%;
+  position: absolute;
+  bottom: 0;
+  text-align: center;
+  background-color: rgba(255, 255, 255, 0.3);
+}
+
+.btn-level {
+  text-align: center;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
 }
 
 button {

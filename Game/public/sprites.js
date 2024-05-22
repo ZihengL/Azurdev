@@ -51,6 +51,8 @@ SpriteHandler.prototype.updatePosition = function () {
   } else {
     this.pos.x = Math.min(this.pos.x + velocity, this.targetPos.x);
   }
+
+
 };
 
 // -------------- RENDER

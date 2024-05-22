@@ -1,13 +1,11 @@
 function Player(saved, opponent, level) {
   Caster.call(
     this,
-    Level.res.player.sprite,
+    Level.res.player,
     saved.stats,
     PLAYER.fx,
     saved.skills,
-    opponent,
-    UI.actors.player,
-    Level.res.player.effects
+    opponent
   );
 
   this.level = level;
@@ -23,27 +21,31 @@ Player.prototype.constructor = Player;
 // -------------- STATIC
 
 Player.load = function () {
-  const res = {
-    effects: {},
-  };
-  var sequence = Promise.resolve();
+  // const res = {
+  //   effects: {},
+  // };
+  // var sequence = Promise.resolve();
 
-  loadImage(PLAYER.fx.spritesheet).then(function (image) {
-    res.sprite = image;
+  // loadImage(PLAYER.fx.spritesheet).then(function (image) {
+  //   res.sprite = image;
 
-    for (const key in AFFINITIES) {
-      const path = AFFINITIES[key].effect.cast;
+  //   // for (const key in AFFINITIES) {
+  //   //   const path = AFFINITIES[key].effect.cast;
 
-      sequence = sequence.then(function () {
-        return loadImage(path).then(function (image) {
-          res.effects[key] = image;
-        });
-      });
-    }
-  });
+  //   //   sequence = sequence.then(function () {
+  //   //     return loadImage(path).then(function (image) {
+  //   //       res.effects[key] = image;
+  //   //     });
+  //   //   });
+  //   // }
+  // });
 
-  return sequence.then(function () {
-    return res;
+  // return sequence.then(function () {
+  //   return res;
+  // });
+
+  return loadImage(PLAYER.fx.spritesheet).then(function (image) {
+    return image;
   });
 };
 
@@ -70,6 +72,8 @@ Player.prototype.update = function (deltaTime) {
 
   this.mana = Math.min(this.mana + this.stats.mana_regen, this.stats.mana);
   this.spriteHandler.update(deltaTime, state);
+
+  console.log("POS", this.spriteHandler.pos, this.spriteHandler.targetPos)
 };
 
 Player.prototype.updateSkills = function (deltaTime) {
