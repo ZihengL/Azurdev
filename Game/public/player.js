@@ -142,7 +142,6 @@ Player.prototype.cast = function () {
 
 Player.prototype.generateSequence = function () {
   const sequenceContainer = document.getElementById(SEQUENCE.div);
-  // this.sequence = [];
   this.sequence = {
     length: this.level.sequences.length,
   };
@@ -152,17 +151,13 @@ Player.prototype.generateSequence = function () {
   for (var i = 0; i < this.sequence.length; i++) {
     const value = getRandomValue(SEQUENCE.values);
     const element = document.createElement("img");
+
     element.id = SEQUENCE.id + i;
     element.class = SEQUENCE.class;
-
-    // element.src = this.getSequenceSrc(value, SEQUENCE.states.INACTIVE);
-    // element.class = SEQUENCE.states.INACTIVE;
-
     this.sequence[i] = {
       value: value,
       element: element,
     };
-
     this.setElementState(i, SEQUENCE.states.INACTIVE);
     sequenceContainer.appendChild(element);
   }
