@@ -19,7 +19,8 @@ function Opponent(image, options, opponent, level) {
 
   document.getElementById(this.containers.name).textContent =
     this.name.toUpperCase();
-  setHidden(this.containers.ui, true);
+
+  this.updateUIVisibility(true);
 }
 Opponent.prototype = Object.create(Caster.prototype);
 Opponent.prototype.constructor = Opponent;
@@ -54,6 +55,114 @@ Opponent.generatedName = function (lang, options) {
 
 // -------------- UPDATE
 
+Opponent.prototype.update = function (deltaTime) {
+  var state = this.spriteHandler.state;
+
+  if (this.isDead()) {
+    state = STATES.DEATH;
+
+    if (this.spriteHandler.isAtEndofAnim(state)) {
+      this.spriteHandler.targetPos = this.positions.end;
+      this.updateUIVisibility(true);
+    }
+  } else if (this.isAttacking()) {
+    state = STATES.CAST;
+    this.skill.update(deltaTime);
+  } else if (this.isInStandby()) {
+    state = STATES.IDLE;
+  } else {
+    this.updateUIVisibility(false);
+
+    if (this.updateCooldown(deltaTime)) {
+      state = STATES.CAST;
+      this.cast();
+    }
+  }
+
+  this.spriteHandler.update(deltaTime, state);
+};
+
+Opponent.prototype.updateCooldown = function (deltaTime) {
+  if (this.cooldown > 0) {
+    this.cooldown -= deltaTime;
+    return false;
+  }
+
+  return true;
+};
+
+Opponent.prototype.cast = function () {
+  Caster.prototype.cast.call(this);
+  this.cooldown = this.stats.cooldown;
+
+  triggerShakeFX(this.containers.cooldown);
+};
+
+Opponent.prototype.updateSkills = function (deltaTime) {
+  this.skills.forEach(function (skill) {
+    skill.update(deltaTime);
+  });
+};
+
+// -------------- RENDER
+
+Opponent.prototype.updateUIVisibility = function (toHidden) {
+  if (this.hiddenUI !== toHidden) {
+    this.hiddenUI = toHidden;
+    setHidden(this.containers.ui, this.hiddenUI);
+  }
+};
+
+Opponent.prototype.updateUI = function () {
+  Caster.prototype.updateUI.call(this);
+
+  const cdfill = document.getElementById(this.containers.cooldown);
+
+  if (this.isDead() || this.opponent.isDead()) {
+    cdfill.style.width = "0%";
+  } else {
+    cdfill.style.width = percentage(this.cooldown, this.stats.cooldown) + "%";
+  }
+};
+
+Opponent.prototype.applyEffect = function (projectile) {
+  Caster.prototype.applyEffect.call(this, projectile);
+
+  this.cooldown = this.stats.cooldown;
+  triggerShakeFX(this.containers.cooldown_container);
+};
+
+// -------------- OTHER
+
+Opponent.prototype.isInStandby = function () {
+  return (
+    !this.isInCombatPos() ||
+    this.opponent.isDead() ||
+    this.opponent.isAttacking()
+  );
+};
+
+Opponent.prototype.isRemovable = function () {
+  return this.spriteHandler.pos.isEqual(this.positions.end);
+};
+
+// -------------- OLD
+
+Opponent.prototype.getRandomSkill = function () {
+  return Math.floor(Math.random() * this.skills.length);
+};
+
+// Opponent.prototype.cast = function () {
+//   const skill = this.skills[this.currentSkill];
+
+//   skill.cast(this.opponent);
+//   this.currentSkill = this.nextSkill;
+//   this.nextSkill = this.getRandomSkill();
+//   this.cooldown = this.stats.cooldown;
+
+//   triggerShakeFX(this.containers.cooldown);
+// };
+
 // Opponent.prototype.update = function (deltaTime) {
 //   var state = this.spriteHandler.state;
 
@@ -81,100 +190,3 @@ Opponent.generatedName = function (lang, options) {
 
 //   this.spriteHandler.update(deltaTime, state);
 // };
-
-Opponent.prototype.update = function (deltaTime) {
-  var state = this.spriteHandler.state;
-
-  if (this.isDead()) {
-    state = STATES.DEATH;
-
-    this.inCombat = false;
-    if (this.spriteHandler.isAtEndofAnim(state)) {
-      this.spriteHandler.targetPos = this.positions.end;
-      setHidden(this.containers.ui, true);
-    }
-  } else {
-    
-  }
-
-  if (this.opponent.isOnTargetPos()) {
-    if (this.isDead()) {
-      state = STATES.DEATH;
-      if (this.spriteHandler.isAtEndofAnim(state)) {
-        this.spriteHandler.targetPos = this.positions.end;
-        setHidden(this.containers.ui, true);
-      }
-    } else {
-      if (this.isOnTargetPos() && !this.opponent.isDead()) {
-        setHidden(this.containers.ui, false);
-        this.updateSkills(deltaTime);
-
-        if (this.updateCooldown(deltaTime)) {
-          state = STATES.CAST;
-          this.cast();
-        }
-      } else {
-        state = STATES.IDLE;
-      }
-    }
-  }
-
-  this.spriteHandler.update(deltaTime, state);
-};
-
-Opponent.prototype.updateCooldown = function (deltaTime) {
-  if (this.cooldown > 0) {
-    this.cooldown -= deltaTime;
-    return false;
-  }
-
-  return true;
-};
-
-Opponent.prototype.updateSkills = function (deltaTime) {
-  this.skills.forEach(function (skill) {
-    skill.update(deltaTime);
-  });
-};
-
-// -------------- RENDER
-
-Opponent.prototype.updateUI = function () {
-  Caster.prototype.updateUI.call(this);
-
-  const cdfill = document.getElementById(this.containers.cooldown);
-
-  if (this.isDead() || this.opponent.isDead()) {
-    cdfill.style.width = "0%";
-  } else {
-    cdfill.style.width = percentage(this.cooldown, this.stats.cooldown) + "%";
-  }
-};
-
-Opponent.prototype.applyEffect = function (projectile) {
-  Caster.prototype.applyEffect.call(this, projectile);
-
-  this.cooldown = this.stats.cooldown;
-  triggerShakeFX(this.containers.cooldown_container);
-};
-
-// -------------- OTHER
-
-Opponent.prototype.isRemovable = function () {
-  return this.spriteHandler.pos.isEqual(this.positions.end);
-};
-
-Opponent.prototype.getRandomSkill = function () {
-  return Math.floor(Math.random() * this.skills.length);
-};
-
-Opponent.prototype.cast = function () {
-  const skill = this.skills[this.currentSkill];
-
-  skill.cast(this.opponent);
-  this.currentSkill = this.nextSkill;
-  this.nextSkill = this.getRandomSkill();
-  this.cooldown = this.stats.cooldown;
-
-  triggerShakeFX(this.containers.cooldown);
-};

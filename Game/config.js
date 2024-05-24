@@ -21,17 +21,38 @@ const LOCALSTORAGE = {
 const KEYMAPS = {
   Escape: "EXIT",
   p: "PAUSE",
-  w: "A",
-  a: "B",
+  a: "A",
+  w: "B",
   s: "C",
   d: "D",
-  ArrowUp: "A",
-  ArrowLeft: "B",
+  ArrowLeft: "A",
+  ArrowUp: "B",
   ArrowDown: "C",
   ArrowRight: "D",
 };
 
-const SEQUENCE = ["A", "B", "C", "D"];
+const SEQUENCE = {
+  values: ["A", "B", "C", "D"],
+  path: "./public/Assets/sequence/",
+  div: "sequence",
+  id: "sequence_",
+  class: "sequence-img",
+  classes: {
+    correct: "bounce",
+    incorrect: "bounce-out",
+  },
+  states: {
+    DEFAULT: 0,
+    ACTIVE: 1,
+    INACTIVE: 2,
+  },
+  images: {
+    A: ["A-1.png", "A-2.png", "A-3.png"],
+    B: ["B-1.png", "B-2.png", "B-3.png"],
+    C: ["C-1.png", "C-2.png", "C-3.png"],
+    D: ["D-1.png", "D-2.png", "D-3.png"],
+  },
+};
 
 // -------------- MENUS
 
@@ -327,17 +348,6 @@ const SKILLS = {
       speed: 1000,
       range: 5,
     },
-  },
-};
-
-const SHIELDS = {
-  fire_shield_weak: {
-    name: { en: "Weak fire Shield", fr: "Bouclier de feu faible" },
-    stats: {
-      affinity: "fire",
-      health: 1,
-    },
-    fx: {},
   },
 };
 
