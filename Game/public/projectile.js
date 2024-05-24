@@ -22,13 +22,7 @@ Projectile.prototype.update = function (deltaTime) {
     this.velocity = direction.multiply(this.fx.speed);
 
     const displacement = this.velocity.multiply(deltaTime);
-    const remainingDistance = this.pos.distanceTo(targetCenter);
-
-    if (displacement.magnitude() > remainingDistance) {
-      this.pos = targetCenter;
-    } else {
-      this.pos = this.pos.add(displacement);
-    }
+    this.pos = this.pos.add(displacement);
   }
 };
 
@@ -49,17 +43,3 @@ Projectile.prototype.isWithinRange = function () {
 
   return diff <= this.fx.range;
 };
-
-// -------------- OLD
-
-// Projectile.prototype.update = function (deltaTime) {
-//   const targetCenter = this.target.bodyCenter();
-
-//   if (!this.pos.isEqual(targetCenter)) {
-//     const direction = this.pos.direction(targetCenter);
-//     this.velocity = direction.multiply(this.fx.speed);
-
-//     const displacement = this.velocity.multiply(deltaTime);
-//     this.pos = this.pos.add(displacement);
-//   }
-// };

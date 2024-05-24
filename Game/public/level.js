@@ -132,12 +132,9 @@ Level.prototype.gameloop = function (tickrate) {
     var deltaTime = (now - self.lastUpdate) / 1000;
     self.lastUpdate = now;
 
-    if (
-      (self.isWon() || self.isLost()) &&
-      self.checkEndLevelStatus(deltaTime)
-    ) {
-      Level.STOPPED = true;
-    }
+    // ON WIN OR LOSE
+    Level.STOPPED =
+      (self.isWon() || self.isLost()) && self.updateLevelEnd(deltaTime);
 
     if (!Level.STOPPED) {
       if (!Level.PAUSED) {
@@ -156,7 +153,7 @@ Level.prototype.gameloop = function (tickrate) {
 // -------------- UPDATE
 
 Level.prototype.update = function (deltaTime) {
-  this.player.update(deltaTime, this.lastKeyPressed);
+  this.player.update(deltaTime);
   this.opponent.update(deltaTime);
   this.background.update(this.player.getState());
 
@@ -172,6 +169,26 @@ Level.prototype.update = function (deltaTime) {
   this.lastKeyPressed = null;
 };
 
+Level.prototype.updateLevelEnd = function (deltaTime) {
+  if (!this.endDelay) {
+    this.endDelay = DISPLAY.other.delays.end_delay;
+    this.setStatus(this.isWon() ? "status_victory" : "status_defeat");
+
+    if (this.isWon()) {
+      this.player.setDestination(this.player.positions.end);
+      this.profile.level_progress = Math.min(
+        this.profile.level_progress + 1,
+        LEVELS.length - 1
+      );
+    }
+
+    return false;
+  }
+
+  this.endDelay -= deltaTime;
+  return this.endDelay <= 0;
+};
+
 // -------------- RENDER
 
 Level.prototype.render = function () {
@@ -185,8 +202,6 @@ Level.prototype.render = function () {
 
 Level.prototype.input = function (value) {
   this.lastKeyPressed = value;
-
-  triggerBounceFX(document.getElementById(value));
 };
 
 Level.prototype.generateSequence = function () {
@@ -201,7 +216,7 @@ Level.prototype.generateSequence = function () {
 Level.prototype.checkSequence = function () {
   const currentValue = this.sequence[this.currentIndex];
 
-  if (this.lastKeyPressed === currentValue) {
+  if (value === currentValue) {
     this.currentIndex++;
     return true;
   }
@@ -220,7 +235,7 @@ Level.prototype.isWon = function () {
 };
 
 Level.prototype.isLost = function () {
-  return this.player.isDead();
+  return this.player.health === 0;
 };
 
 // If win/lose conditions met and subsequent animations are also complete.
@@ -229,26 +244,6 @@ Level.prototype.isLevelComplete = function () {
     (this.player.isDead() || this.killcount >= this.opponents.count) &&
     Level.STOPPED
   );
-};
-
-Level.prototype.checkEndLevelStatus = function (deltaTime) {
-  if (!this.endDelay) {
-    this.endDelay = DISPLAY.other.delays.end_delay;
-    this.setStatus(this.isWon() ? "status_victory" : "status_defeat");
-
-    if (this.isWon()) {
-      this.player.setDestination(this.player.positions.end);
-      this.profile.level_progress = Math.min(
-        this.profile.level_progress + 1,
-        LEVELS.length - 1
-      );
-    }
-
-    return false;
-  }
-
-  this.endDelay -= deltaTime;
-  return this.endDelay <= 0;
 };
 
 // -------------- OPPONENT
@@ -269,12 +264,12 @@ Level.prototype.getRandomOpponent = function () {
 
 // -------------- OTHER
 
-Level.prototype.areAlive = function () {
-  return !this.player.isDead() && !this.opponent.isDead();
-};
-
 Level.prototype.areOnTargetPos = function () {
   return this.player.isOnTargetPos() && this.opponent.isOnTargetPos();
+};
+
+Level.prototype.areAlive = function () {
+  return !this.player.isDead() && !this.opponent.isDead();
 };
 
 Level.prototype.areInCombatPos = function () {
@@ -333,23 +328,6 @@ Level.prototype.setStatus = function (elemId) {
 //       changeScreen(SCREENS.GAME, SCREENS.MAP);
 //     }
 //   }, tickrate);
-// };
-
-// Level.prototype.update = function (deltaTime) {
-//   this.player.update(deltaTime);
-//   this.opponent.update(deltaTime);
-//   this.background.update(this.player.getState());
-
-//   if (this.opponent.isRemovable()) {
-//     this.killcount++;
-//     this.profile.gold += this.opponent.stats.gold;
-//     if (!this.isWon()) {
-//       this.opponent = this.getRandomOpponent();
-//       this.player.opponent = this.opponent;
-//     }
-//   }
-
-//   this.lastKeyPressed = null;
 // };
 
 // -----------------------------------

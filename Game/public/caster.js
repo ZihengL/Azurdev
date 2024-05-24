@@ -5,7 +5,7 @@ function Caster(image, stats, fx, skills, opponent, ui, skillEffects) {
   this.health = this.stats.health;
   this.shield = null;
   this.name = "";
-  this.skill = new Skill(Object.keys(SKILLS)[0], this);
+  this.inCombat = false;
 
   // SKILLS
   this.skills = [];
@@ -55,12 +55,7 @@ function Caster(image, stats, fx, skills, opponent, ui, skillEffects) {
 // -------------- UPDATE
 
 Caster.prototype.update = function (deltaTime, state) {
-  if (this.isDead()) {
-    state = STATES.DEATH;
-  }
-
   this.spriteHandler.update(deltaTime, state);
-  this.skill.update(deltaTime);
 };
 
 Caster.prototype.updatePosition = function () {
@@ -79,10 +74,9 @@ Caster.prototype.updateSkills = function (deltaTime) {
 
 Caster.prototype.render = function () {
   if (!this.isDead()) {
-    this.skill.render();
-    // this.skills.forEach(function (skill) {
-    //   skill.render();
-    // });
+    this.skills.forEach(function (skill) {
+      skill.render();
+    });
   }
 
   this.spriteHandler.render();
@@ -119,14 +113,6 @@ Caster.prototype.renderStatusBar = function (options, max, remaining) {
 
 // -------------- STATE
 
-Caster.prototype.isOutOfCombat = function () {
-  return (
-    !this.isInCombatPos() ||
-    this.opponent.isDead() ||
-    this.opponent.isAttacking()
-  );
-};
-
 Caster.prototype.isOnTargetPos = function () {
   return this.spriteHandler.isOnTargetPos();
 };
@@ -135,15 +121,8 @@ Caster.prototype.isAtPos = function (pos) {
   return this.spriteHandler.pos.isEqual(pos);
 };
 
-Caster.prototype.isMovingTo = function (pos) {
-  return this.spriteHandler.targetPos.isEqual(pos);
-};
-
 Caster.prototype.isInCombatPos = function () {
-  return (
-    this.isAtPos(this.positions.combat) &&
-    this.isMovingTo(this.positions.combat)
-  );
+  return this.isAtPos(this.positions.combat);
 };
 
 Caster.prototype.isAtEndPos = function () {
@@ -156,14 +135,6 @@ Caster.prototype.isMovingToEndPos = function () {
 
 Caster.prototype.isCasting = function () {
   return this.spriteHandler.isAtEndofAnim(STATES.CAST);
-};
-
-Caster.prototype.isAttacking = function () {
-  return this.skill.projectiles.length > 0;
-};
-
-Caster.prototype.isCombatReady = function () {
-  return !this.isDead() && this.isInCombatPos() && !this.isAttacking();
 };
 
 Caster.prototype.isDead = function () {
@@ -188,9 +159,7 @@ Caster.prototype.setDestination = function (coordinates) {
 
 // -------------- STATUS EFFECTS
 
-Caster.prototype.cast = function () {
-  this.skill.cast(this.opponent);
-};
+Caster.prototype.isProtectedFrom = function (skill) {};
 
 Caster.prototype.applyEffect = function (projectile) {
   this.health -= projectile.damage;

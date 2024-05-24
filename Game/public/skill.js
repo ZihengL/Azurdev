@@ -57,6 +57,33 @@ Skill.prototype.update = function (deltaTime) {
   }
 };
 
+Skill.prototype.updateCastEffect = function (deltaTime) {
+  if (this.castEffect) {
+    const increments = EFFECTS.cast_effect;
+    var delay = this.castEffect.delay;
+    var opacity = this.castEffect.opacity;
+    var angle = this.castEffect.angle;
+
+    if (this.sequenceIdx > 0) {
+      delay = increments.delay;
+      opacity = Math.min(opacity + increments.opacity, 1);
+    } else if (delay > 0) {
+      delay -= deltaTime;
+    } else {
+      opacity = Math.max(opacity - increments.opacity, 0);
+    }
+
+    angle += increments.angle;
+    if (this.castEffect.angle > 2) {
+      angle = 0;
+    }
+
+    this.castEffect.delay = delay;
+    this.castEffect.opacity = opacity;
+    this.castEffect.angle = angle;
+  }
+};
+
 Skill.prototype.render = function () {
   this.projectiles.forEach(
     function (projectile) {
@@ -92,33 +119,6 @@ Skill.prototype.renderUI = function (x, y) {
 };
 
 // -------------- OTHER
-
-Skill.prototype.updateCastEffect = function (deltaTime) {
-  if (this.castEffect) {
-    const increments = EFFECTS.cast_effect;
-    var delay = this.castEffect.delay;
-    var opacity = this.castEffect.opacity;
-    var angle = this.castEffect.angle;
-
-    if (this.sequenceIdx > 0) {
-      delay = increments.delay;
-      opacity = Math.min(opacity + increments.opacity, 1);
-    } else if (delay > 0) {
-      delay -= deltaTime;
-    } else {
-      opacity = Math.max(opacity - increments.opacity, 0);
-    }
-
-    angle += increments.angle;
-    if (this.castEffect.angle > 2) {
-      angle = 0;
-    }
-
-    this.castEffect.delay = delay;
-    this.castEffect.opacity = opacity;
-    this.castEffect.angle = angle;
-  }
-};
 
 Skill.prototype.setCastEffect = function (image) {
   const effect = AFFINITIES[this.stats.affinity].effect;

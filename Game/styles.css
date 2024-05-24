@@ -249,34 +249,19 @@ body {
 
 #p_skill_container {
   width: 100%;
-  min-height: 50px;
-  /* height: 4vw; */
-  justify-self: center;
   display: flex;
   justify-content: center;
-  gap: 20px;
+  gap: 10px;
   position: absolute;
-  bottom: 20px;
-  /* border: solid white; */
-}
-
-#sequence {
-  height: 5vw;
-  display: flex;
-  justify-content: center;
-  flex-direction: row;
-  gap: 1.5vw;
-}
-
-.sequence-img {
+  bottom: 0;
 }
 
 .skill {
-  /* width: 6vw;
-  height: 6vw; */
+  width: 6vw;
+  height: 6vw;
   border: none;
   background-color: transparent;
-
+  bottom: 2vw;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -572,170 +557,6 @@ button {
 }
 
 .fade-out {
-  -webkit-animation: fadeOut 0.5s ease-in-out;
-  animation: fadeOut 0.5s ease-in-out;
-}
-
-/* BOUNCE ANIMATION */
-@-webkit-keyframes bounce {
-  70% {
-    -webkit-transform: translateY(0%);
-    transform: translateY(0%);
-  }
-  80% {
-    -webkit-transform: translateY(-15%);
-    transform: translateY(-15%);
-  }
-  90% {
-    -webkit-transform: translateY(0%);
-    transform: translateY(0%);
-  }
-  95% {
-    -webkit-transform: translateY(-7%);
-    transform: translateY(-7%);
-  }
-  97% {
-    -webkit-transform: translateY(0%);
-    transform: translateY(0%);
-  }
-  99% {
-    -webkit-transform: translateY(-3%);
-    transform: translateY(-3%);
-  }
-  100% {
-    -webkit-transform: translateY(0);
-    transform: translateY(0);
-  }
-}
-
-@keyframes bounce {
-  70% {
-    -webkit-transform: translateY(0%);
-    transform: translateY(0%);
-  }
-  80% {
-    -webkit-transform: translateY(-15%);
-    transform: translateY(-15%);
-  }
-  90% {
-    -webkit-transform: translateY(0%);
-    transform: translateY(0%);
-  }
-  95% {
-    -webkit-transform: translateY(-7%);
-    transform: translateY(-7%);
-  }
-  97% {
-    -webkit-transform: translateY(0%);
-    transform: translateY(0%);
-  }
-  99% {
-    -webkit-transform: translateY(-3%);
-    transform: translateY(-3%);
-  }
-  100% {
-    -webkit-transform: translateY(0);
-    transform: translateY(0);
-  }
-}
-
-.bounce {
-  -webkit-animation: bounce 2s ease-in-out;
-  animation: bounce 2s ease-in-out;
-  /* -webkit-animation-iteration-count: 1;
-  animation-iteration-count: 1; */
-}
-
-.bounce-in {
-  -webkit-animation: bounce-in 2s ease-in-out;
-  animation: bounce-in 2s ease-in-out;
-}
-
-@-webkit-keyframes bounce-in {
-  0% {
-    opacity: 0;
-    -webkit-transform: scale(0.3);
-    transform: scale(0.3);
-  }
-  50% {
-    opacity: 1;
-    -webkit-transform: scale(1.05);
-    transform: scale(1.05);
-  }
-  70% { 
-    -webkit-transform: scale(0.9);
-    transform: scale(0.9); 
-  }
-  100% { 
-    -webkit-transform: scale(1);
-    transform: scale(1); 
-  }
-}
-
-@keyframes bounce-in {
-  0% {
-    opacity: 0;
-    -webkit-transform: scale(0.3);
-    transform: scale(0.3);
-  }
-  50% {
-    opacity: 1;
-    -webkit-transform: scale(1.05);
-    transform: scale(1.05);
-  }
-  70% { 
-    -webkit-transform: scale(0.9);
-    transform: scale(0.9); 
-  }
-  100% { 
-    -webkit-transform: scale(1);
-    transform: scale(1); 
-  }
-}
-
-.bounce-out {
-  -webkit-animation: bounce-out 2s ease-in-out;
-  animation: bounce-out 2s ease-in-out;
-}
-
-@-webkit-keyframes bounce-out {
-  0% { 
-    -webkit-transform: scale(1);
-    transform: scale(1); 
-  }
-  25% { 
-    -webkit-transform: scale(0.95);
-    transform: scale(0.95); 
-  }
-  50% {
-    opacity: 1;
-    -webkit-transform: scale(1.1);
-    transform: scale(1.1);
-  }
-  100% {
-    opacity: 0;
-    -webkit-transform: scale(0.3);
-    transform: scale(0.3);
-  } 
-}
-
-@keyframes bounce-out {
-  0% { 
-    -webkit-transform: scale(1);
-    transform: scale(1); 
-  }
-  25% { 
-    -webkit-transform: scale(0.95);
-    transform: scale(0.95); 
-  }
-  50% {
-    opacity: 1;
-    -webkit-transform: scale(1.1);
-    transform: scale(1.1);
-  }
-  100% {
-    opacity: 0;
-    -webkit-transform: scale(0.3);
-    transform: scale(0.3);
-  } 
+  -webkit-animation: fadeOut 0.5s forwards;
+  animation: fadeOut 0.5s forwards;
 }

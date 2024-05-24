@@ -244,14 +244,19 @@ function triggerTimedFX(container, classname, time) {
   }, time);
 }
 
-function triggerFX(container, classname) {
-  container.classList.remove(classname);
+function triggerFX(container, classname, time) {
   container.classList.add(classname);
 
-  container.addEventListener("animationend", function handleAnimationEnd() {
-    container.classList.remove(classname);
-    container.removeEventListener("animationend", handleAnimationEnd);
-  });
+  if (time) {
+    setTimeout(function () {
+      container.classList.remove(classname);
+    }, time);
+  } else {
+    container.addEventListener("animationend", function handleAnimationEnd() {
+      container.classList.remove(classname);
+      container.removeEventListener("animationend", handleAnimationEnd);
+    });
+  }
 }
 
 function triggerFlashFX(affinity) {
@@ -271,8 +276,4 @@ function triggerShakeFX(containerID, intensity) {
 
   triggerFX(element, "shake");
   document.documentElement.style.setProperty("--shake", baseline + "px");
-}
-
-function triggerBounceFX(element) {
-  triggerFX(element, "bounce");
 }

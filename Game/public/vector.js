@@ -38,12 +38,6 @@ Vector2D.prototype.distance = function (vector) {
   return difference.magnitude();
 };
 
-Vector2D.prototype.distanceTo = function (target) {
-  const dx = target.x - this.x;
-  const dy = target.y - this.y;
-  return Math.sqrt(dx * dx + dy * dy);
-};
-
 Vector2D.prototype.difference = function (vector) {
   const x = Math.max(this.x, vector.x) - Math.min(this.x, vector.x);
   const y = Math.max(this.y, vector.y) - Math.min(this.y, vector.y);
