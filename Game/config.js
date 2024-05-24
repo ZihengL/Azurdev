@@ -4,9 +4,12 @@ const LOCALSTORAGE = {
   key: "Autobattler",
   defaults: {
     stats: {
-      health: 5,
+      health: 3,
+      damage: 1,
+      potions: 1,
+
       mana: 20,
-      mana_regen: 2.5,
+      mana_regen_sec: 0.5,
     },
     gold: 100,
     level_progress: 0,
@@ -27,6 +30,8 @@ const KEYMAPS = {
   ArrowDown: "C",
   ArrowRight: "D",
 };
+
+const SEQUENCE = ["A", "B", "C", "D"];
 
 // -------------- MENUS
 
@@ -78,38 +83,156 @@ const DISPLAY = {
 
 const BACKGROUNDS = {
   path: "./public/Assets/backgrounds/",
-  layers: {
-    far: {
-      images: ["far.png"],
-      multiplier: 0,
-      grounded: false,
-      position: { x: 0, y: 0 },
-    },
-    clouds: {
-      images: ["clouds.png"],
-      multiplier: 0.03,
-      grounded: false,
-      position: { x: 0, y: 0 },
-    },
-    middle: {
-      images: ["middle.png"],
-      multiplier: 0.05,
-      grounded: true,
-      position: { x: 0, y: 0 },
-    },
-    near: {
-      images: ["near.png"],
-      multiplier: 1,
-      grounded: true,
-      position: { x: 0, y: 0 },
-    },
-    ground: {
-      images: ["ground.png"],
-      multiplier: 1,
-      grounded: true,
-      position: { x: 0, y: 0 },
-    },
+  themes: {
+    forest: [
+      {
+        image: "forest-0.png",
+        multiplier: 0.03,
+        grounded: true,
+        position: { x: 0, y: 0 },
+      },
+      {
+        image: "forest-1.png",
+        multiplier: 0,
+        grounded: false,
+        position: { x: 0, y: 0 },
+      },
+      {
+        image: "forest-2.png",
+        multiplier: 0.05,
+        grounded: true,
+        position: { x: 0, y: 0 },
+      },
+      {
+        image: "forest-3.png",
+        multiplier: 1,
+        grounded: true,
+        position: { x: 0, y: 0 },
+      },
+    ],
+    mountains: [
+      {
+        image: "mountains-0.png",
+        multiplier: 0,
+        grounded: false,
+        position: { x: 0, y: 0 },
+      },
+      {
+        image: "mountains-1.png",
+        multiplier: 0.03,
+        grounded: true,
+        position: { x: 0, y: 0 },
+      },
+      {
+        image: "mountains-2.png",
+        multiplier: 0.05,
+        grounded: true,
+        position: { x: 0, y: 0 },
+      },
+      {
+        image: "mountains-3.png",
+        multiplier: 0.1,
+        grounded: true,
+        position: { x: 0, y: 0 },
+      },
+      {
+        image: "mountains-4.png",
+        multiplier: 1,
+        grounded: true,
+        position: { x: 0, y: 0 },
+      },
+    ],
+    industrial: [
+      {
+        image: "industrial-0.png",
+        multiplier: 0,
+        grounded: true,
+        position: { x: 0, y: 0 },
+      },
+      {
+        image: "industrial-1.png",
+        multiplier: 0.05,
+        grounded: true,
+        position: { x: 0, y: 0 },
+      },
+      {
+        image: "industrial-2.png",
+        multiplier: 0.1,
+        grounded: true,
+        position: { x: 0, y: 0 },
+      },
+      {
+        image: "industrial-3.png",
+        multiplier: 1,
+        grounded: true,
+        position: { x: 0, y: 0 },
+      },
+    ],
+    space: [
+      {
+        image: "space-0.png",
+        multiplier: 0,
+        grounded: false,
+        position: { x: 0, y: 0 },
+      },
+      {
+        image: "space-1.png",
+        multiplier: 0.003,
+        grounded: false,
+        position: { x: 0, y: 0 },
+      },
+      {
+        image: "space-2.png",
+        multiplier: 0.05,
+        grounded: false,
+        position: { x: 0, y: 0 },
+      },
+      {
+        image: "space-3.png",
+        multiplier: 0.1,
+        grounded: false,
+        position: { x: 0, y: 0 },
+      },
+      {
+        image: "space-4.png",
+        multiplier: 1,
+        grounded: false,
+        position: { x: 0, y: 0 },
+      },
+    ],
   },
+  // layers: {
+  //   far: {
+  //     images: ["far.png"],
+  //     multiplier: 0,
+  //     grounded: false,
+  //     position: { x: 0, y: 0 },
+  //   },
+  //   clouds: {
+  //     images: ["clouds.png"],
+  //     multiplier: 0.03,
+  //     grounded: false,
+  //     position: { x: 0, y: 0 },
+  //   },
+  //   middle: {
+  //     images: ["middle.png"],
+  //     multiplier: 0.05,
+  //     grounded: true,
+  //     position: { x: 0, y: 0 },
+  //   },
+  //   near: {
+  //     images: ["near.png"],
+  //     multiplier: 1,
+  //     grounded: true,
+  //     position: { x: 0, y: 0 },
+  //   },
+  //   ground: {
+  //     images: ["ground.png"],
+  //     multiplier: 1,
+  //     grounded: true,
+  //     position: { x: 0, y: 0 },
+  //   },
+  // },
 };
 
 // -------------- SKILLS & EFFECTS
@@ -169,16 +292,6 @@ const SKILL_LEVELS = {
     cost: 200,
   },
 };
-
-// const EFFECTS = {
-//   cast_timer: 2,
-//   cast_effect: {
-//     delay: 2,
-//     opacity: 0.1,
-//     scale: 0.2,
-//     angle: 0.01,
-//   },
-// };
 
 const SKILLS = {
   fire_weak: {
@@ -242,11 +355,22 @@ const PLAYER = {
   stats: {
     health: 5,
     mana: 20,
-    mana_regen: 2.5,
+    mana_regen_sec: 0.5,
   },
   fx: {
     layer: "actors",
     spritesheet: "./public/Assets/player/player.png",
+    transition_property: "height",
+    containers: {
+      health_container: "p_health_container",
+      health_text: "p_health_text",
+      health_overlay: "p_health_fill_overlay",
+      health: "p_health_fill",
+      mana_container: "p_mana_container",
+      mana_text: "p_mana_text",
+      mana_overlay: "p_mana_fill_overlay",
+      mana: "p_mana_fill",
+    },
     sprites: {
       scale: 1,
       frame: {
@@ -267,13 +391,53 @@ const PLAYER = {
         y: 0.75,
       },
       end: {
-        x: 1.5,
+        x: 3,
         y: 0.75,
       },
     },
     bar_width: 5,
     bar_height: 20,
   },
+};
+
+const OPPONENT = {
+  stats: {
+    strength: { min: 0, max: 2 },
+    cooldown: { min: 6, max: 2 },
+    health: { min: 2, max: 10 },
+    gold: { min: 10, max: 40 },
+  },
+  fx: {
+    transition_property: "width",
+    containers: {
+      ui: "o_ui",
+      name: "o_name",
+      health_container: "o_health_container",
+      health_overlay: "o_health_fill_overlay",
+      health: "o_health_fill",
+      cooldown_container: "o_cooldown_container",
+      cooldown: "o_cooldown_fill",
+      position: {
+        velocity: 5,
+        start: {
+          x: 1.5,
+          y: 0.75,
+        },
+        combat: {
+          x: 0.8,
+          y: 0.75,
+        },
+        end: {
+          x: -0.5,
+          y: 0.75,
+        },
+      },
+    },
+  },
+};
+
+const OPPONENTS2 = {
+  stats: {},
 };
 
 const OPPONENTS = {
@@ -319,7 +483,6 @@ const OPPONENTS = {
     },
   },
   orc_strong: {
-    // name: { en: "orc", fr: "orc" },
     name: ["orc", "orc"],
     strength: 2,
     stats: {
@@ -377,13 +540,23 @@ const OPPONENT_NAMES = {
 
 const LEVELS = [
   {
-    types: ["orc_weak", "orc_strong"],
-    count: 5,
-    mob_cd: 2,
+    opponents: {
+      types: ["orc_weak", "orc_strong"],
+      count: 5,
+    },
+    sequence: {
+      length: 3,
+      time: 5,
+    },
   },
   {
-    types: ["orc_strong"],
-    count: 2,
-    mob_cd: 2,
+    opponents: {
+      types: ["orc_strong"],
+      count: 8,
+    },
+    sequence: {
+      length: 5,
+      time: 4,
+    },
   },
 ];

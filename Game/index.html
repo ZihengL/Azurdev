@@ -10,7 +10,7 @@
   <body>
     <div id="viewport">
       <!-- -----------------------  MAIN  ----------------------- -->
-      <div id="screen_main" class="screen">
+      <div id="screen_main" class="screen active">
         <button id="btn_lang" onclick="changeLanguage();"></button>
 
         <ul id="profile_resources"></ul>
@@ -23,18 +23,18 @@
 
         <div id="main_menu_bottom">
           <button id="btn_newgame" onclick="newProfile();"></button>
-          <button id="btn_map" onclick="setToScreen(SCREENS.MAP);"></button>
+          <button id="btn_map" onclick="changeScreen(SCREENS.MAIN, SCREENS.MAP);"></button>
         </div>
       </div>
 
       <!-- -----------------------  MAP  ----------------------- -->
       <div id="screen_map" class="screen">
         <h1 id="selected_level"></h1>
-        <div id="level_select_btns"></div>
+        <div id="level_select_container" class="center"></div>
 
         <div id="map_screen_btns">
-          <button id="btn_play" onclick="setToScreen(SCREENS.GAME);"></button>
-          <button id="btn_back" onclick="setToScreen(SCREENS.MAIN);"></button>
+          <button id="btn_play" onclick="changeScreen(SCREENS.MAP, SCREENS.GAME);"></button>
+          <button id="btn_back" onclick="changeScreen(SCREENS.MAP, SCREENS.MAIN);"></button>
         </div>
       </div>
     <!-- </div> -->
@@ -47,33 +47,34 @@
       <canvas id="ui" class="game-canvas"></canvas>
 
       <div id="game_screen_btns">
-        <button id="btn_quitLevel" class="level-btns" onclick="Level.quitInstance();"></button>
+        <button id="btn_quitLevel" class="level-btns" onclick="changeScreen(SCREENS.GAME, SCREENS.MAP);"></button>
         <button id="btn_pauseLevel" class="level-btns" onclick="Level.pauseInstance();"></button>
       </div>
 
       <div id="o_ui">
         <h2 id="o_name"></h2>
 
-        <div id="o_health_container" class="o-fill-con">
-          <div id="o_health_fill" class="health o-fill"></div>
+        <div id="o_health_container" class="o-fill-con ui-container">
+          <div id="o_health_fill_overlay" class="o fill overlay health"></div>
+          <div id="o_health_fill" class="o fill health"></div>
         </div>
 
-        <div id="o_cooldown_container" class="o-fill-con">
-          <div id="o_cooldown_fill" class="cooldown o-fill"></div>
+        <div id="o_cooldown_container" class="o-fill-con ui-container">
+          <div id="o_cooldown_fill" class="o fill cooldown"></div>
         </div>
       </div>
 
-      <div id="game_status" class="game-ui">
+      <div id="game_status" class="center">
         <h2 id="status_paused" class="game-status paused"></h2>
         <h2 id="status_victory" class="game-status victory"></h2>
         <h2 id="status_defeat" class="game-status defeat"></h2>
       </div>
 
-      <div id="cast_effects" class="game-ui">
+      <div id="cast_effects" class="game-ui center">
         <img src="./public/Assets/effects/fire1.png" id="cast_fire" class="cast-effect"></img>
-        <!-- <img src="" id="cast_ice" class="game-status cast"></img>
+        <img src="" id="cast_ice" class="game-status cast"></img>
         <img src="" id="cast_poison" class="game-status cast"></img>
-        <img src="" id="cast_shock" class="game-status cast"></img> -->
+        <img src="" id="cast_shock" class="game-status cast"></img>
       </div>
 
       <div id="p_counters" class="">
@@ -81,30 +82,44 @@
         <h5 id="counter_killcount" class=""></h5>
       </div>
 
+      <div id="p_history" class="">
+        <h5 id="counter_gold" class=""></h5>
+        <h5 id="counter_killcount" class=""></h5>
+      </div>
+
       <div id="p_ui" class="player-ui">
-        <div id="p_health_container" class="p-fill-con">
-          <div id="p_health_fill" class="p-fill health"></div>
+        <div id="p_health_container" class="p-fill-con ui-container">
+          <img id="fill_highlight_health" class="fill-img" src="./public/Assets/player/fill_highlight.png">
+          <img id="fill_border_health" class="fill-img" src="./public/Assets/player/fill_border.png"> 
+          <img id="fill_back_health" class="fill-img back" src="./public/Assets/player/fill_back.png"> 
+          <div id="p_health_fill_overlay" class="p fill overlay health"></div>
+          <div id="p_health_fill" class="p fill health"></div>
+          <div id="p_health_text" class="fill-text"></div>
         </div>
 
         <div id="p_skill_container">
-          <button id="A" class="skill">
-            <img src="./public/Assets/effects/fire.png" class="skill-img">
+          <button id="A" class="skill" onclick="Level.instance.input('A');">
+            <img src="./public/Assets/skills/planet6.png" class="skill-img" onclick="Level.instance.input('A');">
           </button>
           <button id="B" class="skill">
-            <img src="./public/Assets/effects/fire.png" class="skill-img">
+            <img src="./public/Assets/skills/planet2.png" class="skill-img" onclick="Level.instance.input('B');">
           </button>
           <button id="C" class="skill">
-            <img src="./public/Assets/effects/fire.png" class="skill-img">
+            <img src="./public/Assets/skills/planet5.png" class="skill-img" onclick="Level.instance.input('C');">
           </button>
           <button id="D" class="skill">
-            <img src="./public/Assets/effects/fire.png" class="skill-img">
+            <img src="./public/Assets/skills/planet20.png" class="skill-img" onclick="Level.instance.input('D');">
           </button>
         </div>
 
-        <div id="p_mana_container" class="p-fill-con">
-          <div id="p_mana_fill" class="p-fill mana"></div>
+        <div id="p_mana_container" class="p-fill-con ui-container">
+          <img id="fill_highlight_mana" class="fill-img" src="./public/Assets/player/fill_highlight.png">
+          <img id="fill_border_mana" class="fill-img" src="./public/Assets/player/fill_border.png">
+          <img id="fill_back_mana" class="fill-img back" src="./public/Assets/player/fill_back.png"> 
+          <div id="p_mana_fill_overlay" class="p fill overlay mana"></div>
+          <div id="p_mana_fill" class="p fill mana"></div>
+          <div id="p_mana_text" class="fill-text"></div>
         </div>
-      <!-- <button id="btn_quitLevel" onclick="setToScreen(SCREENS.MAP);"></button> -->
     </div>
 
     <!-- -----------------------  JS  ----------------------- -->

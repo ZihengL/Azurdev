@@ -4,17 +4,14 @@ function Caster(image, stats, fx, skills, opponent, ui, skillEffects) {
 
   this.health = this.stats.health;
   this.shield = null;
-  this.name = "No name";
+  this.name = "";
+  this.inCombat = false;
 
   // SKILLS
   this.skills = [];
   skills.forEach(
     function (skillname) {
       const skill = new Skill(skillname, this);
-
-      // if (skillEffects) {
-      //   skill.setCastEffect(skillEffects[skill.stats.affinity]);
-      // }
 
       this.skills.push(skill);
     }.bind(this)
@@ -26,6 +23,7 @@ function Caster(image, stats, fx, skills, opponent, ui, skillEffects) {
     combat: surface.ratioPosition(fx.position.combat),
     end: surface.ratioPosition(fx.position.end),
   };
+
   this.spriteHandler = new SpriteHandler(
     fx,
     image,
@@ -50,6 +48,8 @@ function Caster(image, stats, fx, skills, opponent, ui, skillEffects) {
   //     size: end.subtract(start),
   //   };
   // }
+
+  this.shadow = false;
 }
 
 // -------------- UPDATE
@@ -82,29 +82,16 @@ Caster.prototype.render = function () {
   this.spriteHandler.render();
 
   if (this.isOnTargetPos()) {
-    this.renderUI();
+    this.updateUI();
   }
 };
 
-Caster.prototype.renderUI = function () {
-  // this.renderStatusBar(this.ui.health, this.stats.health, this.health);
-  // const ctx = surface.layers.ui.ctx;
-  // const nameplate = this.ui.nameplate;
-  // ctx.font = nameplate.font;
-  // ctx.fillStyle = nameplate.fillStyle;
-  // ctx.textAlign = nameplate.textAlign;
-  // ctx.textBaseline = nameplate.textBaseline;
-  // ctx.fillText(this.name, nameplate.start.x, nameplate.start.y);
-  //   ctx.save();
-  //   for (const key in nameplate) {
-  //     const value = nameplate[key];
-  //     if (ctx[key]) {
-  //       ctx[key] = value;
-  //     }
-  //   }
-  //   ctx.fillText(this.name, nameplate.start.x, nameplate.start.y);
-  //   ctx.restore();
-  // };
+Caster.prototype.updateUI = function () {
+  const hpoverlay = document.getElementById(this.containers.health_overlay);
+  const hpfill = document.getElementById(this.containers.health);
+  const hpvalue = percentage(this.health, this.stats.health) + "%";
+  hpoverlay.style[this.transitionProperty] = hpvalue;
+  hpfill.style[this.transitionProperty] = hpvalue;
 };
 
 Caster.prototype.renderStatusBar = function (options, max, remaining) {
@@ -134,7 +121,7 @@ Caster.prototype.isAtPos = function (pos) {
   return this.spriteHandler.pos.isEqual(pos);
 };
 
-Caster.prototype.isAtCombatPos = function () {
+Caster.prototype.isInCombatPos = function () {
   return this.isAtPos(this.positions.combat);
 };
 
@@ -164,9 +151,7 @@ Caster.prototype.bodyCenter = function () {
   return this.spriteHandler.bodyCenter();
 };
 
-Caster.prototype.setDestination = function (destination) {
-  const coordinates = surface.ratioPosition(destination);
-
+Caster.prototype.setDestination = function (coordinates) {
   this.spriteHandler.targetPos = coordinates;
 };
 
@@ -178,4 +163,17 @@ Caster.prototype.isProtectedFrom = function (skill) {};
 
 Caster.prototype.applyEffect = function (projectile) {
   this.health -= projectile.damage;
+  this.spriteHandler.shadow = true;
+
+  if (!this.isDead()) {
+    const self = this;
+    setTimeout(function () {
+      self.spriteHandler.shadow = false;
+    }, 50);
+  }
+
+  triggerShakeFX(
+    this.containers.health_container,
+    this.health - this.stats.health
+  );
 };

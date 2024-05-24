@@ -9,6 +9,8 @@ function SpriteHandler(fx, image, pos, targetPos) {
   this.state = STATES.IDLE;
   this.index = 0;
   this.lastUpdate = 0;
+
+  this.shadow = false;
 }
 SpriteHandler.id = "actors";
 
@@ -51,8 +53,6 @@ SpriteHandler.prototype.updatePosition = function () {
   } else {
     this.pos.x = Math.min(this.pos.x + velocity, this.targetPos.x);
   }
-
-
 };
 
 // -------------- RENDER
@@ -65,7 +65,8 @@ SpriteHandler.prototype.render = function () {
     sPos,
     this.pos,
     this.size,
-    this.fx.sprites.frame.bleed
+    this.fx.sprites.frame.bleed,
+    this.shadow
   );
 };
 

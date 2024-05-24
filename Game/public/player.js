@@ -10,9 +10,14 @@ function Player(saved, opponent, level) {
 
   this.level = level;
   this.mana = this.stats.mana;
-  this.name = getInLang(PLAYER.name);
+  this.manaRegen = this.stats.mana_regen_sec;
+  this.regenDelay = 1;
 
-  this.currentSkills = [];
+  this.name = getInLang(PLAYER.name);
+  this.containers = PLAYER.fx.containers;
+  this.transitionProperty = PLAYER.fx.transition_property;
+
+  this.sequence = [];
   this.currentIndex = 0;
 }
 Player.prototype = Object.create(Caster.prototype);
@@ -56,43 +61,73 @@ Player.prototype.update = function (deltaTime) {
 
   if (!this.isOnTargetPos() || !this.opponent.isOnTargetPos()) {
     state = STATES.RUN;
-
-    this.skills.forEach(function (skill) {
-      skill.updateCastEffect(deltaTime);
-    });
   } else if (this.isDead()) {
     state = STATES.DEATH;
   } else {
-    if (this.updateSkills(deltaTime)) {
-      state = STATES.CAST;
-    } else {
-      state = STATES.IDLE;
+    if (this.checkSequence(this.level.lastKeyPressed)) {
     }
+
+    // if (this.updateSkills(deltaTime)) {
+    //   state = STATES.CAST;
+    // } else {
+    //   state = STATES.IDLE;
+    // }
   }
 
-  this.mana = Math.min(this.mana + this.stats.mana_regen, this.stats.mana);
-  this.spriteHandler.update(deltaTime, state);
+  // this.regenDelay -= deltaTime;
+  // if (this.regenDelay <= 0) {
+  //   this.regenDelay = 1;
+  //   this.mana = Math.min(this.mana + this.manaRegen, this.stats.mana);
+  // }
 
-  console.log("POS", this.spriteHandler.pos, this.spriteHandler.targetPos)
+  this.spriteHandler.update(deltaTime, state);
+};
+
+Player.prototype.checkSequence = function (value) {
+  const currentValue = this.sequence[this.currentIndex];
+
+  if (value === currentValue) {
+    this.currentIndex++;
+    return true;
+  }
+
+  return !value;
+};
+
+Player.prototype.isSequenceComplete = function () {
+  return this.currentIndex >= this.sequence.length;
 };
 
 Player.prototype.updateSkills = function (deltaTime) {
   const inputValue = this.level.lastKeyPressed;
   var casted = false;
+  var highest = 0;
+  var index = null;
 
   this.skills.forEach(
-    function (skill) {
+    function (skill, idx) {
       skill.update(deltaTime);
 
       if (skill.inputSequence(inputValue) && this.hasEnoughMana(skill)) {
         skill.cast(this.opponent);
         this.mana -= skill.stats.mana_cost;
+        this.history = [];
+        this.currentIndex = 0;
         casted = true;
-      }
 
-      skill.updateCastEffect(deltaTime);
+        this.updateUI();
+        triggerFlashFX(skill.stats.affinity);
+      } else {
+        if (skill.sequenceIdx > highest) {
+          highest = skill.sequenceIdx;
+          index = idx;
+        }
+      }
     }.bind(this)
   );
+
+  if (!casted) {
+  }
 
   return casted;
 };
@@ -109,26 +144,51 @@ Player.prototype.render = function () {
     });
   }
 
-  // if (this.isOnTargetPos()) {
-  this.renderUI();
-  // }
+  this.updateUI();
 };
 
-Player.prototype.renderUI = function () {
-  // Caster.prototype.renderUI.call(this);
-  // this.renderStatusBar(this.ui.mana, this.stats.mana, this.mana);
+Player.prototype.updateUI = function () {
+  Caster.prototype.updateUI.call(this);
+  document.getElementById(this.containers.health_text).textContent =
+    this.health;
 
-  const hpfill = document.getElementById("p_health_fill");
-  hpfill.style.height = percentage(this.health, this.stats.health) + "%";
-
-  const manaFill = document.getElementById("p_mana_fill");
-  manaFill.style.height = percentage(this.mana, this.stats.mana) + "%";
+  // const manaoverlay = document.getElementById(this.containers.mana_overlay);
+  // const manafill = document.getElementById(this.containers.mana);
+  // const manavalue = percentage(this.mana, this.stats.mana) + "%";
+  // manaoverlay.style.height = manavalue;
+  // manafill.style.height = manavalue;
+  // document.getElementById(this.containers.mana_text).textContent = this.mana;
 };
 
 // -------------- OTHER
 
+Player.prototype.generateSequence = function () {
+  this.sequence = [];
+
+  for (var i = 0; i < this.sequences.length; i++) {
+    const value = getRandomValue(SEQUENCE);
+
+    this.sequence.push(value);
+  }
+
+  this.currentIndex = 0;
+};
+
+Player.prototype.applyEffect = function (projectile) {
+  Caster.prototype.applyEffect.call(this, projectile);
+
+  if (!this.isDead()) {
+    this.generateSequence();
+  }
+};
+
 Player.prototype.hasEnoughMana = function (skill) {
-  return this.mana >= skill.stats.mana_cost;
+  if (this.mana >= skill.stats.mana_cost) {
+    return true;
+  }
+
+  triggerShakeFX(this.containers.mana_container);
+  return false;
 };
 
 Player.prototype.toSaveFormat = function () {};

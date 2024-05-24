@@ -107,9 +107,15 @@ Surface.prototype.drawTo = function (id, image, x, y, scale, width, height) {
   layer.ctx.drawImage(image, x, y, width * scale, height * scale);
 };
 
-Surface.prototype.drawActor = function (image, sPos, dPos, size, bleed) {
+Surface.prototype.drawActor = function (image, sPos, dPos, size, bleed, shadow) {
   const layer = this.layers.actors;
   bleed = bleed || 0;
+
+  layer.ctx.save();
+  if (shadow) {
+    layer.ctx.shadowColor = "red";
+    layer.ctx.shadowBlur = 20;
+  }
 
   layer.ctx.drawImage(
     image,
@@ -122,6 +128,7 @@ Surface.prototype.drawActor = function (image, sPos, dPos, size, bleed) {
     size.x,
     size.y
   );
+  layer.ctx.restore();
 };
 
 Surface.prototype.drawCastEffect = function (img, options, shift) {

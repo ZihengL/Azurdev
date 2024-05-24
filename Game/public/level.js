@@ -9,18 +9,13 @@
 
 function Level(lang, profile) {
   this.lang = lang || LANGS[0];
-  this.profile = profile;
+  this.profile = loadProfile();
 
   this.lastUpdate = null;
   this.lastKeyPressed = null;
 
-  // this.killcount = 0;
-  this.opponents = [];
-  this.opponent = null;
-  this.player = new Player(this.profile, this.opponent, this);
-
   this.background = new Background(Level.res.background);
-  this.setLevel(profile.level_progress);
+  this.setLevel(this.profile.level_progress);
 }
 Level.STOPPED = false;
 Level.PAUSED = false;
@@ -49,7 +44,8 @@ Level.load = function () {
   });
 };
 
-Level.setInstance = function (lang, profile, level) {
+Level.setInstance = function (lang, level) {
+  const profile = loadProfile();
   level = level || profile.level_progress;
 
   if (!Level.instance || Level.instance.selectedLevel !== level) {
@@ -68,13 +64,20 @@ Level.quitInstance = function () {
 
   if (instance) {
     Level.STOPPED = true;
-    setToScreen(SCREENS.MAP);
   }
 };
 
 Level.pauseInstance = function () {
   if (Level.instance) {
     Level.setPause(!Level.PAUSED);
+  }
+};
+
+Level.resetInstance = function () {
+  const instance = Level.instance;
+
+  if (instance) {
+    instance.setLevel(Level.selectedLevel);
   }
 };
 
@@ -85,9 +88,7 @@ Level.setLevel = function (level) {
 
 Level.setPause = function (toPause) {
   Level.PAUSED = toPause || !Level.PAUSED;
-
   setVisibility(document.getElementById("status_paused"), Level.PAUSED);
-  console.log(Level.PAUSED);
 };
 
 Level.setStop = function (toStop) {
@@ -97,10 +98,14 @@ Level.setStop = function (toStop) {
 // -------------- SETUP
 
 Level.prototype.setLevel = function (level) {
-  this.opponents = LEVELS[level] || LEVELS[0];
+  this.profile = loadProfile();
+
+  const options = LEVELS[level] || LEVELS[0];
+  this.opponents = options.opponents;
+  this.sequences = options.sequence;
   this.killcount = 0;
 
-  this.player = new Player(profile, null, this);
+  this.player = new Player(this.profile, null, this);
   this.opponent = this.getRandomOpponent();
   this.player.opponent = this.opponent;
 
@@ -111,7 +116,10 @@ Level.prototype.setLevel = function (level) {
 Level.prototype.play = function (tickrate) {
   Level.STOPPED = false;
   Level.PAUSED = false;
+
   this.setStatus();
+  this.lastKeyPressed = null;
+
   this.lastUpdate = Date.now();
   this.gameloop(tickrate);
 };
@@ -124,48 +132,20 @@ Level.prototype.gameloop = function (tickrate) {
     var deltaTime = (now - self.lastUpdate) / 1000;
     self.lastUpdate = now;
 
-    // ON WIN
-    // TODO: END LEVEL UPDATES
-    if (self.isWon()) {
-      if (!self.player.isMovingToEndPos()) {
-        self.player.setDestination(self.player.positions.end);
-        self.setStatus("status_victory");
-        self.profile.level_progress = Math.min(
-          self.profile.level_progress + 1,
-          LEVELS.length - 1
-        );
-      }
-
-      console.log(self.player.isOnTargetPos())
-      
-      if (self.player.isOnTargetPos()) {
-        Level.STOPPED = true;
-      }
-      // Level.STOPPED = self.player.isOnTargetPos();
-    }
-
-    // ON LOSE
-    if (self.isLost()) {
-      if (!self.endDelay) {
-        self.endDelay = DISPLAY.other.delays.end_delay;
-        self.setStatus("status_defeat");
-      } else {
-        self.endDelay -= deltaTime;
-      }
-
-      Level.STOPPED = self.endDelay <= 0;
-    }
+    // ON WIN OR LOSE
+    Level.STOPPED =
+      (self.isWon() || self.isLost()) && self.updateLevelEnd(deltaTime);
 
     if (!Level.STOPPED) {
       if (!Level.PAUSED) {
         self.update(deltaTime);
       }
+
       self.render();
     } else {
       clearInterval(gameID);
       saveProfile(self.profile);
-      // updateMap();
-      setToScreen(SCREENS.MAP);
+      changeScreen(SCREENS.GAME, SCREENS.MAP);
     }
   }, tickrate);
 };
@@ -189,6 +169,26 @@ Level.prototype.update = function (deltaTime) {
   this.lastKeyPressed = null;
 };
 
+Level.prototype.updateLevelEnd = function (deltaTime) {
+  if (!this.endDelay) {
+    this.endDelay = DISPLAY.other.delays.end_delay;
+    this.setStatus(this.isWon() ? "status_victory" : "status_defeat");
+
+    if (this.isWon()) {
+      this.player.setDestination(this.player.positions.end);
+      this.profile.level_progress = Math.min(
+        this.profile.level_progress + 1,
+        LEVELS.length - 1
+      );
+    }
+
+    return false;
+  }
+
+  this.endDelay -= deltaTime;
+  return this.endDelay <= 0;
+};
+
 // -------------- RENDER
 
 Level.prototype.render = function () {
@@ -196,6 +196,36 @@ Level.prototype.render = function () {
   this.background.render();
   this.opponent.render();
   this.player.render();
+};
+
+// -------------- SEQUENCING
+
+Level.prototype.input = function (value) {
+  this.lastKeyPressed = value;
+};
+
+Level.prototype.generateSequence = function () {
+  this.sequence = [];
+  this.currentIndex = 0;
+
+  for (var i = 0; i < this.sequences.length; i++) {
+    this.sequence.push(getRandomValue(SEQUENCE));
+  }
+};
+
+Level.prototype.checkSequence = function () {
+  const currentValue = this.sequence[this.currentIndex];
+
+  if (value === currentValue) {
+    this.currentIndex++;
+    return true;
+  }
+
+  return !value;
+};
+
+Level.prototype.isSequenceComplete = function () {
+  return this.currentIndex >= this.sequence.length;
 };
 
 // -------------- WIN & LOSE
@@ -238,6 +268,18 @@ Level.prototype.areOnTargetPos = function () {
   return this.player.isOnTargetPos() && this.opponent.isOnTargetPos();
 };
 
+Level.prototype.areAlive = function () {
+  return !this.player.isDead() && !this.opponent.isDead();
+};
+
+Level.prototype.areInCombatPos = function () {
+  return this.player.isInCombatPos() && this.opponent.isInCombatPos();
+};
+
+Level.prototype.areInCombat = function () {
+  return this.areAlive() && this.areInCombatPos();
+};
+
 Level.prototype.setStatus = function (elemId) {
   for (key in DISPLAY.other.game_status) {
     const element = document.getElementById(key);
@@ -246,7 +288,49 @@ Level.prototype.setStatus = function (elemId) {
   }
 };
 
-Level.prototype.pauseGame = function () {};
+// Level.prototype.gameloop = function (tickrate) {
+//   const self = this;
+
+//   var gameID = setInterval(function () {
+//     var now = Date.now();
+//     var deltaTime = (now - self.lastUpdate) / 1000;
+//     self.lastUpdate = now;
+
+//     // ON WIN OR LOSE
+//     if (self.isWon() || self.isLost()) {
+//       if (!self.endDelay) {
+//         self.endDelay = DISPLAY.other.delays.end_delay;
+//         self.setStatus(self.isWon() ? "status_victory" : "status_defeat");
+
+//         if (self.isWon()) {
+//           self.player.setDestination(self.player.positions.end);
+//           self.profile.level_progress = Math.min(
+//             self.profile.level_progress + 1,
+//             LEVELS.length - 1
+//           );
+//         }
+//       } else if (self.endDelay > 0) {
+//         self.endDelay -= deltaTime;
+//       } else {
+//         Level.STOPPED = true;
+//       }
+//     }
+
+//     if (!Level.STOPPED) {
+//       if (!Level.PAUSED) {
+//         self.update(deltaTime);
+//       }
+
+//       self.render();
+//     } else {
+//       clearInterval(gameID);
+//       saveProfile(self.profile);
+//       changeScreen(SCREENS.GAME, SCREENS.MAP);
+//     }
+//   }, tickrate);
+// };
+
+// -----------------------------------
 
 // Level.prototype.gameloop = function (currentTime) {
 //   if (this.isLevelComplete()) {

@@ -33,87 +33,80 @@ const surface = new Surface();
 const fps = SCREEN.fps[1];
 const tickrate = 1000 / fps;
 
-var lang;
-var profile = loadProfile();
-var currentScreen = SCREENS.MAIN;
-var selectedLevel = profile.level_progress;
+var lang = LANGS[1];
+// var currentScreen = SCREENS.MAIN;
+// var selectedLevel = profile.level_progress;
 
-document.addEventListener("DOMContentLoaded", function () {
-  Level.setInstance(lang, profile, selectedLevel).then(function (instance) {
-    const level = instance;
+// document.addEventListener("DOMContentLoaded", function () {
+Level.setInstance(lang).then(function (instance) {
+  const level = instance;
+  var profile = instance.profile;
 
-    // MAIN MENU
+  // MAIN MENU
 
-    // MAP MENU
-    const container = document.getElementById("level_select_btns");
-    for (var i = 0; i < LEVELS.length; i++) {
-      const levelBtn = document.createElement("button");
+  // MAP MENU
+  const container = document.getElementById("level_select_container");
+  for (var i = 0; i < LEVELS.length; i++) {
+    const levelBtn = document.createElement("button");
 
-      levelBtn.id = "btn_" + i;
-      levelBtn.class = "btn-level";
-      levelBtn.textContent = i + 1;
+    levelBtn.id = "btn_level" + i;
+    levelBtn.classList.add("btn-level");
+    levelBtn.textContent = i + 1;
 
-      levelBtn.onclick = (function (levelIndex) {
-        return function () {
-          updateLevelSelection(levelIndex);
-        };
-      })(i);
+    levelBtn.onclick = (function (levelIndex) {
+      return function () {
+        updateLevelSelection(levelIndex);
+      };
+    })(i);
 
-      container.appendChild(levelBtn);
+    container.appendChild(levelBtn);
+  }
+  updateLevelSelection(profile.level_progress);
+
+  // document.getElementById("btn_play").onclick = function () {
+  //   setToScreen(SCREENS.GAME);
+  //   level.play(tickrate);
+  // };
+
+  document.addEventListener("keydown", function (event) {
+    const currentScreens = document.querySelectorAll(".screen.active");
+
+    if (currentScreens.length > 1) {
+      return;
     }
-    updateLevelSelection(profile.level_progress);
-    // updateMap();
 
-    document.getElementById("btn_play").onclick = function () {
-      setToScreen(SCREENS.GAME);
-      level.play(tickrate);
-    };
+    const currentScreen = currentScreens[0];
+    const value = KEYMAPS[event.key];
 
-    // LEVEL
-    // const btn_quit = document.getElementById("btn_quitLevel");
-    // document.getElementById("btn_quitLevel").onclick = function () {
-    //   setToScreen(SCREENS.MAP);
-    //   Level.STOPPED = true;
-    // };
-
-    // document.getElementById("btn_pauseLevel").onclick = function () {
-    //   console.log("asdasdas");
-    //   Level.PAUSED = !Level.PAUSED;
-    // };
-
-    document.addEventListener("keydown", function (event) {
-      const value = KEYMAPS[event.key];
-      console.log(event.key, value, event.code, currentScreen);
-
-      switch (currentScreen) {
-        case SCREENS.GAME:
-          if (!Level.STOPPED) {
-            switch (value) {
-              case "A":
-              case "B":
-              case "C":
-              case "D":
-                level.lastKeyPressed = value;
-                break;
-              case "EXIT":
-                Level.quitInstance();
-                break;
-              default:
-                Level.pauseInstance();
-                console.log("Pause", Level.PAUSED);
-            }
+    switch (currentScreen.id) {
+      case SCREENS.GAME:
+        if (!Level.STOPPED) {
+          switch (value) {
+            case "A":
+            case "B":
+            case "C":
+            case "D":
+              level.input(value);
+              break;
+            case "EXIT":
+              Level.quitInstance();
+              break;
+            default:
+              Level.pauseInstance();
+              console.log("Pause", Level.PAUSED);
           }
-          break;
-        case SCREENS.MAP:
-          break;
-        case SCREENS.MAIN:
-          break;
-        default:
-          console.log("Key '" + event.key + "' not mapped to command.");
-      }
-    });
-
-    changeLanguage();
-    setToScreen(currentScreen);
+        }
+        break;
+      case SCREENS.MAP:
+        break;
+      case SCREENS.MAIN:
+        break;
+      default:
+        console.log("Key '" + event.key + "' not mapped to command.");
+    }
   });
+
+  changeLanguage();
+  // changeScreen(SCREENS.MAIN, SCREENS.MAIN);
 });
+// });
