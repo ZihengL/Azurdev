@@ -16,9 +16,6 @@ function Player(saved, opponent, level) {
   this.name = getInLang(PLAYER.name);
   this.containers = PLAYER.fx.containers;
   this.transitionProperty = PLAYER.fx.transition_property;
-
-  this.sequence = [];
-  this.currentIndex = 0;
 }
 Player.prototype = Object.create(Caster.prototype);
 Player.prototype.constructor = Player;
@@ -64,21 +61,18 @@ Player.prototype.update = function (deltaTime) {
   } else if (this.isDead()) {
     state = STATES.DEATH;
   } else {
-    if (this.checkSequence(this.level.lastKeyPressed)) {
+    if (this.updateSkills(deltaTime)) {
+      state = STATES.CAST;
+    } else {
+      state = STATES.IDLE;
     }
-
-    // if (this.updateSkills(deltaTime)) {
-    //   state = STATES.CAST;
-    // } else {
-    //   state = STATES.IDLE;
-    // }
   }
 
-  // this.regenDelay -= deltaTime;
-  // if (this.regenDelay <= 0) {
-  //   this.regenDelay = 1;
-  //   this.mana = Math.min(this.mana + this.manaRegen, this.stats.mana);
-  // }
+  this.regenDelay -= deltaTime;
+  if (this.regenDelay <= 0) {
+    this.regenDelay = 1;
+    this.mana = Math.min(this.mana + this.manaRegen, this.stats.mana);
+  }
 
   this.spriteHandler.update(deltaTime, state);
 };
@@ -174,13 +168,13 @@ Player.prototype.generateSequence = function () {
   this.currentIndex = 0;
 };
 
-Player.prototype.applyEffect = function (projectile) {
-  Caster.prototype.applyEffect.call(this, projectile);
+// Player.prototype.applyEffect = function (projectile) {
+//   Caster.prototype.applyEffect.call(this, projectile);
 
-  if (!this.isDead()) {
-    this.generateSequence();
-  }
-};
+//   // if (!this.isDead()) {
+//   //   // this.generateSequence();
+//   // }
+// };
 
 Player.prototype.hasEnoughMana = function (skill) {
   if (this.mana >= skill.stats.mana_cost) {

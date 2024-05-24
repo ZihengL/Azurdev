@@ -140,7 +140,6 @@ Level.prototype.gameloop = function (tickrate) {
       if (!Level.PAUSED) {
         self.update(deltaTime);
       }
-
       self.render();
     } else {
       clearInterval(gameID);

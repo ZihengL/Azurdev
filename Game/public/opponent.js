@@ -85,18 +85,6 @@ Opponent.generatedName = function (lang, options) {
 Opponent.prototype.update = function (deltaTime) {
   var state = this.spriteHandler.state;
 
-  if (this.isDead()) {
-    state = STATES.DEATH;
-
-    this.inCombat = false;
-    if (this.spriteHandler.isAtEndofAnim(state)) {
-      this.spriteHandler.targetPos = this.positions.end;
-      setHidden(this.containers.ui, true);
-    }
-  } else {
-    
-  }
-
   if (this.opponent.isOnTargetPos()) {
     if (this.isDead()) {
       state = STATES.DEATH;
