@@ -27,6 +27,8 @@
 
 // TODO: LAYERED BACKGROUNDS
 
+// NEW GAME -> NEW PROFILE
+
 const keymap = KEYMAPS.PC;
 const surface = new Surface();
 
