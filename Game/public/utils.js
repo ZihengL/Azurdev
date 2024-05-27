@@ -111,6 +111,16 @@ function getSkillName(affinity, strength) {
   return skillname + " " + adj;
 }
 
+function getCurrentScreenID() {
+  const currentScreens = document.querySelectorAll(".screen.active");
+
+  if (currentScreens.length > 1) {
+    return;
+  }
+
+  return currentScreens[0];
+}
+
 function changeScreen(fromScreenId, toScreenId, isNewGame) {
   const fromScreen = document.getElementById(fromScreenId);
   const toScreen = document.getElementById(toScreenId);
@@ -123,7 +133,6 @@ function changeScreen(fromScreenId, toScreenId, isNewGame) {
     case SCREENS.MAIN:
       break;
     case SCREENS.MAP:
-      console.log("ASDSADAS", Level.instance.profile);
       if (isNewGame) {
         Level.instance.profile = newProfile();
       }
@@ -256,6 +265,7 @@ function addListener(id, trigger, action) {
 // EFFECTS
 
 function triggerTimedFX(container, classname, time) {
+  container.classList.remove(classname);
   container.classList.add(classname);
 
   setTimeout(function () {

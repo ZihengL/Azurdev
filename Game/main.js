@@ -27,6 +27,51 @@
 
 // TODO: LAYERED BACKGROUNDS
 
+function inputAction(action, key, id) {
+  console.log(action, key);
+
+  switch (action) {
+    case "1":
+    case "2":
+    case "3":
+    case "4":
+      Level.input(action);
+      // Level.input(Number(action));
+      break;
+    case "PAUSE":
+      Level.pauseInstance();
+      break;
+    case "EXIT":
+      Level.quitInstance();
+      break;
+    case "PLAY":
+      changeScreen(SCREENS.MAP, SCREENS.GAME);
+      break;
+    case "MAP_TO_MAIN":
+      changeScreen(SCREENS.MAP, SCREENS.MAIN);
+      break;
+    case "REDUCE_LEVEL":
+      updateLevelSelection(Level.selectedLevel - 1);
+      break;
+    case "RAISE_LEVEL":
+      updateLevelSelection(Level.selectedLevel + 1);
+      break;
+    case "CONTINUE_GAME":
+      changeScreen(SCREENS.MAIN, SCREENS.MAP);
+      break;
+    case "NEW_GAME":
+      changeScreen(SCREENS.MAIN, SCREENS.MAP, true);
+      break;
+    case "CHANGE_LANGUAGE":
+      changeLanguage();
+      break;
+    default:
+      console.log(
+        "Key '" + key + "' not mapped to command on screen id: " + id
+      );
+  }
+}
+
 // const keymap = KEYMAPS.PC;
 const surface = new Surface();
 
@@ -67,37 +112,33 @@ Level.setInstance(lang).then(function (instance) {
     }
 
     const currentScreen = currentScreens[0];
-    const value = KEYMAPS[event.key];
+    const keymap = KEYMAPS[currentScreen.id];
+    const key = event.key.toString();
 
-    switch (currentScreen.id) {
-      case SCREENS.GAME:
-        if (!Level.STOPPED && !Level.isLevelEnded()) {
-          switch (value) {
-            case "A":
-            case "B":
-            case "C":
-            case "D":
-              level.input(value);
-              break;
-            case "EXIT":
-              Level.quitInstance();
-              break;
-            case "PAUSE":
-              Level.pauseInstance();
-            default:
-              console.log(
-                "Key '" + event.key + "' not mapped to in-game command."
-              );
-          }
-        }
-        break;
-      case SCREENS.MAP:
-        break;
-      case SCREENS.MAIN:
-        break;
-      default:
-        console.log("Key '" + event.key + "' not mapped to any command.");
+    for (const action in keymap) {
+      const keyarray = keymap[action];
+
+      if (keyarray.map(String).indexOf(key) !== -1) {
+        inputAction(action, key, currentScreen.id);
+      }
     }
+
+    // const currentScreen = currentScreens[0];
+    // const keymap = KEYMAPS[currentScreen.id];
+    // // const value = keymap[event.key];
+    // const key = event.key;
+
+    // for (const action in keymap) {
+    //   const keyarray = keymap[action];
+
+    //   // console.log(keyarray, key, keyarray.indexOf(key), action);
+
+    //   if (keyarray.indexOf(key) !== -1) {
+    //     // console.log(keyarray, key, keyarray.indexOf(key));
+    //     inputAction(action, key, currentScreen.id);
+    //     return;
+    //   }
+    // }
   });
 
   updateLevelSelection(profile.level_progress);

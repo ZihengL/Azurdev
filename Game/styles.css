@@ -80,6 +80,12 @@ body {
   cursor: pointer;
 }
 
+.entity-center {
+  position: absolute;
+  font-size: 3em;
+  color: white;
+  opacity: 0;
+}
 /* SKILLS */
 
 #cast_effects {
@@ -214,6 +220,11 @@ body {
 }
 
 /* PLAYER */
+
+#p_sequence img {
+  width: 4vw;
+  opacity: 0;
+}
 
 #p_ui {
   width: 100%;
@@ -518,23 +529,25 @@ button {
   -webkit-animation: flash 1s linear;
   animation: flash 1s linear;
   opacity: 0;
+  -webkit-animation-iteration-count: 1;
+  animation-iteration-count: 1;
 }
 
 /* FADE IN ANIMATION */
 @-webkit-keyframes fadeIn {
-  from {
+  0% {
     opacity: 0;
   }
-  to {
+  100% {
     opacity: 1;
   }
 }
 
 @keyframes fadeIn {
-  from {
+  0% {
     opacity: 0;
   }
-  to {
+  100% {
     opacity: 1;
   }
 }
@@ -542,23 +555,25 @@ button {
 .fade-in {
   -webkit-animation: fadeIn 0.5s forwards;
   animation: fadeIn 0.5s forwards;
+  -webkit-animation-iteration-count: 1;
+  animation-iteration-count: 1;
 }
 
 /* Fade Out Animation */
 @-webkit-keyframes fadeOut {
-  from {
+  0% {
     opacity: 1;
   }
-  to {
+  100% {
     opacity: 0;
   }
 }
 
 @keyframes fadeOut {
-  from {
+  0% {
     opacity: 1;
   }
-  to {
+  100% {
     opacity: 0;
   }
 }
@@ -566,4 +581,45 @@ button {
 .fade-out {
   -webkit-animation: fadeOut 0.5s forwards;
   animation: fadeOut 0.5s forwards;
+  -webkit-animation-iteration-count: 1;
+  animation-iteration-count: 1;
+}
+
+@-webkit-keyframes dmgFade {
+  0% {
+    -webkit-transform: translateX(0);
+    transform: translateX(0);
+    -webkit-transform: translateY(0);
+    transform: translateY(0);
+  }
+  100% {
+    opacity: 0;
+    -webkit-transform: translateX(-2%);
+    transform: translateX(-2%);
+    -webkit-transform: translateY(4%);
+    transform: translateY(4%);
+  }
+}
+
+@keyframes dmgFade {
+  0% {
+    -webkit-transform: translateX(0);
+    transform: translateX(0);
+    -webkit-transform: translateY(0);
+    transform: translateY(0);
+  }
+  100% {
+    opacity: 0;
+    -webkit-transform: translateX(-2%);
+    transform: translateX(-2%);
+    -webkit-transform: translateY(4%);
+    transform: translateY(4%);
+  }
+}
+
+.dmg-fade {
+  -webkit-animation: dmgFade 0.75s forwards;
+  animation: dmgFade 0.75s forwards;
+  -webkit-animation-iteration-count: 1;
+  animation-iteration-count: 1;
 }

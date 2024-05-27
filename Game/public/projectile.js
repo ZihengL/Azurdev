@@ -3,6 +3,8 @@ function Projectile(position, target, fx) {
   this.target = target;
   this.fx = fx;
 
+  this.previousPos = this.pos;
+
   this.velocity = new Vector2D(0, 0);
 }
 
@@ -23,6 +25,10 @@ Projectile.prototype.update = function (deltaTime) {
 
     const displacement = this.velocity.multiply(deltaTime);
     this.pos = this.pos.add(displacement);
+
+    if (this.pos.x - this.previousPos.x > 10) {
+      this.previousPos = this.pos;
+    }
   }
 };
 
@@ -35,6 +41,21 @@ Projectile.prototype.render = function () {
     ctx.fillStyle = this.fx.color;
     ctx.fill();
     ctx.stroke();
+
+    ctx.save();
+    ctx.globalAlpha = 0.5;
+    ctx.beginPath();
+    ctx.arc(
+      this.previousPos.x,
+      this.previousPos.y,
+      this.fx.size,
+      0,
+      2 * Math.PI
+    );
+    ctx.fillStyle = this.fx.color;
+    ctx.fill();
+    ctx.stroke();
+    ctx.restore();
   }
 };
 

@@ -157,11 +157,17 @@ Caster.prototype.setDestination = function (coordinates) {
 
 // -------------- STATUS EFFECTS
 
-Caster.prototype.isProtectedFrom = function (skill) {};
-
-Caster.prototype.applyEffect = function (projectile) {
-  this.health -= projectile.damage;
+Caster.prototype.applyEffect = function (skill) {
+  this.health -= skill.damage;
+  this.health = Math.max(this.health, 0);
   this.spriteHandler.shadow = true;
+
+  const pos = this.bodyCenter();
+  this.damageContainer.innerText = skill.damage;
+  this.damageContainer.style.left = pos.x + "px";
+  this.damageContainer.style.top = pos.y + "px";
+  console.log(this.damageContainer);
+  triggerFX(this.damageContainer, "dmg-fade");
 
   if (!this.isDead()) {
     const self = this;

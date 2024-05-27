@@ -35,27 +35,28 @@ const LOCALSTORAGE_OLD = {
 };
 
 const KEYMAPS = {
-  Escape: "EXIT",
-  p: "PAUSE",
-  w: "A",
-  a: "B",
-  s: "C",
-  d: "D",
-  ArrowUp: "A",
-  ArrowLeft: "B",
-  ArrowDown: "C",
-  ArrowRight: "D",
-
-  // NEW
-  1: ["ArrowUp", "w"],
-  2: ["ArrowLeft", "a"],
-  3: ["ArrowDown", "s"],
-  4: ["ArrowRight", "d"],
-  EXIT: ["Escape", 461, 1001, 1009, 9],
-  PAUSE: ["p", 8],
+  screen_game: {
+    "1": ["1", "ArrowLeft", "a"],
+    "2": ["2", "ArrowUp", "w"],
+    "3": ["3", "ArrowDown", "s"],
+    "4": ["4", "ArrowRight", "d"],
+    CANCEL_SPELL: ["5", "z"],
+    PAUSE: ["8", "p"],
+    EXIT: ["Escape", "461", "1001", "1009", "9"],
+  },
+  screen_map: {
+    PLAY: ["1", "ArrowUp"],
+    MAP_TO_MAIN: ["2", "ArrowDown", "Escape", "461", "1001", "1009"],
+    MAP_TO_SHOP: ["3", "ArrowRight"],
+    REDUCE_LEVEL: ["8", "ArrowLeft"],
+    RAISE_LEVEL: ["9", "ArrowRight"],
+  },
+  screen_main: {
+    CHANGE_LANGUAGE: ["3", "q"],
+    CONTINUE_GAME: ["1", "ArrowUp"],
+    NEW_GAME: ["2", "ArrowDown"],
+  },
 };
-
-// const SEQUENCE = ["A", "B", "C", "D"];
 
 // -------------- MENUS
 
@@ -78,21 +79,21 @@ const DISPLAY = {
   elements: {
     screen_main: {
       menu_title: { 1: "COMBO-MAGE", 2: "MÉMO-MAGE" },
-      btn_lang: { 1: "FR", 2: "EN" },
-      btn_map: { 1: "Continue", 2: "Continuer" },
-      btn_newgame: { 1: "New game", 2: "Nouveau Jeu" },
+      btn_lang: { 1: "3 FR", 2: "3 EN" },
+      btn_map: { 1: "1 Continue", 2: "1 Continuer" },
+      btn_newgame: { 1: "2 New game", 2: "2 Nouveau Jeu" },
     },
     screen_map: {
       selected_level: {
         1: "Choose your adventure",
         2: "Choisissez votre aventure",
       },
-      btn_play: { 1: "Play", 2: "Jouer" },
-      btn_back: { 1: "Back", 2: "Retour" },
+      btn_play: { 1: "1 Play", 2: "1 Jouer" },
+      btn_back: { 1: "2 Back", 2: "2 Retour" },
     },
     screen_game: {
-      btn_quitLevel: { 1: "Back", 2: "Retour" },
-      btn_pauseLevel: { 1: "Pause", 2: "Pause" },
+      btn_quitLevel: { 1: "9 Back", 2: "9 Retour" },
+      btn_pauseLevel: { 1: "8 Pause", 2: "8 Pause" },
       status_paused: { 1: "PAUSED", 2: "PAUSE" },
       status_victory: { 1: "VICTORY", 2: "VICTOIRE" },
       status_defeat: { 1: "DEFEAT", 2: "DÉFAITE" },
@@ -268,12 +269,7 @@ const SKILL_LEVELS = [
   {
     name: { 1: "Dilute", 2: "Vacillant" },
     length: 4,
-    sequences: {
-      fire: 1134,
-      ice: 2232,
-      poison: 3321,
-      shock: 4422,
-    },
+    sequences: [1134, 2232, 3321, 4422],
     damage: 1,
     mana: 5,
     cost: 50,
@@ -281,12 +277,7 @@ const SKILL_LEVELS = [
   {
     name: { 1: "Middling", 2: "Tempéré" },
     length: 6,
-    sequences: {
-      fire: 131422,
-      ice: 232433,
-      poison: 324211,
-      shock: 442144,
-    },
+    sequences: [131422, 232433, 324211, 442144],
     damage: 3,
     mana: 15,
     cost: 100,
@@ -294,12 +285,7 @@ const SKILL_LEVELS = [
   {
     name: { 1: "Amplified", 2: "Amplifié" },
     length: 8,
-    sequences: {
-      fire: 31413321,
-      ice: 41322432,
-      poison: 31423213,
-      shock: 23142342,
-    },
+    sequences: [31413321, 41322432, 31423213, 23142342],
     damage: 6,
     mana: 30,
     cost: 200,
@@ -357,43 +343,6 @@ const SKILLS = {
   },
 };
 
-const SKILLS_OLD = {
-  fire_weak: {
-    name: { 1: "Weak Fireball", 2: "Boule de feu faible" },
-    stats: {
-      sequence: ["B", "B", "D"],
-      affinity: "fire",
-      cooldown: 1,
-      speed: 1000,
-      damage: 1,
-      mana_cost: 5,
-    },
-    fx: {
-      color: "red",
-      size: 15,
-      speed: 1000,
-      range: 5,
-    },
-  },
-  ice_weak: {
-    name: { 1: "Weak Icicle", 2: "Boule de glace faible" },
-    stats: {
-      sequence: ["A", "A", "C"],
-      affinity: "ice",
-      cooldown: 1,
-      speed: 1000,
-      damage: 1,
-      mana_cost: 5,
-    },
-    fx: {
-      color: "blue",
-      size: 15,
-      speed: 1000,
-      range: 5,
-    },
-  },
-};
-
 // -------------- ACTORS
 
 const SPRITES = {
@@ -415,6 +364,8 @@ const PLAYER = {
     spritesheet: "./public/Assets/player/player.png",
     transition_property: "height",
     containers: {
+      sequence: "p_sequence",
+      damage: "p_damage",
       health_container: "p_health_container",
       health_text: "p_health_text",
       health_overlay: "p_health_fill_overlay",
@@ -454,151 +405,72 @@ const PLAYER = {
 };
 
 const OPPONENT = {
-  stats: {
-    strength: { min: 0, max: 2 },
-    cooldown: { min: 6, max: 2 },
-    health: { min: 2, max: 10 },
-    gold: { min: 10, max: 40 },
-  },
   fx: {
     transition_property: "width",
     containers: {
       ui: "o_ui",
       name: "o_name",
+      damage: "o_damage",
       health_container: "o_health_container",
       health_overlay: "o_health_fill_overlay",
       health: "o_health_fill",
       cooldown_container: "o_cooldown_container",
       cooldown: "o_cooldown_fill",
-      position: {
-        velocity: 5,
-        start: {
-          x: 1.5,
-          y: 0.75,
-        },
-        combat: {
-          x: 0.8,
-          y: 0.75,
-        },
-        end: {
-          x: -0.5,
-          y: 0.75,
-        },
+    },
+    position: {
+      start: {
+        x: 1.5,
+        y: 0.75,
+      },
+      combat: {
+        x: 0.8,
+        y: 0.75,
+      },
+      end: {
+        x: -0.5,
+        y: 0.75,
+      },
+    },
+    sprites: {
+      scale: 1,
+      frame: {
+        width: 120,
+        height: 190,
+        bleed: 20,
       },
     },
   },
 };
 
 const OPPONENTS = [
-  { 
+  {
     name: { 1: "Skeleton", 2: "Skelette" },
     spritesheet: "./public/Assets/player/player.png",
-    gold: 5,
+    rows: { run: 5, idle: 6, death: 4, cast: 3 },
+    gold_multiplier: 1,
     damage_multiplier: 0.5,
     health_multiplier: 0.5,
     cooldown_multiplier: 0.8,
   },
-  { 
+  {
     name: { 1: "Orc", 2: "Orc" },
     spritesheet: "./public/Assets/player/player.png",
-    gold: 10,
+    rows: { run: 5, idle: 6, death: 4, cast: 3 },
+    gold_multiplier: 1.5,
     damage_multiplier: 0.75,
     health_multiplier: 0.75,
     cooldown_multiplier: 1,
   },
-  { 
+  {
     name: { 1: "Vampire", 2: "Vampire" },
     spritesheet: "./public/Assets/player/player.png",
-    gold: 20,
+    rows: { run: 5, idle: 6, death: 4, cast: 3 },
+    gold_multiplier: 3,
     damage_multiplier: 1,
     health_multiplier: 1.5,
     cooldown_multiplier: 0.3,
   },
 ];
-
-const OPPONENTS2 = {
-  orc_weak: {
-    name: { 1: "orc", 2: "orc" },
-    strength: 0,
-    stats: {
-      strength: 1,
-      affinity: "fire",
-      skills: ["fire_weak", "ice_weak"],
-      cooldown: 3,
-      health: 3,
-      weight: 3,
-      gold: 5,
-    },
-    fx: {
-      layer: "actors",
-      spritesheet: "./public/Assets/player/player.png",
-      sprites: {
-        scale: 1,
-        frame: {
-          width: 120,
-          height: 190,
-          bleed: 20,
-        },
-        rows: { run: 5, idle: 6, death: 4, cast: 3 },
-      },
-      position: {
-        velocity: 5,
-        start: {
-          x: 1.5,
-          y: 0.75,
-        },
-        combat: {
-          x: 0.8,
-          y: 0.75,
-        },
-        end: {
-          x: -0.5,
-          y: 0.75,
-        },
-      },
-    },
-  },
-  orc_strong: {
-    name: { 1: "orc", 2: "orc" },
-    strength: 2,
-    stats: {
-      affinity: "fire",
-      skills: ["fire_weak", "ice_weak"],
-      cooldown: 3,
-      health: 3,
-      weight: 3,
-      gold: 25,
-    },
-    fx: {
-      layer: "actors",
-      spritesheet: "./public/Assets/player/player.png",
-      sprites: {
-        scale: 1,
-        frame: {
-          width: 120,
-          height: 190,
-          bleed: 20,
-        },
-        rows: { run: 5, idle: 6, death: 4, cast: 3 },
-      },
-      position: {
-        velocity: 5,
-        start: {
-          x: 1.5,
-          y: 0.75,
-        },
-        combat: {
-          x: 0.8,
-          y: 0.75,
-        },
-        end: {
-          x: -0.5,
-          y: 0.75,
-        },
-      },
-    },
-  },
-};
 
 const OPPONENT_NAMES = {
   strength: {
@@ -617,24 +489,32 @@ const OPPONENT_NAMES = {
 const LEVELS = [
   {
     opponents: {
-      types: [0, 1],
-      strengths: [0, 0],
-      affinities: [0],
       count: 5,
-    },
-    sequence: {
-      length: 3,
-      time: 5,
+      base: {
+        health: 2,
+        cooldown: 3,
+        gold: 2,
+      },
+      modifiers: {
+        types: [0, 1],
+        strengths: [0, 0],
+        affinities: [0],
+      },
     },
   },
   {
     opponents: {
-      types: ["orc_strong"],
-      count: 8,
-    },
-    sequence: {
-      length: 5,
-      time: 4,
+      count: 5,
+      base: {
+        health: 2,
+        cooldown: 3,
+        gold: 2,
+      },
+      modifiers: {
+        types: [0, 1],
+        strengths: [0, 0],
+        affinities: [0],
+      },
     },
   },
 ];

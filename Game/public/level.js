@@ -59,6 +59,12 @@ Level.setInstance = function (lang, level) {
   }
 };
 
+Level.input = function (value) {
+  if (!Level.STOPPED && !Level.isLevelEnded()) {
+    Level.instance.lastKeyPressed = value;
+  }
+};
+
 Level.quitInstance = function () {
   const instance = Level.instance;
 
@@ -97,7 +103,7 @@ Level.setStop = function (toStop) {
 
 Level.isLevelEnded = function () {
   return Level.instance.isWon() || Level.instance.isLost();
-}
+};
 
 // -------------- SETUP
 
@@ -105,6 +111,7 @@ Level.prototype.setLevel = function (level) {
   this.profile = loadProfile();
 
   const options = LEVELS[level] || LEVELS[0];
+  this.options = options;
   this.opponents = options.opponents;
   this.sequences = options.sequence;
   this.killcount = 0;
@@ -121,7 +128,7 @@ Level.prototype.play = function (tickrate) {
   Level.STOPPED = false;
   Level.PAUSED = false;
 
-  // this.setStatus();
+  Level.setLevel(Level.selectedLevel);
   this.lastKeyPressed = null;
   this.lastUpdate = Date.now();
   this.gameloop(tickrate);
@@ -138,7 +145,7 @@ Level.prototype.gameloop = function (tickrate) {
     self.lastUpdate = now;
 
     // ON WIN OR LOSE
-    
+
     if ((self.isWon() || self.isLost()) && self.updateLevelEnd(deltaTime)) {
       Level.STOPPED = true;
     }
@@ -179,7 +186,7 @@ Level.prototype.update = function (deltaTime) {
 Level.prototype.updateLevelEnd = function (deltaTime) {
   if (!this.endDelay) {
     this.endDelay = DISPLAY.other.delays.end_delay;
-    this.setStatus(this.isWon() ? "status_victory" : "status_defeat");
+    setGameStatusVisibility(this.isWon() ? "status_victory" : "status_defeat");
 
     if (this.isWon()) {
       this.player.setDestination(this.player.positions.end);
@@ -208,7 +215,9 @@ Level.prototype.render = function () {
 // -------------- SEQUENCING
 
 Level.prototype.input = function (value) {
-  this.lastKeyPressed = value;
+  if (!Level.STOPPED && !Level.isLevelEnded()) {
+    this.lastKeyPressed = value;
+  }
 };
 
 Level.prototype.generateSequence = function () {
@@ -263,11 +272,19 @@ Level.prototype.setOpponent = function () {
 };
 
 Level.prototype.getRandomOpponent = function () {
-  const key = getRandomValue(this.opponents.types);
-  const options = OPPONENTS[key];
-
-  return new Opponent(Level.res.opponent, options, this.player, this);
+  return Opponent.generateInstance(
+    this.opponents.base,
+    this.opponents.modifiers,
+    this
+  );
 };
+
+// Level.prototype.getRandomOpponent = function () {
+//   const key = getRandomValue(this.opponents.types);
+//   const options = OPPONENTS[key];
+
+//   return new Opponent(Level.res.opponent, options, this.player, this);
+// };
 
 // -------------- OTHER
 

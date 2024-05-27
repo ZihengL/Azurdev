@@ -107,3 +107,124 @@
 //     fx: {},
 //   },
 // };
+
+const OPPONENTS2 = {
+  orc_weak: {
+    name: { 1: "orc", 2: "orc" },
+    strength: 0,
+    stats: {
+      strength: 1,
+      affinity: "fire",
+      skills: ["fire_weak", "ice_weak"],
+      cooldown: 3,
+      health: 3,
+      weight: 3,
+      gold: 5,
+    },
+    fx: {
+      layer: "actors",
+      spritesheet: "./public/Assets/player/player.png",
+      sprites: {
+        scale: 1,
+        frame: {
+          width: 120,
+          height: 190,
+          bleed: 20,
+        },
+        rows: { run: 5, idle: 6, death: 4, cast: 3 },
+      },
+      position: {
+        velocity: 5,
+        start: {
+          x: 1.5,
+          y: 0.75,
+        },
+        combat: {
+          x: 0.8,
+          y: 0.75,
+        },
+        end: {
+          x: -0.5,
+          y: 0.75,
+        },
+      },
+    },
+  },
+  orc_strong: {
+    name: { 1: "orc", 2: "orc" },
+    strength: 2,
+    stats: {
+      affinity: "fire",
+      skills: ["fire_weak", "ice_weak"],
+      cooldown: 3,
+      health: 3,
+      weight: 3,
+      gold: 25,
+    },
+    fx: {
+      layer: "actors",
+      spritesheet: "./public/Assets/player/player.png",
+      sprites: {
+        scale: 1,
+        frame: {
+          width: 120,
+          height: 190,
+          bleed: 20,
+        },
+        rows: { run: 5, idle: 6, death: 4, cast: 3 },
+      },
+      position: {
+        velocity: 5,
+        start: {
+          x: 1.5,
+          y: 0.75,
+        },
+        combat: {
+          x: 0.8,
+          y: 0.75,
+        },
+        end: {
+          x: -0.5,
+          y: 0.75,
+        },
+      },
+    },
+  },
+};
+
+const SKILLS_OLD = {
+  fire_weak: {
+    name: { 1: "Weak Fireball", 2: "Boule de feu faible" },
+    stats: {
+      sequence: ["B", "B", "D"],
+      affinity: "fire",
+      cooldown: 1,
+      speed: 1000,
+      damage: 1,
+      mana_cost: 5,
+    },
+    fx: {
+      color: "red",
+      size: 15,
+      speed: 1000,
+      range: 5,
+    },
+  },
+  ice_weak: {
+    name: { 1: "Weak Icicle", 2: "Boule de glace faible" },
+    stats: {
+      sequence: ["A", "A", "C"],
+      affinity: "ice",
+      cooldown: 1,
+      speed: 1000,
+      damage: 1,
+      mana_cost: 5,
+    },
+    fx: {
+      color: "blue",
+      size: 15,
+      speed: 1000,
+      range: 5,
+    },
+  },
+};

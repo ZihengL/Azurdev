@@ -3,13 +3,11 @@ function Skill(affinity, strength, caster) {
   const stats = SKILL_LEVELS[strength];
 
   this.name = getSkillName(affinity, strength);
-  console.log(affinity, strength, stats);
   this.affinity = affinity;
   this.strength = strength;
   this.damage = stats.damage;
 
-
-  this.sequence = stats.sequences[affinity];
+  this.sequence = stats.sequences[affinity].toString();
   this.stats = stats;
   this.fx = SKILL_FX;
 
@@ -43,14 +41,13 @@ Skill.load = function () {
 
 Skill.codeToInstance = function (code, caster) {
   const segments = code.split("-");
-  console.log(segments);
 
   return new Skill(segments[0], segments[1], caster);
-}
+};
 
 Skill.prototype.toCode = function () {
   return this.affinity + "-" + this.strength;
-}
+};
 
 // -------------- UPDATE & RENDER
 
@@ -73,6 +70,14 @@ Skill.prototype.update = function (deltaTime) {
   // if (this.isOnCD()) {
   //   this.cooldown -= deltaTime;
   // }
+};
+
+Skill.prototype.render = function () {
+  this.projectiles.forEach(
+    function (projectile) {
+      projectile.render();
+    }.bind(this)
+  );
 };
 
 Skill.prototype.updateCastEffect = function (deltaTime) {
@@ -102,14 +107,6 @@ Skill.prototype.updateCastEffect = function (deltaTime) {
   }
 };
 
-Skill.prototype.render = function () {
-  this.projectiles.forEach(
-    function (projectile) {
-      projectile.render();
-    }.bind(this)
-  );
-};
-
 Skill.prototype.renderCastEffect = function () {
   if (this.castEffect && this.castEffect.opacity > 0) {
     surface.drawCastEffect(
@@ -120,37 +117,15 @@ Skill.prototype.renderCastEffect = function () {
   }
 };
 
-Skill.prototype.renderUI = function (x, y) {
-  const size = 25;
+Skill.prototype.validInput = function (sequence) {
+  return this.sequence.indexOf(sequence) === 0;
+};
 
-  // surface.ctx.fillStyle = this.fx.color;
-  // surface.ctx.fillRect(x, y, size, size);
-
-  surface.fillTo("ui", this.fx.color, x, y, size, size);
-
-  // if (this.isOnCD()) {
-  //   const cdSize = size - this.cooldown * size;
-  //   // surface.ctx.fillRect(x, y, cdSize, size);
-
-  //   surface.fillTo("ui", "black", x, y, cdSize, size);
-  // }
+Skill.prototype.atEndOfSequence = function (sequence) {
+  return this.sequence.length === sequence.length;
 };
 
 // -------------- OTHER
-
-// Skill.prototype.setCastEffect = function (image) {
-//   const effect = AFFINITIES[this.stats.affinity].effect;
-
-//   this.castEffect = {
-//     image: image,
-//     width: effect.width,
-//     height: effect.height,
-//     delay: 0,
-//     opacity: 0,
-//     scale: 0,
-//     angle: 0,
-//   };
-// };
 
 Skill.prototype.inputSequence = function (inputValue) {
   if (inputValue && !this.isOnCD()) {
@@ -160,8 +135,6 @@ Skill.prototype.inputSequence = function (inputValue) {
       this.sequenceIdx++;
     } else {
       this.sequenceIdx = 0;
-      // this.cooldown = this.stats.cooldown;
-      // }
     }
 
     return this.sequenceIdx > this.sequence.length - 1;
@@ -221,3 +194,33 @@ Skill.prototype.applyEffect = function (target) {
 
 //   return true;
 // };
+
+// Skill.prototype.setCastEffect = function (image) {
+//   const effect = AFFINITIES[this.stats.affinity].effect;
+
+//   this.castEffect = {
+//     image: image,
+//     width: effect.width,
+//     height: effect.height,
+//     delay: 0,
+//     opacity: 0,
+//     scale: 0,
+//     angle: 0,
+//   };
+// };
+
+Skill.prototype.renderUI = function (x, y) {
+  const size = 25;
+
+  // surface.ctx.fillStyle = this.fx.color;
+  // surface.ctx.fillRect(x, y, size, size);
+
+  surface.fillTo("ui", this.fx.color, x, y, size, size);
+
+  // if (this.isOnCD()) {
+  //   const cdSize = size - this.cooldown * size;
+  //   // surface.ctx.fillRect(x, y, cdSize, size);
+
+  //   surface.fillTo("ui", "black", x, y, cdSize, size);
+  // }
+};
