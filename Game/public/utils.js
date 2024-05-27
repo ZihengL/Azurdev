@@ -16,12 +16,14 @@ function isEmpty(obj) {
   return JSON.stringify(obj) === "{}";
 }
 
-function getRandom(max) {
+function getRandom(max, min) {
+  min = min || 0;
+
   if (max) {
-    return Math.floor(Math.random() * max);
+    return Math.floor(Math.random() * (max - min) + min);
   }
 
-  return Math.floor(Math.random());
+  return Math.floor(Math.random() + min);
 }
 
 function getRandomValue(array) {
@@ -59,7 +61,9 @@ function newProfile() {
 }
 
 function isWithinPlayerProgress(level) {
-  return level <= loadProfile().level_progress;
+  const max = Level.instance.profile.level_progress;
+
+  return level <= max;
 }
 
 // -------------- MATH
@@ -101,10 +105,10 @@ function getSkillName(affinity, strength) {
   const adj = getInLang(SKILL_LEVELS[strength].name);
 
   if (lang === LANGS[0]) {
-    return skillname + " " + adj;
+    return adj + " " + skillname;
   }
 
-  return adj + " " + skillname;
+  return skillname + " " + adj;
 }
 
 function changeScreen(fromScreenId, toScreenId, isNewGame) {
@@ -119,13 +123,15 @@ function changeScreen(fromScreenId, toScreenId, isNewGame) {
     case SCREENS.MAIN:
       break;
     case SCREENS.MAP:
+      console.log("ASDSADAS", Level.instance.profile);
       if (isNewGame) {
         Level.instance.profile = newProfile();
       }
 
+      const max = Level.instance.profile.level_progress;
       for (var i = 0; i < LEVELS.length; i++) {
         const levelBtn = getFromContainer(toScreen, "btn_level" + i);
-        const availability = isWithinPlayerProgress(i) ? 1 : 0;
+        const availability = i <= max ? 1 : 0;
 
         // levelBtn.className = MAPMENU.buttons.lvl_class + availability;
         levelBtn.disabled = !availability;
@@ -159,9 +165,10 @@ function updateScreen(toScreenId) {
     case SCREENS.MAIN:
       break;
     case SCREENS.MAP:
+      const max = Level.instance.profile.level_progress;
       for (var i = 0; i < LEVELS.length; i++) {
         const levelBtn = getFromContainer(screen, "btn_level" + i);
-        const availability = isWithinPlayerProgress(i) ? 1 : 0;
+        const availability = i <= max ? 1 : 0;
 
         // levelBtn.className = MAPMENU.buttons.lvl_class + availability;
         levelBtn.disabled = !availability;
@@ -202,9 +209,10 @@ function setGameStatusVisibility(elemId) {
 function updateMap() {
   const container = document.getElementById("level_select_container");
 
+  const max = Level.instance.profile.level_progress;
   for (var i = 0; i < LEVELS.length; i++) {
     const levelBtn = getFromContainer(container, i);
-    const availability = isWithinPlayerProgress(i) ? 1 : 0;
+    const availability = i <= max ? 1 : 0;
 
     // levelBtn.className = MAPMENU.buttons.lvl_class + availability;
     levelBtn.disabled = !availability;

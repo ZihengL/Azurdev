@@ -12,7 +12,7 @@ const LOCALSTORAGE = {
     },
     gold: 100,
     level_progress: 0,
-    skills: ["fire_weak", "ice_weak", "poison_weak", ""],
+    skills: ["0-0", "1-0", "2-0", "3-0"],
   },
 };
 
@@ -233,39 +233,39 @@ const BACKGROUNDS = {
 
 // -------------- SKILLS & EFFECTS
 
-const AFFINITIES = {
-  fire: {
+const AFFINITIES = [
+  {
     name: { 1: "fire", 2: "feux" },
     skill_name: { 1: "Fireball", 2: "Flamme Arcanique" },
     weakness: "ice",
     color: "red",
     cast_effect: "cast_fire",
   },
-  ice: {
+  {
     name: { 1: "ice", 2: "glace" },
     skill_name: { 1: "Hailstorm", 2: "Tempête Verglaçante" },
     weakness: "fire",
     color: "blue",
     cast_effect: "cast_ice",
   },
-  poison: {
+  {
     name: { 1: "poison", 2: "poison" },
     skill_name: { 1: "Venom Spray", 2: "Pluie Venimeuse" },
     weakness: "shock",
     color: "green",
     cast_effect: "cast_poison",
   },
-  shock: {
+  {
     name: { 1: "shock", 2: "électrique" },
     skill_name: { 1: "Electro Surge", 2: "Surge Électrique" },
     weakness: "poison",
     color: "blue",
     cast_effect: "cast_shock",
   },
-};
+];
 
-const SKILL_LEVELS = {
-  weak: {
+const SKILL_LEVELS = [
+  {
     name: { 1: "Dilute", 2: "Vacillant" },
     length: 4,
     sequences: {
@@ -278,7 +278,7 @@ const SKILL_LEVELS = {
     mana: 5,
     cost: 50,
   },
-  medium: {
+  {
     name: { 1: "Middling", 2: "Tempéré" },
     length: 6,
     sequences: {
@@ -291,7 +291,7 @@ const SKILL_LEVELS = {
     mana: 15,
     cost: 100,
   },
-  strong: {
+  {
     name: { 1: "Amplified", 2: "Amplifié" },
     length: 8,
     sequences: {
@@ -304,7 +304,7 @@ const SKILL_LEVELS = {
     mana: 30,
     cost: 200,
   },
-};
+];
 
 const SKILL_FX = {
   size: 15,
@@ -489,11 +489,34 @@ const OPPONENT = {
   },
 };
 
-const OPPONENTS2 = {
-  stats: {},
-};
+const OPPONENTS = [
+  { 
+    name: { 1: "Skeleton", 2: "Skelette" },
+    spritesheet: "./public/Assets/player/player.png",
+    gold: 5,
+    damage_multiplier: 0.5,
+    health_multiplier: 0.5,
+    cooldown_multiplier: 0.8,
+  },
+  { 
+    name: { 1: "Orc", 2: "Orc" },
+    spritesheet: "./public/Assets/player/player.png",
+    gold: 10,
+    damage_multiplier: 0.75,
+    health_multiplier: 0.75,
+    cooldown_multiplier: 1,
+  },
+  { 
+    name: { 1: "Vampire", 2: "Vampire" },
+    spritesheet: "./public/Assets/player/player.png",
+    gold: 20,
+    damage_multiplier: 1,
+    health_multiplier: 1.5,
+    cooldown_multiplier: 0.3,
+  },
+];
 
-const OPPONENTS = {
+const OPPONENTS2 = {
   orc_weak: {
     name: { 1: "orc", 2: "orc" },
     strength: 0,
@@ -594,7 +617,9 @@ const OPPONENT_NAMES = {
 const LEVELS = [
   {
     opponents: {
-      types: ["orc_weak", "orc_strong"],
+      types: [0, 1],
+      strengths: [0, 0],
+      affinities: [0],
       count: 5,
     },
     sequence: {

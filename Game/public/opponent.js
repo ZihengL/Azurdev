@@ -27,12 +27,29 @@ Opponent.prototype.constructor = Opponent;
 // -------------- STATIC
 
 Opponent.load = function () {
-  return loadImage(PLAYER.fx.spritesheet).then(function (image) {
-    return image;
+  const opponents = [];
+  var sequence = Promise.resolve();
+
+  OPPONENTS.forEach(function (opponent) {
+    sequence = sequence.then(function () {
+      return loadImage(opponent.spritesheet).then(function (image) {
+        opponents.push(image);
+      });
+    });
+  });
+
+  return sequence.then(function () {
+    return opponents;
   });
 };
 
-Opponent.generateInstance = function (minStr, maxStr, opponents) {};
+Opponent.generateInstance = function (types, strengths, affinities) {
+  const type = getRandomValue(types);
+  const strength = getRandomValue(strengths);
+  const affinity = getRandomValue(affinities);
+
+  
+};
 
 Opponent.generatedName = function (lang, options) {
   const adjective = getRandomValue(OPPONENT_NAMES.adjective[lang]);

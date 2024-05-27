@@ -51,6 +51,16 @@ Player.load = function () {
   });
 };
 
+Player.prototype.save = function (profile) {
+  const skillcodes = [];
+  this.skills.forEach(function (skill) {
+    skillcodes.push(skill.toCode());
+  });
+
+  profile.skills = skillcodes;
+  saveProfile(profile);
+}
+
 // -------------- UPDATE
 
 Player.prototype.update = function (deltaTime) {
@@ -102,7 +112,7 @@ Player.prototype.updateSkills = function (deltaTime) {
 
       if (skill.inputSequence(inputValue) && this.hasEnoughMana(skill)) {
         skill.cast(this.opponent);
-        this.mana -= skill.stats.mana_cost;
+        this.mana -= skill.stats.mana;
         this.history = [];
         this.currentIndex = 0;
         casted = true;

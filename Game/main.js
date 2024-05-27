@@ -27,7 +27,7 @@
 
 // TODO: LAYERED BACKGROUNDS
 
-const keymap = KEYMAPS.PC;
+// const keymap = KEYMAPS.PC;
 const surface = new Surface();
 
 const fps = SCREEN.fps[1];

@@ -1,4 +1,4 @@
-function Caster(image, stats, fx, skills, opponent) {
+function Caster(image, stats, fx, skillcodes, opponent) {
   this.stats = stats;
   this.opponent = opponent;
 
@@ -9,11 +9,9 @@ function Caster(image, stats, fx, skills, opponent) {
 
   // SKILLS
   this.skills = [];
-  skills.forEach(
-    function (skillname) {
-      const skill = new Skill(skillname, this);
-
-      this.skills.push(skill);
+  skillcodes.forEach(
+    function (code) {
+      this.skills.push(Skill.codeToInstance(code, this));
     }.bind(this)
   );
 

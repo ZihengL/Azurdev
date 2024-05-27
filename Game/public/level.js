@@ -9,7 +9,7 @@
 
 function Level(lang, profile) {
   this.lang = lang || LANGS[0];
-  this.profile = loadProfile();
+  this.profile = profile || loadProfile();
 
   this.lastUpdate = null;
   this.lastKeyPressed = null;
@@ -150,7 +150,8 @@ Level.prototype.gameloop = function (tickrate) {
       self.render();
     } else {
       clearInterval(gameID);
-      saveProfile(self.profile);
+      self.player.save(self.profile);
+      // saveProfile(self.profile);
       changeScreen(SCREENS.GAME, SCREENS.MAP);
     }
   }, tickrate);
