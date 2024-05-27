@@ -12,7 +12,7 @@ const LOCALSTORAGE = {
     },
     gold: 100,
     level_progress: 0,
-    skills: [],
+    skills: ["fire_weak", "ice_weak", "poison_weak", ""],
   },
 };
 
@@ -226,7 +226,7 @@ const BACKGROUNDS = {
         multiplier: 1,
         grounded: false,
         position: { x: 0, y: 0 },
-      }
+      },
     ],
   },
 };
@@ -236,24 +236,28 @@ const BACKGROUNDS = {
 const AFFINITIES = {
   fire: {
     name: { 1: "fire", 2: "feux" },
+    skill_name: { 1: "Fireball", 2: "Flamme Arcanique" },
     weakness: "ice",
     color: "red",
     cast_effect: "cast_fire",
   },
   ice: {
     name: { 1: "ice", 2: "glace" },
+    skill_name: { 1: "Hailstorm", 2: "Tempête Verglaçante" },
     weakness: "fire",
     color: "blue",
     cast_effect: "cast_ice",
   },
   poison: {
     name: { 1: "poison", 2: "poison" },
+    skill_name: { 1: "Venom Spray", 2: "Pluie Venimeuse" },
     weakness: "shock",
     color: "green",
     cast_effect: "cast_poison",
   },
   shock: {
     name: { 1: "shock", 2: "électrique" },
+    skill_name: { 1: "Electro Surge", 2: "Surge Électrique" },
     weakness: "poison",
     color: "blue",
     cast_effect: "cast_shock",
@@ -268,7 +272,7 @@ const SKILL_LEVELS = {
       fire: 1134,
       ice: 2232,
       poison: 3321,
-      shock: 4422, 
+      shock: 4422,
     },
     damage: 1,
     mana: 5,
@@ -281,7 +285,7 @@ const SKILL_LEVELS = {
       fire: 131422,
       ice: 232433,
       poison: 324211,
-      shock: 442144, 
+      shock: 442144,
     },
     damage: 3,
     mana: 15,
@@ -294,12 +298,18 @@ const SKILL_LEVELS = {
       fire: 31413321,
       ice: 41322432,
       poison: 31423213,
-      shock: 23142342, 
+      shock: 23142342,
     },
     damage: 6,
     mana: 30,
     cost: 200,
   },
+};
+
+const SKILL_FX = {
+  size: 15,
+  speed: 1000,
+  range: 5,
 };
 
 const SKILLS = {

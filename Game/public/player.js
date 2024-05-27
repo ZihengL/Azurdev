@@ -8,8 +8,6 @@ function Player(saved, opponent, level) {
     opponent
   );
 
-  
-
   this.level = level;
   this.mana = this.stats.mana;
   this.manaRegen = this.stats.mana_regen_sec;

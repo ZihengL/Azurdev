@@ -96,6 +96,17 @@ function getInLang(displayOptions) {
   return displayOptions[lang] || displayOptions[LANGS[0]];
 }
 
+function getSkillName(affinity, strength) {
+  const skillname = getInLang(AFFINITIES[affinity].skill_name);
+  const adj = getInLang(SKILL_LEVELS[strength].name);
+
+  if (lang === LANGS[0]) {
+    return skillname + " " + adj;
+  }
+
+  return adj + " " + skillname;
+}
+
 function changeScreen(fromScreenId, toScreenId, isNewGame) {
   const fromScreen = document.getElementById(fromScreenId);
   const toScreen = document.getElementById(toScreenId);

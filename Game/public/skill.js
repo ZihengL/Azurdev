@@ -1,10 +1,14 @@
-function Skill(config, caster, strength) {
+function Skill(affinity, strength, caster) {
   const skill = SKILLS[config];
+  const stats = SKILL_LEVELS[strength];
 
-  this.name = config;
-  this.sequence = skill.stats.sequence;
+  this.affinity = affinity;
+  this.strength = strength;
+
+  this.name = getSkillName(affinity, strength);
+  this.sequence = stats.sequences[affinity];
   this.stats = skill.stats;
-  this.fx = skill.fx;
+  this.fx = SKILL_FX;
 
   this.caster = caster;
   this.sequenceIdx = 0;
@@ -180,6 +184,10 @@ Skill.prototype.applyEffect = function (target) {
   this.cooldown = this.stats.cooldown / 2;
   this.sequenceIdx = 0;
 };
+
+Skill.prototype.toCode = function () {
+  return this.affinity + "_" + this.strength;
+}
 
 // Skill.prototype.inputSequence = function (inputArcane) {
 //   if (this.sequencing.length >= this.sequence.length) {
