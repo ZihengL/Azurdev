@@ -58,6 +58,10 @@ function newProfile() {
   return loadProfile();
 }
 
+function isWithinPlayerProgress(level) {
+  return level <= loadProfile().level_progress;
+}
+
 // -------------- MATH
 
 function percentage(amount, max) {
@@ -67,12 +71,12 @@ function percentage(amount, max) {
 // -------------- MENUS
 
 function changeLanguage() {
-  lang = lang === 0 ? 1 : 0;
+  lang = lang === 2 ? 1 : 2;
 
-  console.log("Switching language to", LANGS[lang]);
+  console.log("Switching language to", lang);
 
-  for (const key in DISPLAY.buttons) {
-    const subkeys = DISPLAY.buttons[key];
+  for (const key in DISPLAY.elements) {
+    const subkeys = DISPLAY.elements[key];
     const container = document.getElementById(key);
 
     if (container) {
@@ -86,22 +90,13 @@ function changeLanguage() {
       }
     }
   }
-
-  for (key in DISPLAY.other.game_status) {
-    const values = DISPLAY.other.game_status[key];
-    const element = document.getElementById(key);
-
-    if (element) {
-      element.textContent = values[lang];
-    }
-  }
 }
 
 function getInLang(displayOptions) {
   return displayOptions[lang] || displayOptions[LANGS[0]];
 }
 
-function changeScreen(fromScreenId, toScreenId) {
+function changeScreen(fromScreenId, toScreenId, isNewGame) {
   const fromScreen = document.getElementById(fromScreenId);
   const toScreen = document.getElementById(toScreenId);
 
@@ -113,6 +108,10 @@ function changeScreen(fromScreenId, toScreenId) {
     case SCREENS.MAIN:
       break;
     case SCREENS.MAP:
+      if (isNewGame) {
+        Level.instance.profile = newProfile();
+      }
+
       for (var i = 0; i < LEVELS.length; i++) {
         const levelBtn = getFromContainer(toScreen, "btn_level" + i);
         const availability = isWithinPlayerProgress(i) ? 1 : 0;
@@ -140,9 +139,6 @@ function changeScreen(fromScreenId, toScreenId) {
       toScreen.removeEventListener("animationend", handleAnimationEnd);
     });
   });
-
-  // updateScreen(screenId);
-  // currentScreen = toScreenId;
 }
 
 function updateScreen(toScreenId) {
@@ -184,6 +180,14 @@ function setToPreviousScreen(current) {
   setToScreen(previous);
 }
 
+function setGameStatusVisibility(elemId) {
+  DISPLAY.other.game_status.forEach(function (id) {
+    const element = document.getElementById(id);
+
+    setVisibility(element, element.id === elemId);
+  });
+}
+
 function updateMap() {
   const container = document.getElementById("level_select_container");
 
@@ -198,16 +202,12 @@ function updateMap() {
 
 function updateLevelSelection(level) {
   if (isWithinPlayerProgress(level)) {
-    const displayText = getInLang(DISPLAY.buttons.screen_map.selected_level);
+    const displayText = getInLang(DISPLAY.elements.screen_map.selected_level);
 
     document.getElementById("selected_level").textContent =
       displayText + ": " + (level + 1);
     Level.selectedLevel = level;
   }
-}
-
-function isWithinPlayerProgress(level) {
-  return level <= loadProfile().level_progress;
 }
 
 // HTML

@@ -13,17 +13,11 @@
       <div id="screen_main" class="screen active">
         <button id="btn_lang" onclick="changeLanguage();"></button>
 
-        <ul id="profile_resources"></ul>
-
-        <ul id="profile_stats">
-          <li id="health"></li>
-          <li id="mana"></li>
-          <li id="mana_regen"></li>
-        </ul>
+        <h1 id="menu_title"></h1>
 
         <div id="main_menu_bottom">
-          <button id="btn_newgame" onclick="newProfile();"></button>
           <button id="btn_map" onclick="changeScreen(SCREENS.MAIN, SCREENS.MAP);"></button>
+          <button id="btn_newgame" onclick="changeScreen(SCREENS.MAIN, SCREENS.MAP, true);"></button>
         </div>
       </div>
 

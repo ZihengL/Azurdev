@@ -33,11 +33,8 @@ const surface = new Surface();
 const fps = SCREEN.fps[1];
 const tickrate = 1000 / fps;
 
-var lang = LANGS[1];
-// var currentScreen = SCREENS.MAIN;
-// var selectedLevel = profile.level_progress;
+var lang = LANGS[0];
 
-// document.addEventListener("DOMContentLoaded", function () {
 Level.setInstance(lang).then(function (instance) {
   const level = instance;
   var profile = instance.profile;
@@ -61,12 +58,6 @@ Level.setInstance(lang).then(function (instance) {
 
     container.appendChild(levelBtn);
   }
-  updateLevelSelection(profile.level_progress);
-
-  // document.getElementById("btn_play").onclick = function () {
-  //   setToScreen(SCREENS.GAME);
-  //   level.play(tickrate);
-  // };
 
   document.addEventListener("keydown", function (event) {
     const currentScreens = document.querySelectorAll(".screen.active");
@@ -80,7 +71,7 @@ Level.setInstance(lang).then(function (instance) {
 
     switch (currentScreen.id) {
       case SCREENS.GAME:
-        if (!Level.STOPPED) {
+        if (!Level.STOPPED && !Level.isLevelEnded()) {
           switch (value) {
             case "A":
             case "B":
@@ -91,9 +82,12 @@ Level.setInstance(lang).then(function (instance) {
             case "EXIT":
               Level.quitInstance();
               break;
-            default:
+            case "PAUSE":
               Level.pauseInstance();
-              console.log("Pause", Level.PAUSED);
+            default:
+              console.log(
+                "Key '" + event.key + "' not mapped to in-game command."
+              );
           }
         }
         break;
@@ -102,11 +96,10 @@ Level.setInstance(lang).then(function (instance) {
       case SCREENS.MAIN:
         break;
       default:
-        console.log("Key '" + event.key + "' not mapped to command.");
+        console.log("Key '" + event.key + "' not mapped to any command.");
     }
   });
 
+  updateLevelSelection(profile.level_progress);
   changeLanguage();
-  // changeScreen(SCREENS.MAIN, SCREENS.MAIN);
 });
-// });

@@ -1,4 +1,4 @@
-function Caster(image, stats, fx, skills, opponent, ui, skillEffects) {
+function Caster(image, stats, fx, skills, opponent) {
   this.stats = stats;
   this.opponent = opponent;
 

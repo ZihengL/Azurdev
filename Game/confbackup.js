@@ -96,3 +96,14 @@
 //     textBaseline: "middle",
 //   },
 // };
+
+// const SHIELDS = {
+//   fire_shield_weak: {
+//     name: { 1: "Weak fire Shield", 2: "Bouclier de feu faible" },
+//     stats: {
+//       affinity: "fire",
+//       health: 1,
+//     },
+//     fx: {},
+//   },
+// };

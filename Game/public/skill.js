@@ -1,4 +1,4 @@
-function Skill(config, caster) {
+function Skill(config, caster, strength) {
   const skill = SKILLS[config];
 
   this.name = config;

@@ -8,6 +8,8 @@ function Player(saved, opponent, level) {
     opponent
   );
 
+  
+
   this.level = level;
   this.mana = this.stats.mana;
   this.manaRegen = this.stats.mana_regen_sec;
@@ -95,8 +97,6 @@ Player.prototype.isSequenceComplete = function () {
 Player.prototype.updateSkills = function (deltaTime) {
   const inputValue = this.level.lastKeyPressed;
   var casted = false;
-  var highest = 0;
-  var index = null;
 
   this.skills.forEach(
     function (skill, idx) {
@@ -119,9 +119,6 @@ Player.prototype.updateSkills = function (deltaTime) {
       }
     }.bind(this)
   );
-
-  if (!casted) {
-  }
 
   return casted;
 };
@@ -146,12 +143,12 @@ Player.prototype.updateUI = function () {
   document.getElementById(this.containers.health_text).textContent =
     this.health;
 
-  // const manaoverlay = document.getElementById(this.containers.mana_overlay);
-  // const manafill = document.getElementById(this.containers.mana);
-  // const manavalue = percentage(this.mana, this.stats.mana) + "%";
-  // manaoverlay.style.height = manavalue;
-  // manafill.style.height = manavalue;
-  // document.getElementById(this.containers.mana_text).textContent = this.mana;
+  const manaoverlay = document.getElementById(this.containers.mana_overlay);
+  const manafill = document.getElementById(this.containers.mana);
+  const manavalue = percentage(this.mana, this.stats.mana) + "%";
+  manaoverlay.style.height = manavalue;
+  manafill.style.height = manavalue;
+  document.getElementById(this.containers.mana_text).textContent = this.mana;
 };
 
 // -------------- OTHER
@@ -167,14 +164,6 @@ Player.prototype.generateSequence = function () {
 
   this.currentIndex = 0;
 };
-
-// Player.prototype.applyEffect = function (projectile) {
-//   Caster.prototype.applyEffect.call(this, projectile);
-
-//   // if (!this.isDead()) {
-//   //   // this.generateSequence();
-//   // }
-// };
 
 Player.prototype.hasEnoughMana = function (skill) {
   if (this.mana >= skill.stats.mana_cost) {
