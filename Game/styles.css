@@ -587,6 +587,7 @@ button {
 
 @-webkit-keyframes dmgFade {
   0% {
+    opacity: 1;
     -webkit-transform: translateX(0);
     transform: translateX(0);
     -webkit-transform: translateY(0);
@@ -594,15 +595,16 @@ button {
   }
   100% {
     opacity: 0;
-    -webkit-transform: translateX(-2%);
-    transform: translateX(-2%);
-    -webkit-transform: translateY(4%);
-    transform: translateY(4%);
+    -webkit-transform: translateX(15px);
+    transform: translateX(15px);
+    -webkit-transform: translateY(-50px);
+    transform: translateY(-50px);
   }
 }
 
 @keyframes dmgFade {
   0% {
+    opacity: 1;
     -webkit-transform: translateX(0);
     transform: translateX(0);
     -webkit-transform: translateY(0);
@@ -610,10 +612,10 @@ button {
   }
   100% {
     opacity: 0;
-    -webkit-transform: translateX(-2%);
-    transform: translateX(-2%);
-    -webkit-transform: translateY(4%);
-    transform: translateY(4%);
+    -webkit-transform: translateX(15px);
+    transform: translateX(15px);
+    -webkit-transform: translateY(-50px);
+    transform: translateY(-50px);
   }
 }
 
@@ -622,4 +624,5 @@ button {
   animation: dmgFade 0.75s forwards;
   -webkit-animation-iteration-count: 1;
   animation-iteration-count: 1;
+  opacity: 1;
 }

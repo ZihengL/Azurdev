@@ -168,6 +168,7 @@ Caster.prototype.applyEffect = function (skill) {
   this.damageContainer.style.top = pos.y + "px";
   console.log(this.damageContainer);
   triggerFX(this.damageContainer, "dmg-fade");
+  console.log(this.damageContainer);
 
   if (!this.isDead()) {
     const self = this;
