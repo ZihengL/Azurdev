@@ -5,6 +5,7 @@ function SpriteHandler(fx, image, pos, targetPos) {
   this.size = surface.ratioSizing(this.fx.sprites.frame);
   this.pos = pos;
   this.targetPos = targetPos;
+  this.center = new Vector2D(this.pos.x, this.pos.y - this.size.y / 2);
 
   this.state = STATES.IDLE;
   this.index = 0;
@@ -53,6 +54,9 @@ SpriteHandler.prototype.updatePosition = function () {
   } else {
     this.pos.x = Math.min(this.pos.x + velocity, this.targetPos.x);
   }
+
+  this.center.x = this.pos.x;
+  this.center.y = this.pos.y - this.size.y / 2 + this.fx.sprites.frame.bleed / 2;
 };
 
 // -------------- RENDER
@@ -98,8 +102,9 @@ SpriteHandler.prototype.frameCenter = function () {
 };
 
 SpriteHandler.prototype.bodyCenter = function () {
-  const center = this.frameCenter();
-  return new Vector2D(this.pos.x + center.x, this.pos.y - center.y);
+  // const center = this.frameCenter();
+  // return new Vector2D(this.pos.x + center.x, this.pos.y - center.y);
+  return this.center;
 };
 
 // -------------- CONDITIONALS

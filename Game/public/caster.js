@@ -1,4 +1,4 @@
-function Caster(image, stats, fx, skillcodes, opponent) {
+function Caster(image, stats, fx, skillIDs, opponent) {
   this.stats = stats;
   this.opponent = opponent;
 
@@ -9,11 +9,12 @@ function Caster(image, stats, fx, skillcodes, opponent) {
 
   // SKILLS
   this.skills = [];
-  skillcodes.forEach(
-    function (code) {
-      this.skills.push(Skill.codeToInstance(code, this));
-    }.bind(this)
-  );
+  this.skills = skillIDs;
+  // skillIDs.forEach(
+  //   function (id) {
+  //     this.skills.push(Skill.codeToInstance(id, this));
+  //   }.bind(this)
+  // );
 
   // POSITIONS
   this.positions = {
@@ -29,25 +30,7 @@ function Caster(image, stats, fx, skillcodes, opponent) {
     this.positions.combat
   );
 
-  // UI
-  // this.ui = {
-  //   nameplate: Object.assign({}, ui.nameplate),
-  // };
-  // this.ui.nameplate.start = surface.ratioPosition(this.ui.nameplate.start);
-  // for (const key in ui.status_bars) {
-  //   const options = ui.status_bars[key];
-  //   const start = surface.ratioPosition(options.start);
-  //   const end = surface.ratioPosition(options.end);
-
-  //   this.ui[key] = {
-  //     color: options.color,
-  //     missing: options.missing,
-  //     pos: start,
-  //     size: end.subtract(start),
-  //   };
-  // }
-
-  this.shadow = false;
+  this.projectiles = [];
 }
 
 // -------------- UPDATE
@@ -71,11 +54,11 @@ Caster.prototype.updateSkills = function (deltaTime) {
 // -------------- RENDER
 
 Caster.prototype.render = function () {
-  if (!this.isDead()) {
-    this.skills.forEach(function (skill) {
-      skill.render();
-    });
-  }
+  // if (!this.isDead()) {
+  //   this.skills.forEach(function (skill) {
+  //     skill.render();
+  //   });
+  // }
 
   this.spriteHandler.render();
 
@@ -92,22 +75,22 @@ Caster.prototype.updateUI = function () {
   hpfill.style[this.transitionProperty] = hpvalue;
 };
 
-Caster.prototype.renderStatusBar = function (options, max, remaining) {
-  surface.fillVectorToUI(options.missing, options.pos, options.size);
+// Caster.prototype.renderStatusBar = function (options, max, remaining) {
+//   surface.fillVectorToUI(options.missing, options.pos, options.size);
 
-  if (remaining > 0) {
-    const unit = options.size.x / max;
-    const size = options.size.copy();
-    const position = options.pos.copy();
+//   if (remaining > 0) {
+//     const unit = options.size.x / max;
+//     const size = options.size.copy();
+//     const position = options.pos.copy();
 
-    size.x = remaining * unit;
-    if (position.x > surface.centerX()) {
-      position.x += (max - remaining) * unit;
-    }
+//     size.x = remaining * unit;
+//     if (position.x > surface.centerX()) {
+//       position.x += (max - remaining) * unit;
+//     }
 
-    surface.fillVectorToUI(options.color, position, size);
-  }
-};
+//     surface.fillVectorToUI(options.color, position, size);
+//   }
+// };
 
 // -------------- STATE
 
@@ -163,12 +146,11 @@ Caster.prototype.applyEffect = function (skill) {
   this.spriteHandler.shadow = true;
 
   const pos = this.bodyCenter();
-  this.damageContainer.innerText = skill.damage;
-  this.damageContainer.style.left = pos.x + "px";
-  this.damageContainer.style.top = pos.y + "px";
-  console.log(this.damageContainer);
-  triggerFX(this.damageContainer, "dmg-fade");
-  console.log(this.damageContainer);
+  this.damageElement.innerText = skill.damage;
+  this.damageElement.style.left = pos.x + "px";
+  this.damageElement.style.top = pos.y + "px";
+
+  triggerFX(this.damageElement, "dmg-fade");
 
   if (!this.isDead()) {
     const self = this;

@@ -23,7 +23,6 @@ const LOCALSTORAGE_OLD = {
       health: 3,
       damage: 1,
       potions: 1,
-
       mana: 20,
       mana_regen_sec: 0.5,
     },
@@ -36,10 +35,10 @@ const LOCALSTORAGE_OLD = {
 
 const KEYMAPS = {
   screen_game: {
-    "1": ["1", "ArrowLeft", "a"],
-    "2": ["2", "ArrowUp", "w"],
-    "3": ["3", "ArrowDown", "s"],
-    "4": ["4", "ArrowRight", "d"],
+    1: ["1", "ArrowLeft", "a"],
+    2: ["2", "ArrowUp", "w"],
+    3: ["3", "ArrowDown", "s"],
+    4: ["4", "ArrowRight", "d"],
     CANCEL_SPELL: ["5", "z"],
     PAUSE: ["8", "p"],
     EXIT: ["Escape", "461", "1001", "1009", "9"],
@@ -305,7 +304,6 @@ const SKILLS = {
     stats: {
       affinity: "fire",
       cooldown: 1,
-      speed: 1000,
       damage: 1,
       mana_cost: 5,
     },
@@ -322,7 +320,6 @@ const SKILLS = {
     stats: {
       affinity: "ice",
       cooldown: 1,
-      speed: 1000,
       damage: 1,
       mana_cost: 5,
     },

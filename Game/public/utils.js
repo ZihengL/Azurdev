@@ -264,28 +264,26 @@ function addListener(id, trigger, action) {
 
 // EFFECTS
 
-function triggerTimedFX(container, classname, time) {
-  container.classList.remove(classname);
-  container.classList.add(classname);
+function triggerTimedFX(element, classname, time) {
+  element.classList.remove(classname);
+  element.classList.add(classname);
 
   setTimeout(function () {
-    container.classList.remove(classname);
+    element.classList.remove(classname);
   }, time);
 }
 
-function triggerFX(container, classname, time) {
-  container.classList.add(classname);
+function triggerFX(element, classname, callback) {
+  element.classList.add(classname);
 
-  if (time) {
-    setTimeout(function () {
-      container.classList.remove(classname);
-    }, time);
-  } else {
-    container.addEventListener("animationend", function handleAnimationEnd() {
-      container.classList.remove(classname);
-      container.removeEventListener("animationend", handleAnimationEnd);
-    });
-  }
+  element.addEventListener("animationend", function handleAnimationEnd() {
+    element.classList.remove(classname);
+    element.removeEventListener("animationend", handleAnimationEnd);
+
+    if (callback) {
+      callback();
+    }
+  });
 }
 
 function triggerFlashFX(affinity) {

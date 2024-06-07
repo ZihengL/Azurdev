@@ -27,6 +27,25 @@
 
 // TODO: LAYERED BACKGROUNDS
 
+// NO FLOAT FOR MANA
+// NO MOVING BACKGROUND DURING BATTLE
+// GROUND PICTURE
+// BUTTON SIZE ++
+
+// GAP, FLEX NOT COMPATIBLE
+// REPLACE FLEX WITH
+// REPLACE BUTTON WITH JUST IMG -> PUT ONCLICK DIRECTLY ON IMG
+
+// CREATE SUBFOLDERS FOR SPELLS (NAMED AS SPELLID)
+// ICON.PNG, PROJECTILE.PNG
+// ALIGN BACKGROUND TO TOP OF GROUND SURFACE
+
+// ARROW NAVIGATION ->
+// MAKE LEVELS HARD ENOUGH SO THAT PLAYERS NEED TO PLAY A LEVEL MULTIPLE TIMES FOR ENOUGH MONEY TO GET STUFF FOR NEXT LEVEL
+// ON LOSE: NO REWARD AND GET LESS GOLD FROM BEATING SAME LEVEL MULTIPLE TIMES, 1/10 GOLD
+
+const jumptogame = true;
+
 function inputAction(action, key, id) {
   console.log(action, key);
 
@@ -36,7 +55,6 @@ function inputAction(action, key, id) {
     case "3":
     case "4":
       Level.input(action);
-      // Level.input(Number(action));
       break;
     case "PAUSE":
       Level.pauseInstance();
@@ -143,4 +161,8 @@ Level.setInstance(lang).then(function (instance) {
 
   updateLevelSelection(profile.level_progress);
   changeLanguage();
+
+  if (jumptogame) {
+    changeScreen(SCREENS.MAIN, SCREENS.GAME);
+  }
 });

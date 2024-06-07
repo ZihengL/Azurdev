@@ -13,7 +13,7 @@ function Opponent(image, stats, fx, name, level) {
 
   document.getElementById(this.containers.name).textContent =
     this.name.toUpperCase();
-  this.damageContainer = document.getElementById(this.containers.damage);
+  this.damageElement = document.getElementById(this.containers.damage);
   setHidden(this.containers.ui, true);
 }
 Opponent.prototype = Object.create(Caster.prototype);

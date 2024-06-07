@@ -18,9 +18,9 @@ function Player(saved, opponent, level) {
   this.transitionProperty = PLAYER.fx.transition_property;
 
   this.sequence = "";
-  this.historyContainer = document.getElementById(this.containers.sequence);
-  this.damageContainer = document.getElementById(this.containers.damage);
-  console.log(this.damageContainer);
+  this.historyElement = document.getElementById(this.containers.sequence);
+  this.damageElement = document.getElementById(this.containers.damage);
+  this.inputElement = document.getElementById("p_input");
 }
 Player.prototype = Object.create(Caster.prototype);
 Player.prototype.constructor = Player;
@@ -57,6 +57,8 @@ Player.prototype.update = function (deltaTime) {
     const value = this.level.lastKeyPressed;
 
     if (value) {
+      this.sequence += value;
+
       if (this.checkSkills(deltaTime, value)) {
         state = STATES.CAST;
       } else {
@@ -75,18 +77,24 @@ Player.prototype.update = function (deltaTime) {
     this.mana = Math.min(this.mana + this.manaRegen, this.stats.mana);
   }
 
+  console.log(this.sequence);
   this.spriteHandler.update(deltaTime, state);
 };
 
+// -------------- SKILLS
+
+Player.prototype.sequenceIndex = function () {
+  return this.sequence.length - 1;
+};
+
 Player.prototype.checkSkills = function (deltaTime, value) {
-  var validInput = false;
+  var valid = false;
   var casted = false;
 
-  this.sequence += value;
   this.skills.forEach(
     function (skill) {
       if (skill.validInput(this.sequence)) {
-        validInput = true;
+        valid = true;
 
         if (skill.atEndOfSequence(this.sequence) && this.hasEnoughMana(skill)) {
           casted = true;
@@ -102,48 +110,48 @@ Player.prototype.checkSkills = function (deltaTime, value) {
     }.bind(this)
   );
 
-  const element = document.createElement("img");
-  element.src = document.getElementById(value + "-img").src;
-  this.historyContainer.appendChild(element);
-  element.classList.add("fade-in");
-
-  if (!validInput || casted) {
-    const self = this;
-    this.historyContainer.classList.add("fade-out");
-
-    setTimeout(function () {
-      self.historyContainer.classList.remove("fade-out");
-      self.historyContainer.textContent = "";
-      self.sequence = "";
-    }, 500);
+  this.displayInputEffect(value);
+  if (!valid || casted) {
+    this.resetInputEffect(!valid || casted);
   }
 
-  return validInput;
+  return valid;
 };
 
-Player.prototype.updateSkills = function (deltaTime) {
-  const inputValue = this.level.lastKeyPressed;
-  var casted = false;
+Player.prototype.displayInputEffect = function (value) {
+  const src = document.getElementById(value + "-img").src;
+  const element = document.createElement("img");
 
-  this.skills.forEach(
-    function (skill) {
-      skill.update(deltaTime);
+  element.src = this.inputElement.src = src;
+  this.historyElement.appendChild(element);
+  element.classList.add("spell-fade-in");
 
-      if (skill.inputSequence(inputValue) && this.hasEnoughMana(skill)) {
-        skill.cast(this.opponent);
-        this.mana -= skill.stats.mana;
-        this.history = [];
-        this.currentIndex = 0;
-        casted = true;
+  // this.inputElement.src = src;
+  this.inputElement.classList.add("flash-in-out");
+  setTimeout(
+    function () {
+      this.inputElement.classList.remove("flash-in-out");
+      this.inputElement.src = "";
+    }.bind(this),
+    500
+  );
+};
 
-        this.updateUI();
-        triggerFlashFX(skill.affinity);
-      } else {
-      }
+Player.prototype.resetInputEffect = function (casted) {
+  const glowClass = (casted ? "" : "in") + "valid-glow";
+
+  this.historyElement.classList.add("spell-fade-out");
+  this.historyElement.classList.add(glowClass);
+
+  this.historyElement.addEventListener(
+    "animationend",
+    function handleAnimationEnd() {
+      this.historyElement.classList.remove("spell-fade-out");
+      this.historyElement.classList.remove(glowClass);
+      this.historyElement.textContent = "";
+      this.sequence = "";
     }.bind(this)
   );
-
-  return casted;
 };
 
 // -------------- RENDER
@@ -151,32 +159,32 @@ Player.prototype.updateSkills = function (deltaTime) {
 Player.prototype.render = function () {
   this.spriteHandler.render();
 
-  if (!this.isDead()) {
-    this.skills.forEach(function (skill) {
-      skill.render();
-      skill.renderCastEffect();
-    });
-  }
+  // if (!this.isDead()) {
+  //   this.skills.forEach(function (skill) {
+  //     skill.render();
+  //   });
+  // }
 
   this.updateUI();
 };
 
 Player.prototype.updateUI = function () {
   Caster.prototype.updateUI.call(this);
-  document.getElementById(this.containers.health_text).textContent =
-    this.health;
+  document.getElementById(this.containers.health_text).textContent = Math.floor(
+    this.health
+  );
 
   const manaoverlay = document.getElementById(this.containers.mana_overlay);
   const manafill = document.getElementById(this.containers.mana);
   const manavalue = percentage(this.mana, this.stats.mana) + "%";
   manaoverlay.style.height = manavalue;
   manafill.style.height = manavalue;
-  document.getElementById(this.containers.mana_text).textContent = this.mana;
+  document.getElementById(this.containers.mana_text).textContent = Math.floor(
+    this.mana
+  );
 };
 
 // -------------- OTHER
-
-Player.prototype.cancelSequence = function () {};
 
 Player.prototype.hasEnoughMana = function (skill) {
   if (this.mana >= skill.stats.mana) {
@@ -204,3 +212,50 @@ Player.prototype.generateSequence = function () {
 
   this.currentIndex = 0;
 };
+
+Player.prototype.drawcircle = function (pos) {
+  const ctx = surface.layers.effects.ctx;
+  ctx.beginPath();
+  ctx.arc(pos.x, pos.y, 5, 0, 2 * Math.PI);
+  ctx.fillStyle = "red";
+  ctx.fill();
+  ctx.stroke();
+};
+
+Player.prototype.addProjectile = function (skillID) {
+  const ctx = surface.layers.effects.ctx;
+  ctx.beginPath();
+  ctx.arc(pos.x, pos.y, 5, 0, 2 * Math.PI);
+  ctx.fillStyle = "red";
+  ctx.fill();
+  ctx.stroke();
+};
+
+// -------------- EFFECTS
+
+// -------------- OLD
+
+// Player.prototype.updateSkills = function (deltaTime) {
+//   const inputValue = this.level.lastKeyPressed;
+//   var casted = false;
+
+//   this.skills.forEach(
+//     function (skill) {
+//       skill.update(deltaTime);
+
+//       if (skill.inputSequence(inputValue) && this.hasEnoughMana(skill)) {
+//         skill.cast(this.opponent);
+//         this.mana -= skill.stats.mana;
+//         this.history = [];
+//         this.currentIndex = 0;
+//         casted = true;
+
+//         this.updateUI();
+//         triggerFlashFX(skill.affinity);
+//       } else {
+//       }
+//     }.bind(this)
+//   );
+
+//   return casted;
+// };
