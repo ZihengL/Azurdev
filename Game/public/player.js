@@ -20,7 +20,7 @@ function Player(saved, opponent, level) {
   this.sequence = "";
   this.historyElement = document.getElementById(this.containers.sequence);
   this.damageElement = document.getElementById(this.containers.damage);
-  this.inputElement = document.getElementById("p_input");
+  this.inputContainer = document.getElementById("p_input");
 }
 Player.prototype = Object.create(Caster.prototype);
 Player.prototype.constructor = Player;
@@ -54,31 +54,20 @@ Player.prototype.update = function (deltaTime) {
   } else if (this.isDead()) {
     state = STATES.DEATH;
   } else {
-    const value = this.level.lastKeyPressed;
+    state = STATES.IDLE;
 
+    const value = this.level.lastKeyPressed;
     if (value) {
       this.sequence += value;
 
-      if (this.checkSkills(deltaTime, value)) {
+      if (this.updateSequence(deltaTime, value)) {
         state = STATES.CAST;
-      } else {
-        state = STATES.IDLE;
       }
-    } else {
-      this.skills.forEach(function (skill) {
-        skill.update(deltaTime);
-      });
     }
   }
 
-  this.regenDelay -= deltaTime;
-  if (this.regenDelay <= 0) {
-    this.regenDelay = 1;
-    this.mana = Math.min(this.mana + this.manaRegen, this.stats.mana);
-  }
-
-  console.log(this.sequence);
-  this.spriteHandler.update(deltaTime, state);
+  this.updateManaRegen(deltaTime);
+  Caster.prototype.update.call(this, deltaTime, state);
 };
 
 // -------------- SKILLS
@@ -87,7 +76,7 @@ Player.prototype.sequenceIndex = function () {
   return this.sequence.length - 1;
 };
 
-Player.prototype.checkSkills = function (deltaTime, value) {
+Player.prototype.updateSequence = function (deltaTime, value) {
   var valid = false;
   var casted = false;
 
@@ -100,71 +89,62 @@ Player.prototype.checkSkills = function (deltaTime, value) {
           casted = true;
 
           this.mana -= skill.stats.mana;
-          skill.cast(this.opponent);
+          skill.createProjectile();
           this.updateUI();
           triggerFlashFX(skill.affinity);
         }
       }
-
-      skill.update(deltaTime);
     }.bind(this)
   );
 
-  this.displayInputEffect(value);
+  this.displayInputEffect(value, valid);
   if (!valid || casted) {
-    this.resetInputEffect(!valid || casted);
+    setTimeout(
+      function () {
+        this.resetInputEffect(!valid || casted);
+      }.bind(this),
+      500
+    );
   }
 
   return valid;
 };
 
-Player.prototype.displayInputEffect = function (value) {
-  const src = document.getElementById(value + "-img").src;
-  const element = document.createElement("img");
+Player.prototype.displayInputEffect = function (value, valid) {
+  const glowClass = (valid ? "" : "in") + "valid-glow";
 
-  element.src = this.inputElement.src = src;
-  this.historyElement.appendChild(element);
-  element.classList.add("spell-fade-in");
+  const historyComp = document.createElement("img");
+  const inputComp = document.createElement("img");
 
-  // this.inputElement.src = src;
-  this.inputElement.classList.add("flash-in-out");
-  setTimeout(
-    function () {
-      this.inputElement.classList.remove("flash-in-out");
-      this.inputElement.src = "";
-    }.bind(this),
-    500
-  );
+  historyComp.src = inputComp.src = document.getElementById(value + "-img").src;
+  historyComp.classList.add("spell-fade-in", glowClass);
+  this.historyElement.appendChild(historyComp);
+
+  inputComp.classList.add("center", "flash-in-out", glowClass);
+  this.inputContainer.appendChild(inputComp);
+
+  setTimeout(function () {
+    inputComp.remove();
+  }, 500);
 };
 
-Player.prototype.resetInputEffect = function (casted) {
-  const glowClass = (casted ? "" : "in") + "valid-glow";
-
+Player.prototype.resetInputEffect = function () {
   this.historyElement.classList.add("spell-fade-out");
-  this.historyElement.classList.add(glowClass);
 
-  this.historyElement.addEventListener(
-    "animationend",
-    function handleAnimationEnd() {
+  setTimeout(
+    function () {
       this.historyElement.classList.remove("spell-fade-out");
-      this.historyElement.classList.remove(glowClass);
       this.historyElement.textContent = "";
       this.sequence = "";
-    }.bind(this)
+    }.bind(this),
+    1500
   );
 };
 
 // -------------- RENDER
 
 Player.prototype.render = function () {
-  this.spriteHandler.render();
-
-  // if (!this.isDead()) {
-  //   this.skills.forEach(function (skill) {
-  //     skill.render();
-  //   });
-  // }
-
+  Caster.prototype.render.call(this);
   this.updateUI();
 };
 
@@ -186,6 +166,15 @@ Player.prototype.updateUI = function () {
 
 // -------------- OTHER
 
+Player.prototype.updateManaRegen = function (deltaTime) {
+  this.regenDelay -= deltaTime;
+
+  if (this.regenDelay <= 0) {
+    this.regenDelay = 1;
+    this.mana = Math.min(this.mana + this.manaRegen, this.stats.mana);
+  }
+};
+
 Player.prototype.hasEnoughMana = function (skill) {
   if (this.mana >= skill.stats.mana) {
     return true;
@@ -203,33 +192,33 @@ Player.prototype.applyEffect = function (skill) {
   Caster.prototype.applyEffect.call(this, skill);
 };
 
-Player.prototype.generateSequence = function () {
-  for (var i = 0; i < this.sequences.length; i++) {
-    const value = getRandomValue(SEQUENCE);
+// Player.prototype.generateSequence = function () {
+//   for (var i = 0; i < this.sequences.length; i++) {
+//     const value = getRandomValue(SEQUENCE);
 
-    this.sequence.push(value);
-  }
+//     this.sequence.push(value);
+//   }
 
-  this.currentIndex = 0;
-};
+//   this.currentIndex = 0;
+// };
 
-Player.prototype.drawcircle = function (pos) {
-  const ctx = surface.layers.effects.ctx;
-  ctx.beginPath();
-  ctx.arc(pos.x, pos.y, 5, 0, 2 * Math.PI);
-  ctx.fillStyle = "red";
-  ctx.fill();
-  ctx.stroke();
-};
+// Player.prototype.drawcircle = function (pos) {
+//   const ctx = surface.layers.effects.ctx;
+//   ctx.beginPath();
+//   ctx.arc(pos.x, pos.y, 5, 0, 2 * Math.PI);
+//   ctx.fillStyle = "red";
+//   ctx.fill();
+//   ctx.stroke();
+// };
 
-Player.prototype.addProjectile = function (skillID) {
-  const ctx = surface.layers.effects.ctx;
-  ctx.beginPath();
-  ctx.arc(pos.x, pos.y, 5, 0, 2 * Math.PI);
-  ctx.fillStyle = "red";
-  ctx.fill();
-  ctx.stroke();
-};
+// Player.prototype.addProjectile = function (skillID) {
+//   const ctx = surface.layers.effects.ctx;
+//   ctx.beginPath();
+//   ctx.arc(pos.x, pos.y, 5, 0, 2 * Math.PI);
+//   ctx.fillStyle = "red";
+//   ctx.fill();
+//   ctx.stroke();
+// };
 
 // -------------- EFFECTS
 

@@ -5,16 +5,14 @@ function Caster(image, stats, fx, skillIDs, opponent) {
   this.health = this.stats.health;
   this.shield = null;
   this.name = "";
-  this.inCombat = false;
 
   // SKILLS
   this.skills = [];
-  this.skills = skillIDs;
-  // skillIDs.forEach(
-  //   function (id) {
-  //     this.skills.push(Skill.codeToInstance(id, this));
-  //   }.bind(this)
-  // );
+  skillIDs.forEach(
+    function (id) {
+      this.skills.push(Skill.codeToInstance(id, this));
+    }.bind(this)
+  );
 
   // POSITIONS
   this.positions = {
@@ -37,6 +35,10 @@ function Caster(image, stats, fx, skillIDs, opponent) {
 
 Caster.prototype.update = function (deltaTime, state) {
   this.spriteHandler.update(deltaTime, state);
+
+  this.projectiles = this.projectiles.filter(function (projectile) {
+    return !projectile.update(deltaTime);
+  });
 };
 
 Caster.prototype.updatePosition = function () {
@@ -54,17 +56,11 @@ Caster.prototype.updateSkills = function (deltaTime) {
 // -------------- RENDER
 
 Caster.prototype.render = function () {
-  // if (!this.isDead()) {
-  //   this.skills.forEach(function (skill) {
-  //     skill.render();
-  //   });
-  // }
-
   this.spriteHandler.render();
 
-  if (this.isOnTargetPos()) {
-    this.updateUI();
-  }
+  this.projectiles.forEach(function (projectile) {
+    projectile.render();
+  });
 };
 
 Caster.prototype.updateUI = function () {
@@ -75,22 +71,39 @@ Caster.prototype.updateUI = function () {
   hpfill.style[this.transitionProperty] = hpvalue;
 };
 
-// Caster.prototype.renderStatusBar = function (options, max, remaining) {
-//   surface.fillVectorToUI(options.missing, options.pos, options.size);
+// -------------- GETTERS
 
-//   if (remaining > 0) {
-//     const unit = options.size.x / max;
-//     const size = options.size.copy();
-//     const position = options.pos.copy();
+Caster.prototype.getState = function () {
+  return this.spriteHandler.state;
+};
 
-//     size.x = remaining * unit;
-//     if (position.x > surface.centerX()) {
-//       position.x += (max - remaining) * unit;
-//     }
+Caster.prototype.bodyCenter = function () {
+  return this.spriteHandler.bodyCenter();
+};
 
-//     surface.fillVectorToUI(options.color, position, size);
-//   }
-// };
+Caster.prototype.setDestination = function (coordinates) {
+  this.spriteHandler.targetPos = coordinates;
+};
+
+// -------------- CONDITIONALS
+
+// -------------- STATUS EFFECTS
+
+Caster.prototype.applyEffect = function (damage) {
+  this.health = Math.max(this.health - damage, 0);
+  this.triggerDamageEffects(damage);
+};
+
+Caster.prototype.triggerDamageEffects = function (damage) {
+  const pos = this.bodyCenter();
+  this.damageElement.innerText = damage;
+  this.damageElement.style.left = pos.x + "px";
+  this.damageElement.style.top = pos.y + "px";
+
+  triggerFX(this.damageElement, "dmg-fade");
+  triggerShakeFX(this.containers.health_container);
+  this.spriteHandler.triggerDamageGlow(this.isDead());
+};
 
 // -------------- STATE
 
@@ -118,49 +131,12 @@ Caster.prototype.isCasting = function () {
   return this.spriteHandler.isAtEndofAnim(STATES.CAST);
 };
 
+Caster.prototype.isAttacking = function () {
+  return this.projectiles.length > 0;
+};
+
 Caster.prototype.isDead = function () {
   return this.health <= 0;
 };
 
-// -------------- GETTERS
-
-Caster.prototype.getState = function () {
-  return this.spriteHandler.state;
-};
-
-Caster.prototype.bodyCenter = function () {
-  return this.spriteHandler.bodyCenter();
-};
-
-Caster.prototype.setDestination = function (coordinates) {
-  this.spriteHandler.targetPos = coordinates;
-};
-
-// -------------- CONDITIONALS
-
-// -------------- STATUS EFFECTS
-
-Caster.prototype.applyEffect = function (skill) {
-  this.health -= skill.damage;
-  this.health = Math.max(this.health, 0);
-  this.spriteHandler.shadow = true;
-
-  const pos = this.bodyCenter();
-  this.damageElement.innerText = skill.damage;
-  this.damageElement.style.left = pos.x + "px";
-  this.damageElement.style.top = pos.y + "px";
-
-  triggerFX(this.damageElement, "dmg-fade");
-
-  if (!this.isDead()) {
-    const self = this;
-    setTimeout(function () {
-      self.spriteHandler.shadow = false;
-    }, 50);
-  }
-
-  triggerShakeFX(
-    this.containers.health_container,
-    this.health - this.stats.health
-  );
-};
+// -------------- EFFECTS

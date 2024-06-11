@@ -1,4 +1,6 @@
-function Projectile(position, target, fx, damage, affinity) {
+function Projectile(target, damage, affinity, position, fx) {
+  this.damage = damage;
+  this.affinity = affinity;
   this.pos = position;
   this.target = target;
   this.fx = fx;
@@ -24,6 +26,12 @@ Projectile.prototype.update = function (deltaTime) {
 
     const displacement = this.velocity.multiply(deltaTime);
     this.pos = this.pos.add(displacement);
+
+    return false;
+  } else {
+    this.target.applyEffect(this.damage, this.affinity);
+
+    return true;
   }
 };
 

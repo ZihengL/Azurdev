@@ -56,7 +56,8 @@ SpriteHandler.prototype.updatePosition = function () {
   }
 
   this.center.x = this.pos.x;
-  this.center.y = this.pos.y - this.size.y / 2 + this.fx.sprites.frame.bleed / 2;
+  this.center.y =
+    this.pos.y - this.size.y / 2 + this.fx.sprites.frame.bleed / 2;
 };
 
 // -------------- RENDER
@@ -136,4 +137,17 @@ SpriteHandler.prototype.isPastLastFrame = function () {
   const framescount = this.fx.sprites.rows[this.state] - 1;
 
   return this.index >= framescount;
+};
+
+SpriteHandler.prototype.triggerDamageGlow = function (isDead) {
+  this.shadow = true;
+
+  if (!isDead) {
+    setTimeout(
+      function () {
+        this.shadow = false;
+      }.bind(this),
+      50
+    );
+  }
 };

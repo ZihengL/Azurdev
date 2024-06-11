@@ -292,15 +292,15 @@ function triggerFlashFX(affinity) {
   triggerFX(element, "flash");
 }
 
-function triggerShakeFX(containerID, intensity) {
+function triggerShakeFX(containerID) {
   const element = document.getElementById(containerID);
-  const baseline = 5;
+  // const baseline = 5;
 
-  if (intensity) {
-    intensity = intensity * baseline;
-    document.documentElement.style.setProperty("--shake", intensity + "px");
-  }
+  // if (intensity) {
+  //   intensity = intensity * baseline;
+  //   document.documentElement.style.setProperty("--shake", intensity + "px");
+  // }
 
   triggerFX(element, "shake");
-  document.documentElement.style.setProperty("--shake", baseline + "px");
+  // document.documentElement.style.setProperty("--shake", baseline + "px");
 }

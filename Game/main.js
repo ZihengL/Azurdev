@@ -44,7 +44,13 @@
 // MAKE LEVELS HARD ENOUGH SO THAT PLAYERS NEED TO PLAY A LEVEL MULTIPLE TIMES FOR ENOUGH MONEY TO GET STUFF FOR NEXT LEVEL
 // ON LOSE: NO REWARD AND GET LESS GOLD FROM BEATING SAME LEVEL MULTIPLE TIMES, 1/10 GOLD
 
-const jumptogame = true;
+
+
+const jumptogame = false;
+
+function changeNavigationSelection() {
+  
+}
 
 function inputAction(action, key, id) {
   console.log(action, key);
@@ -96,7 +102,7 @@ const surface = new Surface();
 const fps = SCREEN.fps[1];
 const tickrate = 1000 / fps;
 
-var lang = LANGS[0];
+var lang = 1;
 
 Level.setInstance(lang).then(function (instance) {
   const level = instance;
@@ -140,23 +146,6 @@ Level.setInstance(lang).then(function (instance) {
         inputAction(action, key, currentScreen.id);
       }
     }
-
-    // const currentScreen = currentScreens[0];
-    // const keymap = KEYMAPS[currentScreen.id];
-    // // const value = keymap[event.key];
-    // const key = event.key;
-
-    // for (const action in keymap) {
-    //   const keyarray = keymap[action];
-
-    //   // console.log(keyarray, key, keyarray.indexOf(key), action);
-
-    //   if (keyarray.indexOf(key) !== -1) {
-    //     // console.log(keyarray, key, keyarray.indexOf(key));
-    //     inputAction(action, key, currentScreen.id);
-    //     return;
-    //   }
-    // }
   });
 
   updateLevelSelection(profile.level_progress);

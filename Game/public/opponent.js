@@ -82,34 +82,6 @@ Opponent.generateName = function (lang, names, options) {
 
 // -------------- UPDATE
 
-// Opponent.prototype.update = function (deltaTime) {
-//   var state = this.spriteHandler.state;
-
-//   if (this.opponent.isOnTargetPos()) {
-//     if (this.isDead()) {
-//       state = STATES.DEATH;
-//       if (this.spriteHandler.isAtEndofAnim(state)) {
-//         this.spriteHandler.targetPos = this.positions.end;
-//         setHidden(this.containers.ui, true);
-//       }
-//     } else {
-//       if (this.isOnTargetPos() && !this.opponent.isDead()) {
-//         setHidden(this.containers.ui, false);
-//         this.updateSkills(deltaTime);
-
-//         if (this.updateCooldown(deltaTime)) {
-//           state = STATES.CAST;
-//           this.cast();
-//         }
-//       } else {
-//         state = STATES.IDLE;
-//       }
-//     }
-//   }
-
-//   this.spriteHandler.update(deltaTime, state);
-// };
-
 Opponent.prototype.update = function (deltaTime) {
   var state = this.spriteHandler.state;
 
@@ -123,7 +95,6 @@ Opponent.prototype.update = function (deltaTime) {
     } else {
       if (this.isOnTargetPos() && !this.opponent.isDead()) {
         setHidden(this.containers.ui, false);
-        this.updateSkills(deltaTime);
 
         if (this.updateCooldown(deltaTime)) {
           state = STATES.CAST;
@@ -135,7 +106,11 @@ Opponent.prototype.update = function (deltaTime) {
     }
   }
 
-  this.spriteHandler.update(deltaTime, state);
+  if (this.projectiles.length > 0) {
+    console.log("PROJ", this.projectiles.length);
+  }
+
+  Caster.prototype.update.call(this, deltaTime, state);
 };
 
 Opponent.prototype.updateCooldown = function (deltaTime) {
@@ -147,10 +122,12 @@ Opponent.prototype.updateCooldown = function (deltaTime) {
   return true;
 };
 
-Opponent.prototype.updateSkills = function (deltaTime) {
-  this.skills.forEach(function (skill) {
-    skill.update(deltaTime);
-  });
+Opponent.prototype.render = function () {
+  Caster.prototype.render.call(this);
+
+  if (this.isOnTargetPos()) {
+    this.updateUI();
+  }
 };
 
 // -------------- RENDER
@@ -167,9 +144,9 @@ Opponent.prototype.updateUI = function () {
   }
 };
 
-Opponent.prototype.applyEffect = function (skill) {
-  if (skill.affinity !== this.stats.affinity) {
-    Caster.prototype.applyEffect.call(this, skill);
+Opponent.prototype.applyEffect = function (damage, affinity) {
+  if (affinity !== this.stats.affinity) {
+    Caster.prototype.applyEffect.call(this, damage);
 
     this.cooldown = this.stats.cooldown;
     triggerShakeFX(this.containers.cooldown_container);
@@ -187,12 +164,7 @@ Opponent.prototype.getRandomSkill = function () {
 };
 
 Opponent.prototype.cast = function () {
-  const skill = this.skills[this.currentSkill];
-
-  skill.cast(this.opponent);
-  this.currentSkill = this.nextSkill;
-  this.nextSkill = this.getRandomSkill();
+  this.skills[0].createProjectile();
   this.cooldown = this.stats.cooldown;
-
-  triggerShakeFX(this.containers.cooldown);
+  triggerFX(document.getElementById("o_cooldown_container"), "bump");
 };
