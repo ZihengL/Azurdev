@@ -1,6 +1,6 @@
-function Background(themes) {
-  this.skyColor = "aqua";
-  this.themes = themes;
+function Background(scenes) {
+  // this.skyColor = "aqua";
+  this.scenes = scenes;
   this.generate();
 
   const x = 0;
@@ -8,36 +8,32 @@ function Background(themes) {
   const w = surface.ratioProportionX(1);
   const h = surface.ratioProportionY(1) - y;
 
-  this.ground = {
-    x,
-    y,
-    w,
-    h,
-  };
+  this.ground = { x, y, w, h };
 }
-Background.id = "backgrounds";
 
 // -------------- STATIC
 
 Background.load = function () {
-  const themes = {};
+  const scenes = {};
   var sequence = Promise.resolve();
 
-  for (const key in BACKGROUNDS.themes) {
-    const theme = BACKGROUNDS.themes[key];
-    themes[key] = [];
+  for (const key in BACKGROUNDS) {
+    const scene = BACKGROUNDS[key];
+    scenes[key] = [];
 
-    theme.forEach(function (layer) {
+    for (var i = 0; i < scene.length; i++) {
+      const path = "./public/Assets/backgrounds/" + key + "/" + i + ".png";
+
       sequence = sequence.then(function () {
-        return loadImage(BACKGROUNDS.path + layer.image).then(function (image) {
-          themes[key].push(image);
+        return loadImage(path).then(function (image) {
+          scenes[key].push(image);
         });
       });
-    });
+    }
   }
 
   return sequence.then(function () {
-    return themes;
+    return scenes;
   });
 };
 
@@ -46,8 +42,8 @@ Background.load = function () {
 Background.prototype.update = function (state) {
   const velocity = SPRITES.velocity;
 
-  for (var i = 0; i < this.theme.length; i++) {
-    const layer = this.theme[i];
+  for (var i = 0; i < this.scene.length; i++) {
+    const layer = this.scene[i];
     const pos = layer.position;
 
     if (state === STATES.RUN || !layer.grounded) {
@@ -63,15 +59,15 @@ Background.prototype.update = function (state) {
 // -------------- RENDER
 
 Background.prototype.render = function () {
-  surface.fillTo(Background.id, this.skyColor);
+  // surface.fillTo("backgrounds", this.skyColor);
 
-  for (var i = 0; i < this.theme.length; i++) {
-    const layer = this.theme[i];
+  for (var i = 0; i < this.scene.length; i++) {
+    const layer = this.scene[i];
     const pos = layer.position;
 
-    surface.drawTo(Background.id, layer.image, pos.x, 0);
+    surface.drawTo("backgrounds", layer.image, pos.x, 0);
     if (layer.position.x < 0) {
-      surface.drawTo(Background.id, layer.image, pos.x + surface.width, 0);
+      surface.drawTo("backgrounds", layer.image, pos.x + surface.width, 0);
     }
   }
 
@@ -83,16 +79,34 @@ Background.prototype.render = function () {
 // -------------- OTHER
 
 Background.prototype.generate = function () {
-  const keys = Object.keys(BACKGROUNDS.themes);
+  const keys = Object.keys(BACKGROUNDS);
   const key = keys[Math.floor(Math.random() * keys.length)];
-  const theme = BACKGROUNDS.themes[key];
+  const scene = BACKGROUNDS[key];
 
-  this.theme = [];
-  for (var i = 0; i < theme.length; i++) {
-    const options = theme[i];
+  this.scene = [];
+  for (var i = 0; i < scene.length; i++) {
+    const options = scene[i];
 
-    this.theme[i] = {
-      image: this.themes[key][i],
+    this.scene[i] = {
+      image: this.scenes[key][i],
+      multiplier: options.multiplier,
+      grounded: options.grounded,
+      position: surface.ratioPosition(options.position),
+    };
+  }
+};
+
+Background.prototype.loadScene = function () {
+  const keys = Object.keys(BACKGROUNDS);
+  const key = keys[Math.floor(Math.random() * keys.length)];
+  const scene = BACKGROUNDS[key];
+
+  this.scene = [];
+  for (var i = 0; i < scene.length; i++) {
+    const options = scene[i];
+
+    this.scene[i] = {
+      image: this.scenes[key][i],
       multiplier: options.multiplier,
       grounded: options.grounded,
       position: surface.ratioPosition(options.position),

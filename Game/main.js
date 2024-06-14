@@ -44,13 +44,9 @@
 // MAKE LEVELS HARD ENOUGH SO THAT PLAYERS NEED TO PLAY A LEVEL MULTIPLE TIMES FOR ENOUGH MONEY TO GET STUFF FOR NEXT LEVEL
 // ON LOSE: NO REWARD AND GET LESS GOLD FROM BEATING SAME LEVEL MULTIPLE TIMES, 1/10 GOLD
 
-
-
 const jumptogame = false;
 
-function changeNavigationSelection() {
-  
-}
+function changeNavigationSelection() {}
 
 function inputAction(action, key, id) {
   console.log(action, key);
@@ -60,13 +56,13 @@ function inputAction(action, key, id) {
     case "2":
     case "3":
     case "4":
-      Level.input(action);
+      Game.input(action);
       break;
     case "PAUSE":
-      Level.pauseInstance();
+      Game.pauseInstance();
       break;
     case "EXIT":
-      Level.quitInstance();
+      Game.quitInstance();
       break;
     case "PLAY":
       changeScreen(SCREENS.MAP, SCREENS.GAME);
@@ -75,10 +71,10 @@ function inputAction(action, key, id) {
       changeScreen(SCREENS.MAP, SCREENS.MAIN);
       break;
     case "REDUCE_LEVEL":
-      updateLevelSelection(Level.selectedLevel - 1);
+      updateLevelSelection(Game.selectedLevel - 1);
       break;
     case "RAISE_LEVEL":
-      updateLevelSelection(Level.selectedLevel + 1);
+      updateLevelSelection(Game.selectedLevel + 1);
       break;
     case "CONTINUE_GAME":
       changeScreen(SCREENS.MAIN, SCREENS.MAP);
@@ -104,30 +100,11 @@ const tickrate = 1000 / fps;
 
 var lang = 1;
 
-Level.setInstance(lang).then(function (instance) {
+Game.setInstance(lang).then(function (instance) {
   const level = instance;
   var profile = instance.profile;
 
-  // MAIN MENU
-
-  // MAP MENU
-  const container = document.getElementById("level_select_container");
-  for (var i = 0; i < LEVELS.length; i++) {
-    const levelBtn = document.createElement("button");
-
-    levelBtn.id = "btn_level" + i;
-    levelBtn.classList.add("btn-level");
-    levelBtn.textContent = i + 1;
-
-    levelBtn.onclick = (function (levelIndex) {
-      return function () {
-        updateLevelSelection(levelIndex);
-      };
-    })(i);
-
-    container.appendChild(levelBtn);
-  }
-
+  // CONTROLS EVENT LISTENER
   document.addEventListener("keydown", function (event) {
     const currentScreens = document.querySelectorAll(".screen.active");
 
@@ -147,6 +124,24 @@ Level.setInstance(lang).then(function (instance) {
       }
     }
   });
+
+  // MAP MENU
+  const container = document.getElementById("level_select_container");
+  for (var i = 0; i < LEVELS.length; i++) {
+    const levelBtn = document.createElement("button");
+
+    levelBtn.id = "btn_level" + i;
+    levelBtn.classList.add("btn-level");
+    levelBtn.textContent = i + 1;
+
+    levelBtn.onclick = (function (levelIndex) {
+      return function () {
+        updateLevelSelection(levelIndex);
+      };
+    })(i);
+
+    container.appendChild(levelBtn);
+  }
 
   updateLevelSelection(profile.level_progress);
   changeLanguage();

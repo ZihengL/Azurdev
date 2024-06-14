@@ -1,26 +1,19 @@
-function Player(saved, opponent, level) {
+function Player(saved, opponent) {
   Caster.call(
     this,
-    Level.res.player,
+    Game.res.player,
     saved.stats,
     PLAYER.fx,
-    saved.skills,
+    saved.spell_ids,
     opponent
   );
 
-  this.level = level;
   this.mana = this.stats.mana;
   this.manaRegen = this.stats.mana_regen_sec;
   this.regenDelay = 1;
 
-  this.name = getInLang(PLAYER.name);
-  this.containers = PLAYER.fx.containers;
-  this.transitionProperty = PLAYER.fx.transition_property;
-
   this.sequence = "";
-  this.historyElement = document.getElementById(this.containers.sequence);
-  this.damageElement = document.getElementById(this.containers.damage);
-  this.inputContainer = document.getElementById("p_input");
+  this.inputLocked = false;
 }
 Player.prototype = Object.create(Caster.prototype);
 Player.prototype.constructor = Player;
@@ -35,18 +28,19 @@ Player.load = function () {
 };
 
 Player.prototype.save = function (profile) {
-  const skillcodes = [];
-  this.skills.forEach(function (skill) {
-    skillcodes.push(skill.toCode());
-  });
+  const spellIds = [];
 
-  profile.skills = skillcodes;
+  this.spells.forEach(function (spell) {
+    spellIds.push(spell.getID());
+  });
+  profile.spell_ids = spellIds;
+
   saveProfile(profile);
 };
 
 // -------------- UPDATE
 
-Player.prototype.update = function (deltaTime) {
+Player.prototype.update = function (deltaTime, value) {
   var state = this.spriteHandler.state;
 
   if (!this.isOnTargetPos() || !this.opponent.isOnTargetPos()) {
@@ -54,14 +48,15 @@ Player.prototype.update = function (deltaTime) {
   } else if (this.isDead()) {
     state = STATES.DEATH;
   } else {
+    // TODO: KEEP TO CAST IF
     state = STATES.IDLE;
 
-    const value = this.level.lastKeyPressed;
-    if (value) {
-      this.sequence += value;
+    if (value && !this.inputLocked) {
+      state = STATES.CAST;
 
-      if (this.updateSequence(deltaTime, value)) {
-        state = STATES.CAST;
+      const spell = this.checkSequence(value);
+      if (spell && this.isCastable(spell)) {
+        this.castSpell(spell);
       }
     }
   }
@@ -70,75 +65,71 @@ Player.prototype.update = function (deltaTime) {
   Caster.prototype.update.call(this, deltaTime, state);
 };
 
-// -------------- SKILLS
+// -------------- SPELLS
 
 Player.prototype.sequenceIndex = function () {
   return this.sequence.length - 1;
 };
 
-Player.prototype.updateSequence = function (deltaTime, value) {
-  var valid = false;
-  var casted = false;
+Player.prototype.castSpell = function (spell) {
+  Caster.prototype.castSpell.call(this, spell);
 
-  this.skills.forEach(
-    function (skill) {
-      if (skill.validInput(this.sequence)) {
-        valid = true;
+  this.mana -= spell.manacost;
+  this.resetSequence();
+};
 
-        if (skill.atEndOfSequence(this.sequence) && this.hasEnoughMana(skill)) {
-          casted = true;
+Player.prototype.checkSequence = function (value) {
+  this.sequence += value;
+  for (var i = 0; i < this.spells.length; i++) {
+    const spell = this.spells[i];
 
-          this.mana -= skill.stats.mana;
-          skill.createProjectile();
-          this.updateUI();
-          triggerFlashFX(skill.affinity);
-        }
-      }
-    }.bind(this)
-  );
-
-  this.displayInputEffect(value, valid);
-  if (!valid || casted) {
-    setTimeout(
-      function () {
-        this.resetInputEffect(!valid || casted);
-      }.bind(this),
-      500
-    );
+    if (spell.validateSequence(this.sequence)) {
+      this.addToSequenceEffect(value, true);
+      return spell;
+    }
   }
 
-  return valid;
+  this.addToSequenceEffect(value, false);
+  this.resetSequence();
+  return null;
 };
 
-Player.prototype.displayInputEffect = function (value, valid) {
-  const glowClass = (valid ? "" : "in") + "valid-glow";
-
-  const historyComp = document.createElement("img");
-  const inputComp = document.createElement("img");
-
-  historyComp.src = inputComp.src = document.getElementById(value + "-img").src;
-  historyComp.classList.add("spell-fade-in", glowClass);
-  this.historyElement.appendChild(historyComp);
-
-  inputComp.classList.add("center", "flash-in-out", glowClass);
-  this.inputContainer.appendChild(inputComp);
-
-  setTimeout(function () {
-    inputComp.remove();
-  }, 500);
-};
-
-Player.prototype.resetInputEffect = function () {
-  this.historyElement.classList.add("spell-fade-out");
+Player.prototype.resetSequence = function () {
+  this.inputLocked = true;
+  this.sequence = "";
 
   setTimeout(
     function () {
-      this.historyElement.classList.remove("spell-fade-out");
-      this.historyElement.textContent = "";
-      this.sequence = "";
+      this.inputLocked = false;
+      this.resetSequenceEffect();
     }.bind(this),
-    1500
+    500
   );
+};
+
+Player.prototype.resetSequenceEffect = function () {
+  const sequenceElement = this.elements.sequence;
+  const inputElement = this.elements.input;
+
+  sequenceElement.classList.add("spell-fade-out");
+  setTimeout(function () {
+    sequenceElement.classList.remove("spell-fade-out");
+    sequenceElement.textContent = inputElement.textContent = "";
+  }, 1500);
+};
+
+Player.prototype.addToSequenceEffect = function (value, valid) {
+  const validityEffect = (valid ? "" : "in") + "valid-glow";
+  const sequenceSub = document.createElement("img");
+  const inputSub = document.createElement("img");
+
+  sequenceSub.src = inputSub.src = this.elements[value].src;
+
+  sequenceSub.classList.add("spell-fade-in", validityEffect);
+  this.elements.sequence.appendChild(sequenceSub);
+
+  inputSub.classList.add("center", "flash-in-out", validityEffect);
+  this.elements.input.appendChild(inputSub);
 };
 
 // -------------- RENDER
@@ -149,22 +140,20 @@ Player.prototype.render = function () {
 };
 
 Player.prototype.updateUI = function () {
-  Caster.prototype.updateUI.call(this);
-  document.getElementById(this.containers.health_text).textContent = Math.floor(
-    this.health
-  );
+  Caster.prototype.updateUI.call(this, "height");
+  this.elements.health_text.textContent = Math.floor(this.health);
 
-  const manaoverlay = document.getElementById(this.containers.mana_overlay);
-  const manafill = document.getElementById(this.containers.mana);
   const manavalue = percentage(this.mana, this.stats.mana) + "%";
-  manaoverlay.style.height = manavalue;
-  manafill.style.height = manavalue;
-  document.getElementById(this.containers.mana_text).textContent = Math.floor(
-    this.mana
-  );
+  this.elements.mana_overlay.style.height = this.elements.mana.style.height =
+    manavalue;
+  this.elements.mana_text.textContent = Math.floor(this.mana);
 };
 
-// -------------- OTHER
+// -------------- MISC
+
+Player.prototype.getAffinityElementByValue = function (value) {
+  return this.elements[value];
+};
 
 Player.prototype.updateManaRegen = function (deltaTime) {
   this.regenDelay -= deltaTime;
@@ -175,21 +164,25 @@ Player.prototype.updateManaRegen = function (deltaTime) {
   }
 };
 
-Player.prototype.hasEnoughMana = function (skill) {
-  if (this.mana >= skill.stats.mana) {
-    return true;
+Player.prototype.validateManaCost = function (spell) {
+  if (this.mana < spell.manacost) {
+    triggerShakeFX(this.elements.mana_container);
+    return false;
   }
 
-  triggerShakeFX(this.containers.mana_container);
-  return false;
+  return true;
 };
 
-Player.prototype.applyEffect = function (skill) {
+Player.prototype.isCastable = function (spell) {
+  return spell.isEqualLength(this.sequence) && this.validateManaCost(spell);
+};
+
+Player.prototype.applyEffect = function (damage) {
   if (Player.debug) {
     this.health = 100;
   }
 
-  Caster.prototype.applyEffect.call(this, skill);
+  Caster.prototype.applyEffect.call(this, damage);
 };
 
 // Player.prototype.generateSequence = function () {

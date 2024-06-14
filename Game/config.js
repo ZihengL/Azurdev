@@ -4,7 +4,7 @@ const LOCALSTORAGE = {
   key: "Combomage",
   defaults: {
     stats: {
-      health: 3,
+      health: 5,
       damage: 1,
       potions: 1,
       mana: 20,
@@ -12,24 +12,8 @@ const LOCALSTORAGE = {
     },
     gold: 100,
     level_progress: 0,
-    skills: ["0-0", "1-0", "2-0", "3-0"],
-  },
-};
-
-const LOCALSTORAGE_OLD = {
-  key: "Combomage",
-  defaults: {
-    stats: {
-      health: 3,
-      damage: 1,
-      potions: 1,
-      mana: 20,
-      mana_regen_sec: 0.5,
-    },
-    gold: 100,
-    level_progress: 0,
-    skills: ["fire_weak", "ice_weak"],
-    loadout: ["fire_weak", "ice_weak"],
+    // spell_ids: ["0-0", "1-0", "2-0", "3-0"],
+    spellS: [1334, 3321, 2232, 4422],
   },
 };
 
@@ -110,125 +94,104 @@ const DISPLAY = {
 // -------------- BACKGROUNDS & UI
 
 const BACKGROUNDS = {
-  path: "./public/Assets/backgrounds/",
-  themes: {
-    forest: [
-      {
-        image: "forest-0.png",
-        multiplier: 0.03,
-        grounded: true,
-        position: { x: 0, y: 0 },
-      },
-      {
-        image: "forest-1.png",
-        multiplier: 0,
-        grounded: false,
-        position: { x: 0, y: 0 },
-      },
-      {
-        image: "forest-2.png",
-        multiplier: 0.05,
-        grounded: true,
-        position: { x: 0, y: 0 },
-      },
-      {
-        image: "forest-3.png",
-        multiplier: 1,
-        grounded: true,
-        position: { x: 0, y: 0 },
-      },
-    ],
-    mountains: [
-      {
-        image: "mountains-0.png",
-        multiplier: 0,
-        grounded: false,
-        position: { x: 0, y: 0 },
-      },
-      {
-        image: "mountains-1.png",
-        multiplier: 0.03,
-        grounded: true,
-        position: { x: 0, y: 0 },
-      },
-      {
-        image: "mountains-2.png",
-        multiplier: 0.05,
-        grounded: true,
-        position: { x: 0, y: 0 },
-      },
-      {
-        image: "mountains-3.png",
-        multiplier: 0.1,
-        grounded: true,
-        position: { x: 0, y: 0 },
-      },
-      {
-        image: "mountains-4.png",
-        multiplier: 1,
-        grounded: true,
-        position: { x: 0, y: 0 },
-      },
-    ],
-    industrial: [
-      {
-        image: "industrial-0.png",
-        multiplier: 0,
-        grounded: true,
-        position: { x: 0, y: 0 },
-      },
-      {
-        image: "industrial-1.png",
-        multiplier: 0.05,
-        grounded: true,
-        position: { x: 0, y: 0 },
-      },
-      {
-        image: "industrial-2.png",
-        multiplier: 0.1,
-        grounded: true,
-        position: { x: 0, y: 0 },
-      },
-      {
-        image: "industrial-3.png",
-        multiplier: 1,
-        grounded: true,
-        position: { x: 0, y: 0 },
-      },
-    ],
-    space: [
-      {
-        image: "space-0.png",
-        multiplier: 0,
-        grounded: false,
-        position: { x: 0, y: 0 },
-      },
-      {
-        image: "space-1.png",
-        multiplier: 0.003,
-        grounded: false,
-        position: { x: 0, y: 0 },
-      },
-      {
-        image: "space-2.png",
-        multiplier: 0.05,
-        grounded: false,
-        position: { x: 0, y: 0 },
-      },
-      {
-        image: "space-3.png",
-        multiplier: 0.1,
-        grounded: false,
-        position: { x: 0, y: 0 },
-      },
-      {
-        image: "space-4.png",
-        multiplier: 1,
-        grounded: false,
-        position: { x: 0, y: 0 },
-      },
-    ],
-  },
+  forest: [
+    {
+      multiplier: 0.03,
+      grounded: true,
+      position: { x: 0, y: 0 },
+    },
+    {
+      multiplier: 0,
+      grounded: false,
+      position: { x: 0, y: 0 },
+    },
+    {
+      multiplier: 0.05,
+      grounded: true,
+      position: { x: 0, y: 0 },
+    },
+    {
+      multiplier: 1,
+      grounded: true,
+      position: { x: 0, y: 0 },
+    },
+  ],
+  mountains: [
+    {
+      multiplier: 0,
+      grounded: false,
+      position: { x: 0, y: 0 },
+    },
+    {
+      multiplier: 0.03,
+      grounded: true,
+      position: { x: 0, y: 0 },
+    },
+    {
+      multiplier: 0.05,
+      grounded: true,
+      position: { x: 0, y: 0 },
+    },
+    {
+      multiplier: 0.1,
+      grounded: true,
+      position: { x: 0, y: 0 },
+    },
+    {
+      multiplier: 1,
+      grounded: true,
+      position: { x: 0, y: 0 },
+    },
+  ],
+  industrial: [
+    {
+      multiplier: 0,
+      grounded: true,
+      position: { x: 0, y: 0 },
+    },
+    {
+      multiplier: 0.05,
+      grounded: true,
+      position: { x: 0, y: 0 },
+    },
+    {
+      multiplier: 0.1,
+      grounded: true,
+      position: { x: 0, y: 0 },
+    },
+    {
+      multiplier: 1,
+      grounded: true,
+      position: { x: 0, y: 0 },
+    },
+  ],
+  space: [
+    {
+      multiplier: 0,
+      grounded: false,
+      position: { x: 0, y: 0 },
+    },
+    {
+      multiplier: 0.003,
+      grounded: false,
+      position: { x: 0, y: 0 },
+    },
+    {
+      multiplier: 0.05,
+      grounded: false,
+      position: { x: 0, y: 0 },
+    },
+    {
+      multiplier: 0.1,
+      grounded: false,
+      position: { x: 0, y: 0 },
+    },
+    {
+      multiplier: 1,
+      grounded: false,
+      position: { x: 0, y: 0 },
+    },
+  ],
 };
 
 // -------------- SKILLS & EFFECTS
@@ -237,28 +200,24 @@ const AFFINITIES = [
   {
     name: { 1: "fire", 2: "feux" },
     skill_name: { 1: "Fireball", 2: "Flamme Arcanique" },
-    weakness: "ice",
     color: "red",
     cast_effect: "cast_fire",
   },
   {
     name: { 1: "ice", 2: "glace" },
     skill_name: { 1: "Hailstorm", 2: "Tempête Verglaçante" },
-    weakness: "fire",
     color: "blue",
     cast_effect: "cast_ice",
   },
   {
     name: { 1: "poison", 2: "poison" },
     skill_name: { 1: "Venom Spray", 2: "Pluie Venimeuse" },
-    weakness: "shock",
     color: "green",
     cast_effect: "cast_poison",
   },
   {
     name: { 1: "shock", 2: "électrique" },
     skill_name: { 1: "Electro Surge", 2: "Surge Électrique" },
-    weakness: "poison",
     color: "blue",
     cast_effect: "cast_shock",
   },
@@ -270,7 +229,7 @@ const SKILL_LEVELS = [
     length: 4,
     sequences: [1134, 2232, 3321, 4422],
     damage: 1,
-    mana: 5,
+    mana_cost: 5,
     cost: 50,
   },
   {
@@ -278,7 +237,7 @@ const SKILL_LEVELS = [
     length: 6,
     sequences: [131422, 232433, 324211, 442144],
     damage: 3,
-    mana: 15,
+    mana_cost: 15,
     cost: 100,
   },
   {
@@ -286,7 +245,7 @@ const SKILL_LEVELS = [
     length: 8,
     sequences: [31413321, 41322432, 31423213, 23142342],
     damage: 6,
-    mana: 30,
+    mana_cost: 30,
     cost: 200,
   },
 ];
@@ -333,10 +292,74 @@ const SKILLS = {
   poison: {
     name: { 1: "Venom Spray", 2: "Pluie Venimeuse" },
     sequence: 23,
+    stats: {
+      affinity: "poison",
+      cooldown: 1,
+      damage: 1,
+      mana_cost: 5,
+    },
   },
   shock: {
     name: { 1: "Electro Surge", 2: "Surge Électrique" },
     sequence: 34,
+    stats: {
+      affinity: "shock",
+      cooldown: 1,
+      damage: 1,
+      mana_cost: 5,
+    },
+  },
+};
+
+const SPELLS = {
+  // FIRE
+  1334: {
+    name: { 1: "Scorch", 2: "Feu Torride" },
+    affinity: 0,
+    cooldown: 1,
+    damage: 1,
+    mana_cost: 5,
+    cost: 50,
+    image: "",
+  },
+  2232: {
+    name: { 1: "Fireball", 2: "Flamme Arcanique" },
+    affinity: 0,
+    cooldown: 1,
+    damage: 3,
+    mana_cost: 5,
+    cost: 50,
+    image: "",
+  },
+  // ICE
+  3321: {
+    name: { 1: "Hailstorm", 2: "Tempête Verglaçante" },
+    affinity: 1,
+    cooldown: 1,
+    damage: 3,
+    mana_cost: 5,
+    cost: 50,
+    image: "",
+  },
+  // POISON
+  2232: {
+    name: { 1: "Venom Spray", 2: "Pluie Venimeuse" },
+    affinity: 2,
+    cooldown: 1,
+    damage: 3,
+    mana_cost: 5,
+    cost: 50,
+    image: "",
+  },
+  // SHOCK
+  4422: {
+    name: { 1: "Electro Surge", 2: "Surge Électrique" },
+    affinity: 3,
+    cooldown: 1,
+    damage: 3,
+    mana_cost: 5,
+    cost: 50,
+    image: "",
   },
 };
 
@@ -360,9 +383,11 @@ const PLAYER = {
     layer: "actors",
     spritesheet: "./public/Assets/player/player.png",
     transition_property: "height",
-    containers: {
-      sequence: "p_sequence",
-      damage: "p_damage",
+    elements: {
+      1: "1-img",
+      2: "2-img",
+      3: "3-img",
+      4: "4-img",
       health_container: "p_health_container",
       health_text: "p_health_text",
       health_overlay: "p_health_fill_overlay",
@@ -371,6 +396,9 @@ const PLAYER = {
       mana_text: "p_mana_text",
       mana_overlay: "p_mana_fill_overlay",
       mana: "p_mana_fill",
+      damage: "p_damage",
+      sequence: "p_sequence",
+      input: "p_input",
     },
     sprites: {
       scale: 1,
@@ -404,7 +432,7 @@ const PLAYER = {
 const OPPONENT = {
   fx: {
     transition_property: "width",
-    containers: {
+    elements: {
       ui: "o_ui",
       name: "o_name",
       damage: "o_damage",
@@ -486,7 +514,9 @@ const OPPONENT_NAMES = {
 const LEVELS = [
   {
     opponents: {
+      scene: 0,
       count: 5,
+      payout: 100,
       base: {
         health: 2,
         cooldown: 3,
@@ -501,7 +531,9 @@ const LEVELS = [
   },
   {
     opponents: {
+      scene: 0,
       count: 5,
+      payout: 150,
       base: {
         health: 2,
         cooldown: 3,

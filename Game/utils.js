@@ -61,7 +61,7 @@ function newProfile() {
 }
 
 function isWithinPlayerProgress(level) {
-  const max = Level.instance.profile.level_progress;
+  const max = Game.instance.profile.level_progress;
 
   return level <= max;
 }
@@ -100,7 +100,7 @@ function getInLang(displayOptions) {
   return displayOptions[lang] || displayOptions[LANGS[0]];
 }
 
-function getSkillName(affinity, strength) {
+function getSpellName(affinity, strength) {
   const skillname = getInLang(AFFINITIES[affinity].skill_name);
   const adj = getInLang(SKILL_LEVELS[strength].name);
 
@@ -126,7 +126,7 @@ function changeScreen(fromScreenId, toScreenId, isNewGame) {
   const toScreen = document.getElementById(toScreenId);
 
   if (fromScreenId === SCREENS.GAME) {
-    Level.quitInstance();
+    Game.quitInstance();
   }
 
   switch (toScreenId) {
@@ -134,10 +134,10 @@ function changeScreen(fromScreenId, toScreenId, isNewGame) {
       break;
     case SCREENS.MAP:
       if (isNewGame) {
-        Level.instance.profile = newProfile();
+        Game.instance.profile = newProfile();
       }
 
-      const max = Level.instance.profile.level_progress;
+      const max = Game.instance.profile.level_progress;
       for (var i = 0; i < LEVELS.length; i++) {
         const levelBtn = getFromContainer(toScreen, "btn_level" + i);
         const availability = i <= max ? 1 : 0;
@@ -147,11 +147,11 @@ function changeScreen(fromScreenId, toScreenId, isNewGame) {
       }
       break;
     default:
-      Level.STOPPED = false;
-      Level.PAUSED = false;
-      Level.instance.setLevel(Level.selectedLevel);
-      Level.resetInstance();
-      Level.instance.play();
+      Game.STOPPED = false;
+      Game.PAUSED = false;
+      Game.instance.setLevel(Game.selectedLevel);
+      Game.resetInstance();
+      Game.instance.play();
   }
 
   fromScreen.classList.add("fade-out");
@@ -174,7 +174,7 @@ function updateScreen(toScreenId) {
     case SCREENS.MAIN:
       break;
     case SCREENS.MAP:
-      const max = Level.instance.profile.level_progress;
+      const max = Game.instance.profile.level_progress;
       for (var i = 0; i < LEVELS.length; i++) {
         const levelBtn = getFromContainer(screen, "btn_level" + i);
         const availability = i <= max ? 1 : 0;
@@ -184,11 +184,11 @@ function updateScreen(toScreenId) {
       }
       break;
     default:
-      Level.STOPPED = false;
-      Level.PAUSED = false;
-      Level.instance.setLevel(selectedLevel);
-      Level.resetInstance();
-      Level.instance.play();
+      Game.STOPPED = false;
+      Game.PAUSED = false;
+      Game.instance.setLevel(selectedLevel);
+      Game.resetInstance();
+      Game.instance.play();
   }
 }
 
@@ -218,7 +218,7 @@ function setGameStatusVisibility(elemId) {
 function updateMap() {
   const container = document.getElementById("level_select_container");
 
-  const max = Level.instance.profile.level_progress;
+  const max = Game.instance.profile.level_progress;
   for (var i = 0; i < LEVELS.length; i++) {
     const levelBtn = getFromContainer(container, i);
     const availability = i <= max ? 1 : 0;
@@ -234,7 +234,7 @@ function updateLevelSelection(level) {
 
     document.getElementById("selected_level").textContent =
       displayText + ": " + (level + 1);
-    Level.selectedLevel = level;
+    Game.selectedLevel = level;
   }
 }
 
@@ -292,15 +292,8 @@ function triggerFlashFX(affinity) {
   triggerFX(element, "flash");
 }
 
-function triggerShakeFX(containerID) {
-  const element = document.getElementById(containerID);
-  // const baseline = 5;
-
-  // if (intensity) {
-  //   intensity = intensity * baseline;
-  //   document.documentElement.style.setProperty("--shake", intensity + "px");
-  // }
+function triggerShakeFX(id) {
+  const element = document.getElementById(id);
 
   triggerFX(element, "shake");
-  // document.documentElement.style.setProperty("--shake", baseline + "px");
 }

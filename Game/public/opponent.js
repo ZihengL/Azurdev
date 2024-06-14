@@ -1,20 +1,14 @@
-function Opponent(image, stats, fx, name, level) {
-  Caster.call(this, image, stats, fx, stats.skills);
+function Opponent(image, stats, fx, name, player) {
+  Caster.call(this, image, stats, fx, stats.spells, player);
 
-  this.level = level;
-  this.opponent = this.level.player;
+  this.opponent = player;
   this.cooldown = this.stats.cooldown;
-  this.currentSkill = this.getRandomSkill();
-  this.nextSkill = this.getRandomSkill();
+  this.currentSpell = this.getRandomSpell();
+  this.nextSpell = this.getRandomSpell();
 
   this.name = name;
-  this.containers = OPPONENT.fx.containers;
-  this.transitionProperty = OPPONENT.fx.transition_property;
-
-  document.getElementById(this.containers.name).textContent =
-    this.name.toUpperCase();
-  this.damageElement = document.getElementById(this.containers.damage);
-  setHidden(this.containers.ui, true);
+  this.elements.name.textContent = this.name.toUpperCase();
+  this.elements.ui.classList.add("hidden");
 }
 Opponent.prototype = Object.create(Caster.prototype);
 Opponent.prototype.constructor = Opponent;
@@ -38,17 +32,17 @@ Opponent.load = function () {
   });
 };
 
-Opponent.generateInstance = function (base, modifiers, level) {
+Opponent.generateInstance = function (base, modifiers, game) {
   const type = getRandomValue(modifiers.types);
   const strength = getRandomValue(modifiers.strengths);
   const affinity = getRandomValue(modifiers.affinities);
   const typeOptions = OPPONENTS[type];
-  const image = Level.res.opponent[type];
+  const image = Game.res.opponent[type];
 
   const stats = {
     strength: strength,
     affinity: affinity,
-    skills: [affinity + "-" + strength],
+    spells: [affinity + "-" + strength],
     health: base.health * typeOptions.health_multiplier,
     cooldown: base.cooldown * typeOptions.cooldown_multiplier,
     gold: base.gold * typeOptions.gold_multiplier,
@@ -57,9 +51,9 @@ Opponent.generateInstance = function (base, modifiers, level) {
   const fx = Object.assign({}, OPPONENT.fx);
   fx.sprites.rows = typeOptions.rows;
 
-  const name = Opponent.generateName(level.lang, typeOptions.name, stats);
+  const name = Opponent.generateName(game.lang, typeOptions.name, stats);
 
-  return new Opponent(image, stats, fx, name, level);
+  return new Opponent(image, stats, fx, name, game.player);
 };
 
 Opponent.generateName = function (lang, names, options) {
@@ -90,15 +84,15 @@ Opponent.prototype.update = function (deltaTime) {
       state = STATES.DEATH;
       if (this.spriteHandler.isAtEndofAnim(state)) {
         this.spriteHandler.targetPos = this.positions.end;
-        setHidden(this.containers.ui, true);
+        this.elements.ui.classList.add("hidden");
       }
     } else {
       if (this.isOnTargetPos() && !this.opponent.isDead()) {
-        setHidden(this.containers.ui, false);
+        this.elements.ui.classList.remove("hidden");
 
         if (this.updateCooldown(deltaTime)) {
           state = STATES.CAST;
-          this.cast();
+          this.castSpell(this.spells[0]);
         }
       } else {
         state = STATES.IDLE;
@@ -133,38 +127,40 @@ Opponent.prototype.render = function () {
 // -------------- RENDER
 
 Opponent.prototype.updateUI = function () {
-  Caster.prototype.updateUI.call(this);
-
-  const cdfill = document.getElementById(this.containers.cooldown);
+  Caster.prototype.updateUI.call(this, "width");
 
   if (this.isDead() || this.opponent.isDead()) {
-    cdfill.style.width = "0%";
+    this.elements.cooldown.style.width = "0%";
   } else {
-    cdfill.style.width = percentage(this.cooldown, this.stats.cooldown) + "%";
+    this.elements.cooldown.style.width =
+      percentage(this.cooldown, this.stats.cooldown) + "%";
   }
 };
+
+// -------------- STATUS EFFECTS
 
 Opponent.prototype.applyEffect = function (damage, affinity) {
   if (affinity !== this.stats.affinity) {
     Caster.prototype.applyEffect.call(this, damage);
 
     this.cooldown = this.stats.cooldown;
-    triggerShakeFX(this.containers.cooldown_container);
+    triggerFX(this.elements.cooldown_container, "shake");
   }
 };
 
-// -------------- OTHER
+// -------------- MISC
 
 Opponent.prototype.isRemovable = function () {
   return this.spriteHandler.pos.isEqual(this.positions.end);
 };
 
-Opponent.prototype.getRandomSkill = function () {
-  return Math.floor(Math.random() * this.skills.length);
+Opponent.prototype.getRandomSpell = function () {
+  return Math.floor(Math.random() * this.spells.length);
 };
 
-Opponent.prototype.cast = function () {
-  this.skills[0].createProjectile();
+Opponent.prototype.castSpell = function (spell) {
+  Caster.prototype.castSpell.call(this, spell);
+
   this.cooldown = this.stats.cooldown;
-  triggerFX(document.getElementById("o_cooldown_container"), "bump");
+  triggerFX(this.elements.cooldown_container, "bump");
 };

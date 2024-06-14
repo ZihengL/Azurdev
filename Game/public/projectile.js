@@ -1,8 +1,8 @@
 function Projectile(target, damage, affinity, position, fx) {
+  this.target = target;
   this.damage = damage;
   this.affinity = affinity;
   this.pos = position;
-  this.target = target;
   this.fx = fx;
 
   this.velocity = new Vector2D(0, 0);
@@ -10,15 +10,15 @@ function Projectile(target, damage, affinity, position, fx) {
 }
 
 Projectile.prototype.getTargetCenter = function () {
-  return this.target.bodyCenter();
+  return this.target.getBodyCenter();
 };
 
 Projectile.prototype.isOnTarget = function () {
-  return this.pos.isEqual(this.target.bodyCenter());
+  return this.pos.isEqual(this.target.getBodyCenter());
 };
 
 Projectile.prototype.update = function (deltaTime) {
-  const targetCenter = this.target.bodyCenter();
+  const targetCenter = this.target.getBodyCenter();
 
   if (!this.pos.isEqual(targetCenter)) {
     const direction = this.pos.direction(targetCenter);

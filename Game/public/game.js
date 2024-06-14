@@ -7,107 +7,103 @@
 
 // TODO: SKILL UPDATE/RENDER, PLAYER INTEGRATION, MOB SPAWNING, LEVEL COMPLETION
 
-function Level(lang, profile) {
+function Game(lang, profile) {
   this.lang = lang || LANGS[0];
   this.profile = profile || loadProfile();
 
   this.lastUpdate = null;
   this.lastKeyPressed = null;
 
-  this.background = new Background(Level.res.background);
+  this.background = new Background(Game.res.background);
   this.setLevel(this.profile.level_progress);
 }
-Level.STOPPED = false;
-Level.PAUSED = false;
+Game.STOPPED = false;
+Game.PAUSED = false;
 
-Level.instance = null;
-Level.selectedLevel = 0;
-Level.res = {};
+Game.instance = null;
+Game.selectedLevel = 0;
+Game.res = {};
 
 // -------------- STATIC
 
-Level.load = function () {
+Game.load = function () {
   return Background.load().then(function (res) {
-    Level.res.background = res;
+    Game.res.background = res;
 
     return Player.load().then(function (res) {
-      Level.res.player = res;
+      Game.res.player = res;
 
       return Opponent.load().then(function (res) {
-        Level.res.opponent = res;
-
-        // return Skill.load().then(function (res) {
-        //   Level.res.skills = res;
-        // });
+        Game.res.opponent = res;
       });
     });
   });
 };
 
-Level.setInstance = function (lang, level) {
+Game.setInstance = function (lang, level) {
   const profile = loadProfile();
   level = level || profile.level_progress;
 
-  if (!Level.instance || Level.instance.selectedLevel !== level) {
-    return Level.load().then(function () {
-      Level.instance = new Level(lang, profile);
+  if (!Game.instance || Game.instance.selectedLevel !== level) {
+    return Game.load().then(function () {
+      Game.instance = new Game(lang, profile);
 
-      return Level.instance;
+      return Game.instance;
     });
   } else {
-    return Level.instance;
+    return Game.instance;
   }
 };
 
-Level.input = function (value) {
-  if (!Level.STOPPED && !Level.isLevelEnded()) {
-    Level.instance.lastKeyPressed = value;
+Game.input = function (value) {
+  if (!Game.STOPPED && !Game.isLevelEnded()) {
+    Game.instance.lastKeyPressed = value;
   }
 };
 
-Level.quitInstance = function () {
-  const instance = Level.instance;
+Game.quitInstance = function () {
+  const instance = Game.instance;
 
   if (instance) {
-    Level.STOPPED = true;
+    Game.STOPPED = true;
   }
 };
 
-Level.pauseInstance = function () {
-  if (Level.instance) {
-    Level.setPause(!Level.PAUSED);
+Game.pauseInstance = function () {
+  if (Game.instance) {
+    Game.setPause(!Game.PAUSED);
   }
 };
 
-Level.resetInstance = function () {
-  const instance = Level.instance;
+Game.resetInstance = function () {
+  const instance = Game.instance;
 
   if (instance) {
-    instance.setLevel(Level.selectedLevel);
+    instance.setLevel(Game.selectedLevel);
   }
 };
 
-Level.setLevel = function (level) {
-  Level.selectedLevel = level;
-  Level.instance.setLevel(level);
+Game.setLevel = function (level) {
+  Game.selectedLevel = level;
+  Game.instance.setLevel(level);
 };
 
-Level.setPause = function (toPause) {
-  Level.PAUSED = toPause || !Level.PAUSED;
-  setVisibility(document.getElementById("status_paused"), Level.PAUSED);
+Game.setPause = function (toPause) {
+  Game.PAUSED = toPause || !Game.PAUSED;
+  setVisibility(document.getElementById("status_paused"), Game.PAUSED);
 };
 
-Level.setStop = function (toStop) {
-  Level.STOPPED = toStop || !Level.STOPPED;
+Game.setStop = function (toStop) {
+  Game.STOPPED = toStop || !Game.STOPPED;
 };
 
-Level.isLevelEnded = function () {
-  return Level.instance.isWon() || Level.instance.isLost();
+Game.isLevelEnded = function () {
+  return Game.instance.isWon() || Game.instance.isLost();
 };
 
 // -------------- SETUP
 
-Level.prototype.setLevel = function (level) {
+Game.prototype.setLevel = function (level) {
   this.profile = loadProfile();
 
   const options = LEVELS[level] || LEVELS[0];
@@ -116,7 +112,7 @@ Level.prototype.setLevel = function (level) {
   this.sequences = options.sequence;
   this.killcount = 0;
 
-  this.player = new Player(this.profile, null, this);
+  this.player = new Player(this.profile, null);
   this.opponent = this.getRandomOpponent();
   this.player.opponent = this.opponent;
 
@@ -124,11 +120,11 @@ Level.prototype.setLevel = function (level) {
   this.background.generate();
 };
 
-Level.prototype.play = function (tickrate) {
-  Level.STOPPED = false;
-  Level.PAUSED = false;
+Game.prototype.play = function (tickrate) {
+  Game.STOPPED = false;
+  Game.PAUSED = false;
 
-  Level.setLevel(Level.selectedLevel);
+  Game.setLevel(Game.selectedLevel);
   this.lastKeyPressed = null;
   this.lastUpdate = Date.now();
   this.gameloop(tickrate);
@@ -136,38 +132,37 @@ Level.prototype.play = function (tickrate) {
   setGameStatusVisibility();
 };
 
-Level.prototype.gameloop = function (tickrate) {
-  const self = this;
+Game.prototype.gameloop = function (tickrate) {
+  var gameID = setInterval(
+    function () {
+      var now = Date.now();
+      var deltaTime = (now - this.lastUpdate) / 1000;
+      this.lastUpdate = now;
 
-  var gameID = setInterval(function () {
-    var now = Date.now();
-    var deltaTime = (now - self.lastUpdate) / 1000;
-    self.lastUpdate = now;
-
-    // ON WIN OR LOSE
-
-    if ((self.isWon() || self.isLost()) && self.updateLevelEnd(deltaTime)) {
-      Level.STOPPED = true;
-    }
-
-    if (!Level.STOPPED) {
-      if (!Level.PAUSED) {
-        self.update(deltaTime);
+      // ON WIN OR LOSE
+      if ((this.isWon() || this.isLost()) && this.updateLevelEnd(deltaTime)) {
+        Game.STOPPED = true;
       }
-      self.render();
-    } else {
-      clearInterval(gameID);
-      self.player.save(self.profile);
-      // saveProfile(self.profile);
-      changeScreen(SCREENS.GAME, SCREENS.MAP);
-    }
-  }, tickrate);
+
+      if (!Game.STOPPED) {
+        if (!Game.PAUSED) {
+          this.update(deltaTime);
+        }
+        this.render();
+      } else {
+        this.player.save(this.profile);
+        clearInterval(gameID);
+        changeScreen(SCREENS.GAME, SCREENS.MAP);
+      }
+    }.bind(this),
+    tickrate
+  );
 };
 
 // -------------- UPDATE
 
-Level.prototype.update = function (deltaTime) {
-  this.player.update(deltaTime);
+Game.prototype.update = function (deltaTime) {
+  this.player.update(deltaTime, this.lastKeyPressed);
   this.opponent.update(deltaTime);
   this.background.update(this.player.getState());
 
@@ -183,13 +178,13 @@ Level.prototype.update = function (deltaTime) {
   this.lastKeyPressed = null;
 };
 
-Level.prototype.updateLevelEnd = function (deltaTime) {
+Game.prototype.updateLevelEnd = function (deltaTime) {
   if (!this.endDelay) {
     this.endDelay = DISPLAY.other.delays.end_delay;
     setGameStatusVisibility(this.isWon() ? "status_victory" : "status_defeat");
 
     if (this.isWon()) {
-      this.player.setDestination(this.player.positions.end);
+      this.player.setTargetPosition(this.player.positions.end);
       this.profile.level_progress = Math.min(
         this.profile.level_progress + 1,
         LEVELS.length - 1
@@ -205,73 +200,22 @@ Level.prototype.updateLevelEnd = function (deltaTime) {
 
 // -------------- RENDER
 
-Level.prototype.render = function () {
+Game.prototype.render = function () {
   surface.clear();
   this.background.render();
   this.opponent.render();
   this.player.render();
 };
 
-// -------------- SEQUENCING
+// -------------- GETTERS / SETTERS
 
-Level.prototype.input = function (value) {
-  if (!Level.STOPPED && !Level.isLevelEnded()) {
+Game.prototype.input = function (value) {
+  if (!Game.STOPPED && !Game.isLevelEnded()) {
     this.lastKeyPressed = value;
   }
 };
 
-Level.prototype.generateSequence = function () {
-  this.sequence = [];
-  this.currentIndex = 0;
-
-  for (var i = 0; i < this.sequences.length; i++) {
-    this.sequence.push(getRandomValue(SEQUENCE));
-  }
-};
-
-Level.prototype.checkSequence = function () {
-  const currentValue = this.sequence[this.currentIndex];
-
-  if (value === currentValue) {
-    this.currentIndex++;
-    return true;
-  }
-
-  return !value;
-};
-
-Level.prototype.isSequenceComplete = function () {
-  return this.currentIndex >= this.sequence.length;
-};
-
-// -------------- WIN & LOSE
-
-Level.prototype.isWon = function () {
-  return this.killcount >= this.opponents.count;
-};
-
-Level.prototype.isLost = function () {
-  return this.player.health === 0;
-};
-
-// If win/lose conditions met and subsequent animations are also complete.
-Level.prototype.isLevelComplete = function () {
-  return (
-    (this.player.isDead() || this.killcount >= this.opponents.count) &&
-    Level.STOPPED
-  );
-};
-
-// -------------- OPPONENT
-
-Level.prototype.setOpponent = function () {
-  if (!this.opponent || this.opponent.isRemovable()) {
-    this.opponent = this.getRandomOpponent();
-    this.player.opponent = this.opponent;
-  }
-};
-
-Level.prototype.getRandomOpponent = function () {
+Game.prototype.getRandomOpponent = function () {
   return Opponent.generateInstance(
     this.opponents.base,
     this.opponents.modifiers,
@@ -279,43 +223,55 @@ Level.prototype.getRandomOpponent = function () {
   );
 };
 
-// Level.prototype.getRandomOpponent = function () {
-//   const key = getRandomValue(this.opponents.types);
-//   const options = OPPONENTS[key];
-
-//   return new Opponent(Level.res.opponent, options, this.player, this);
-// };
-
-// -------------- OTHER
-
-Level.prototype.areOnTargetPos = function () {
-  return this.player.isOnTargetPos() && this.opponent.isOnTargetPos();
+Game.prototype.setOpponent = function () {
+  if (!this.opponent || this.opponent.isRemovable()) {
+    this.opponent = this.getRandomOpponent();
+    this.player.opponent = this.opponent;
+  }
 };
 
-Level.prototype.areAlive = function () {
-  return !this.player.isDead() && !this.opponent.isDead();
-};
-
-Level.prototype.areInCombatPos = function () {
-  return this.player.isInCombatPos() && this.opponent.isInCombatPos();
-};
-
-Level.prototype.areInCombat = function () {
-  return this.areAlive() && this.areInCombatPos();
-};
-
-Level.prototype.setStatus = function (elemId) {
-  // for (key in DISPLAY.other.game_status) {
-  //   const element = document.getElementById(key);
-
-  //   setVisibility(element, element.id === elemId);
-  // }
-
+Game.prototype.setStatus = function (elemId) {
   DISPLAY.other.game_status.forEach(function (id) {
     const element = document.getElementById(id);
 
     setVisibility(element, element.id === elemId);
   });
+};
+
+// -------------- WIN & LOSE
+
+Game.prototype.isWon = function () {
+  return this.killcount >= this.opponents.count;
+};
+
+Game.prototype.isLost = function () {
+  return this.player.health === 0;
+};
+
+// If win/lose conditions met and subsequent animations are also complete.
+Game.prototype.isLevelComplete = function () {
+  return (
+    (this.player.isDead() || this.killcount >= this.opponents.count) &&
+    Game.STOPPED
+  );
+};
+
+// -------------- MISC
+
+Game.prototype.areOnTargetPos = function () {
+  return this.player.isOnTargetPos() && this.opponent.isOnTargetPos();
+};
+
+Game.prototype.areAlive = function () {
+  return !this.player.isDead() && !this.opponent.isDead();
+};
+
+Game.prototype.areInCombatPos = function () {
+  return this.player.isInCombatPos() && this.opponent.isInCombatPos();
+};
+
+Game.prototype.areInCombat = function () {
+  return this.areAlive() && this.areInCombatPos();
 };
 
 // Level.prototype.gameloop = function (tickrate) {
