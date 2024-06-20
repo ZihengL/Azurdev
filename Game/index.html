@@ -12,13 +12,12 @@
     <div id="viewport">
       <!-- -----------------------  MAIN  ----------------------- -->
       <div id="screen_main" class="screen active">
-        <button id="btn_lang" onclick="changeLanguage();"></button>
-
         <h1 id="menu_title"></h1>
 
-        <div id="main_menu_bottom">
-          <button id="btn_map" onclick="changeScreen(SCREENS.MAIN, SCREENS.MAP);"></button>
-          <button id="btn_newgame" onclick="changeScreen(SCREENS.MAIN, SCREENS.MAP, true);"></button>
+        <div id="screen_main_btns" class="nav">
+          <button id="btn_continue" onclick="changeScreen(SCREENS.MAIN.id, SCREENS.MAP.id);"></button>
+          <button id="btn_newgame" onclick="changeScreen(SCREENS.MAIN.id, SCREENS.MAP.id, true);"></button>
+          <button id="btn_lang" onclick="changeLanguage();"></button>
         </div>
       </div>
 
@@ -27,12 +26,11 @@
         <h1 id="selected_level"></h1>
         <div id="level_select_container" class="center"></div>
 
-        <div id="map_screen_btns">
-          <button id="btn_play" onclick="changeScreen(SCREENS.MAP, SCREENS.GAME);"></button>
-          <button id="btn_back" onclick="changeScreen(SCREENS.MAP, SCREENS.MAIN);"></button>
+        <div id="screen_map_btns" class="nav">
+          <button id="btn_play" onclick="changeScreen(SCREENS.MAP.id, SCREENS.GAME.id);"></button>
+          <button id="btn_back" onclick="changeScreen(SCREENS.MAP.id, SCREENS.MAIN.id);"></button>
         </div>
       </div>
-    <!-- </div> -->
 
     <!-- -----------------------  GAME  ----------------------- -->
     <div id="screen_game" class="screen">
@@ -41,9 +39,9 @@
       <canvas id="effects" class="game-canvas"></canvas>
       <canvas id="ui" class="game-canvas"></canvas>
 
-      <div id="game_screen_btns">
+      <div id="screen_game_btns" class="nav">
         <button id="btn_pauseLevel" class="level-btns" onclick="Level.pauseInstance();"></button>
-        <button id="btn_quitLevel" class="level-btns" onclick="changeScreen(SCREENS.GAME, SCREENS.MAP);"></button>
+        <button id="btn_quitLevel" class="level-btns" onclick="changeScreen(SCREENS.GAME.id, SCREENS.MAP.id);"></button>
       </div>
 
       <div id="p_damage" class="entity-center"></div>
@@ -123,6 +121,7 @@
     <script src="./localstorage.js"></script>
     <script src="./config.js"></script>
     <script src="./utils.js"></script>
+    <script src="./public/screen.js"></script>
     <script src="./public/vector.js"></script>
     <script src="./public/surface.js"></script>
     <script src="./public/backgrounds.js"></script>

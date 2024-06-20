@@ -40,7 +40,7 @@ Background.load = function () {
 // -------------- UPDATE
 
 Background.prototype.update = function (state) {
-  const velocity = SPRITES.velocity;
+  const velocity = 2.5;
 
   for (var i = 0; i < this.scene.length; i++) {
     const layer = this.scene[i];
@@ -78,9 +78,7 @@ Background.prototype.render = function () {
 
 // -------------- OTHER
 
-Background.prototype.generate = function () {
-  const keys = Object.keys(BACKGROUNDS);
-  const key = keys[Math.floor(Math.random() * keys.length)];
+Background.prototype.setScene = function (key) {
   const scene = BACKGROUNDS[key];
 
   this.scene = [];
@@ -96,7 +94,7 @@ Background.prototype.generate = function () {
   }
 };
 
-Background.prototype.loadScene = function () {
+Background.prototype.generate = function () {
   const keys = Object.keys(BACKGROUNDS);
   const key = keys[Math.floor(Math.random() * keys.length)];
   const scene = BACKGROUNDS[key];

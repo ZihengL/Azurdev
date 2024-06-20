@@ -46,9 +46,9 @@
 
 const jumptogame = false;
 
-function changeNavigationSelection() {}
+function changeNavSelection(screenId, isIncrement) {}
 
-function inputAction(action, key, id) {
+function inputAction(action, key, screenId) {
   console.log(action, key);
 
   switch (action) {
@@ -65,10 +65,10 @@ function inputAction(action, key, id) {
       Game.quitInstance();
       break;
     case "PLAY":
-      changeScreen(SCREENS.MAP, SCREENS.GAME);
+      changeScreen(SCREENS.screen_map.id, SCREENS.screen_game.id);
       break;
     case "MAP_TO_MAIN":
-      changeScreen(SCREENS.MAP, SCREENS.MAIN);
+      changeScreen(SCREENS.screen_map.id, SCREENS.screen_main.id);
       break;
     case "REDUCE_LEVEL":
       updateLevelSelection(Game.selectedLevel - 1);
@@ -77,17 +77,17 @@ function inputAction(action, key, id) {
       updateLevelSelection(Game.selectedLevel + 1);
       break;
     case "CONTINUE_GAME":
-      changeScreen(SCREENS.MAIN, SCREENS.MAP);
+      changeScreen(SCREENS.screen_main.id, SCREENS.screen_map.id);
       break;
     case "NEW_GAME":
-      changeScreen(SCREENS.MAIN, SCREENS.MAP, true);
+      changeScreen(SCREENS.screen_main.id, SCREENS.screen_map.id, true);
       break;
     case "CHANGE_LANGUAGE":
       changeLanguage();
       break;
     default:
       console.log(
-        "Key '" + key + "' not mapped to command on screen id: " + id
+        "Key '" + key + "' not mapped to command on screen id: " + screenId
       );
   }
 }
@@ -100,27 +100,35 @@ const tickrate = 1000 / fps;
 
 var lang = 1;
 
+const screen = new Screen(lang);
+
 Game.setInstance(lang).then(function (instance) {
-  const level = instance;
   var profile = instance.profile;
 
   // CONTROLS EVENT LISTENER
   document.addEventListener("keydown", function (event) {
-    const currentScreens = document.querySelectorAll(".screen.active");
+    const actives = document.querySelectorAll(".screen.active");
+    if (actives.length > 1) return;
 
-    if (currentScreens.length > 1) {
-      return;
-    }
-
-    const currentScreen = currentScreens[0];
+    const currentScreen = actives[0];
     const keymap = KEYMAPS[currentScreen.id];
     const key = event.key.toString();
+
+    console.log(key);
 
     for (const action in keymap) {
       const keyarray = keymap[action];
 
       if (keyarray.map(String).indexOf(key) !== -1) {
         inputAction(action, key, currentScreen.id);
+      }
+    }
+
+    const value = KEYMAPS[currentScreen.id][key];
+
+    if (value) {
+      if (currentScreen.id === "screen_game") {
+      } else {
       }
     }
   });
@@ -147,6 +155,6 @@ Game.setInstance(lang).then(function (instance) {
   changeLanguage();
 
   if (jumptogame) {
-    changeScreen(SCREENS.MAIN, SCREENS.GAME);
+    changeScreen(SCREENS.screen_main, SCREENS.screen_game);
   }
 });

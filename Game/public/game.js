@@ -17,12 +17,12 @@ function Game(lang, profile) {
   this.background = new Background(Game.res.background);
   this.setLevel(this.profile.level_progress);
 }
-Game.STOPPED = false;
-Game.PAUSED = false;
-
 Game.instance = null;
 Game.selectedLevel = 0;
 Game.res = {};
+
+Game.STOPPED = false;
+Game.PAUSED = false;
 
 // -------------- STATIC
 
@@ -238,7 +238,7 @@ Game.prototype.setStatus = function (elemId) {
   });
 };
 
-// -------------- WIN & LOSE
+// -------------- WIN / LOSE
 
 Game.prototype.isWon = function () {
   return this.killcount >= this.opponents.count;
@@ -259,7 +259,7 @@ Game.prototype.isLevelComplete = function () {
 // -------------- MISC
 
 Game.prototype.areOnTargetPos = function () {
-  return this.player.isOnTargetPos() && this.opponent.isOnTargetPos();
+  return this.player.isAtTargetPos() && this.opponent.isAtTargetPos();
 };
 
 Game.prototype.areAlive = function () {

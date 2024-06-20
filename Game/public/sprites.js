@@ -18,7 +18,7 @@ SpriteHandler.id = "actors";
 // -------------- UPDATE
 
 SpriteHandler.prototype.update = function (deltaTime, state) {
-  if (this.lastUpdate >= SPRITES.animation_speed) {
+  if (this.lastUpdate >= 0.25) {
     this.lastUpdate = 0;
     this.updateState(state);
   } else {
@@ -47,7 +47,7 @@ SpriteHandler.prototype.updateState = function (state) {
 };
 
 SpriteHandler.prototype.updatePosition = function () {
-  const velocity = SPRITES.velocity;
+  const velocity = 2.5;
 
   if (this.pos.x > this.targetPos.x) {
     this.pos.x = Math.max(this.pos.x - velocity, this.targetPos.x);
@@ -117,7 +117,7 @@ SpriteHandler.prototype.isResettable = function () {
   );
 };
 
-SpriteHandler.prototype.isOnTargetPos = function () {
+SpriteHandler.prototype.isAtTargetPos = function () {
   return this.pos.isEqual(this.targetPos);
 };
 

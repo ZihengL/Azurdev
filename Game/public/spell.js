@@ -1,18 +1,14 @@
-function Spell(affinity, strength, caster) {
-  const stats = SKILL_LEVELS[strength];
+function Spell(id) {
+  const options = SPELLS[id];
 
-  this.name = getSpellName(affinity, strength);
-  this.affinity = affinity;
-  this.strength = strength;
-  this.damage = stats.damage;
-  this.manacost = stats.mana_cost;
-  this.cost = stats.cost;
+  this.sequence = id;
+  this.name = options.name;
+  this.affinity = options.affinity;
+  this.damage = options.damage;
+  this.cooldown = options.cooldown;
+  this.manacost = options.manacost;
 
-  this.sequence = stats.sequences[affinity].toString();
-  this.stats = stats;
   this.fx = SKILL_FX;
-
-  this.caster = caster;
 }
 
 // -------------- STATIC
@@ -21,9 +17,9 @@ Spell.load = function () {
   const spells = {};
   var sequence = Promise.resolve();
 
-  for (var key in AFFINITIES) {
-    const affinity = AFFINITIES[key];
-    const path = affinity.effect.cast;
+  for (var key in SPELLS) {
+    const spell = SPELLS[key];
+    const path = spell.effect.cast;
 
     sequence = sequence.then(function () {
       return loadImage(path).then(function (image) {
@@ -66,9 +62,10 @@ Spell.prototype.isCastable = function (player) {
   return this.isEqualLength(player.sequence) && player.mana >= this.manacost;
 };
 
-Spell.prototype.createProjectile = function () {
+Spell.prototype.createProjectile = function (origin, target) {
   return new Projectile(
-    this.caster.opponent,
+    origin,
+    target,
     this.damage,
     this.affinity,
     this.caster.getBodyCenter(),

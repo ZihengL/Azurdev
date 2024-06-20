@@ -1,13 +1,13 @@
-function Opponent(image, stats, fx, name, player) {
-  Caster.call(this, image, stats, fx, stats.spells, player);
+function Opponent(id, player) {
+  const options = OPPONENTS[id];
+  console.log()
+  Caster.call(this, Game.res.opponent[id], options, OPPONENT.fx, player);
 
-  this.opponent = player;
-  this.cooldown = this.stats.cooldown;
-  this.currentSpell = this.getRandomSpell();
-  this.nextSpell = this.getRandomSpell();
+  this.spell = this.opponent = player;
+  this.cooldown = this.maxCooldown = options.cooldown;
 
-  this.name = name;
-  this.elements.name.textContent = this.name.toUpperCase();
+  this.name = options.name;
+  this.elements.name.textContent = this.name[lang].toUpperCase();
   this.elements.ui.classList.add("hidden");
 }
 Opponent.prototype = Object.create(Caster.prototype);
@@ -20,8 +20,10 @@ Opponent.load = function () {
   var sequence = Promise.resolve();
 
   OPPONENTS.forEach(function (opponent) {
+    path = "./public/Assets/player/" + opponent.image + ".png";
+
     sequence = sequence.then(function () {
-      return loadImage(opponent.spritesheet).then(function (image) {
+      return loadImage(path).then(function (image) {
         opponents.push(image);
       });
     });
@@ -45,7 +47,6 @@ Opponent.generateInstance = function (base, modifiers, game) {
     spells: [affinity + "-" + strength],
     health: base.health * typeOptions.health_multiplier,
     cooldown: base.cooldown * typeOptions.cooldown_multiplier,
-    gold: base.gold * typeOptions.gold_multiplier,
   };
 
   const fx = Object.assign({}, OPPONENT.fx);
@@ -53,7 +54,7 @@ Opponent.generateInstance = function (base, modifiers, game) {
 
   const name = Opponent.generateName(game.lang, typeOptions.name, stats);
 
-  return new Opponent(image, stats, fx, name, game.player);
+  return new Opponent(type, game.player);
 };
 
 Opponent.generateName = function (lang, names, options) {
@@ -79,7 +80,7 @@ Opponent.generateName = function (lang, names, options) {
 Opponent.prototype.update = function (deltaTime) {
   var state = this.spriteHandler.state;
 
-  if (this.opponent.isOnTargetPos()) {
+  if (this.opponent.isAtTargetPos()) {
     if (this.isDead()) {
       state = STATES.DEATH;
       if (this.spriteHandler.isAtEndofAnim(state)) {
@@ -87,21 +88,17 @@ Opponent.prototype.update = function (deltaTime) {
         this.elements.ui.classList.add("hidden");
       }
     } else {
-      if (this.isOnTargetPos() && !this.opponent.isDead()) {
+      if (this.isAtTargetPos() && !this.opponent.isDead()) {
         this.elements.ui.classList.remove("hidden");
 
         if (this.updateCooldown(deltaTime)) {
           state = STATES.CAST;
-          this.castSpell(this.spells[0]);
+          this.castSpell(this.spell);
         }
       } else {
         state = STATES.IDLE;
       }
     }
-  }
-
-  if (this.projectiles.length > 0) {
-    console.log("PROJ", this.projectiles.length);
   }
 
   Caster.prototype.update.call(this, deltaTime, state);
@@ -119,7 +116,7 @@ Opponent.prototype.updateCooldown = function (deltaTime) {
 Opponent.prototype.render = function () {
   Caster.prototype.render.call(this);
 
-  if (this.isOnTargetPos()) {
+  if (this.isAtTargetPos()) {
     this.updateUI();
   }
 };
@@ -129,12 +126,12 @@ Opponent.prototype.render = function () {
 Opponent.prototype.updateUI = function () {
   Caster.prototype.updateUI.call(this, "width");
 
-  if (this.isDead() || this.opponent.isDead()) {
-    this.elements.cooldown.style.width = "0%";
-  } else {
-    this.elements.cooldown.style.width =
-      percentage(this.cooldown, this.stats.cooldown) + "%";
+  var cooldownValue = 0;
+  if (!this.isDead() && !this.opponent.isDead()) {
+    cooldownValue = percentage(this.cooldown, this.maxCooldown);
   }
+
+  this.elements.cooldown.style.width = cooldownValue + "%";
 };
 
 // -------------- STATUS EFFECTS
@@ -143,7 +140,7 @@ Opponent.prototype.applyEffect = function (damage, affinity) {
   if (affinity !== this.stats.affinity) {
     Caster.prototype.applyEffect.call(this, damage);
 
-    this.cooldown = this.stats.cooldown;
+    this.cooldown = this.maxCooldown;
     triggerFX(this.elements.cooldown_container, "shake");
   }
 };
@@ -154,13 +151,15 @@ Opponent.prototype.isRemovable = function () {
   return this.spriteHandler.pos.isEqual(this.positions.end);
 };
 
-Opponent.prototype.getRandomSpell = function () {
-  return Math.floor(Math.random() * this.spells.length);
-};
+
 
 Opponent.prototype.castSpell = function (spell) {
   Caster.prototype.castSpell.call(this, spell);
 
-  this.cooldown = this.stats.cooldown;
+  this.cooldown = this.maxCooldown;
   triggerFX(this.elements.cooldown_container, "bump");
 };
+
+// Opponent.prototype.getRandomSpell = function () {
+//   return Math.floor(Math.random() * this.spells.length);
+// };

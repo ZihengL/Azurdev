@@ -1,17 +1,7 @@
-function Caster(image, stats, fx, spells, opponent) {
-  this.stats = stats;
+function Caster(image, options, fx, opponent) {
   this.opponent = opponent;
-
-  this.health = this.stats.health;
-
-  // SPELLS
-  this.spells = [];
+  this.maxHealth = this.health = options.health;
   this.projectiles = [];
-  spells.forEach(
-    function (id) {
-      this.spells.push(Spell.getInstanceFromID(id, this));
-    }.bind(this)
-  );
 
   // POSITIONS
   this.positions = {
@@ -62,7 +52,7 @@ Caster.prototype.render = function () {
 };
 
 Caster.prototype.updateUI = function (axis) {
-  const healthValue = percentage(this.health, this.stats.health) + "%";
+  const healthValue = percentage(this.health, this.maxHealth) + "%";
   this.elements.health_overlay.style[axis] = this.elements.health.style[axis] =
     healthValue;
 };
@@ -84,7 +74,9 @@ Caster.prototype.setTargetPosition = function (targetPos) {
 // -------------- STATUS EFFECTS
 
 Caster.prototype.castSpell = function (spell) {
-  this.projectiles.push(spell.createProjectile());
+  this.projectiles.push(
+    spell.createProjectile(this.getBodyCenter(), this.opponent)
+  );
 };
 
 Caster.prototype.applyEffect = function (damage) {
@@ -106,8 +98,8 @@ Caster.prototype.triggerDamageEffects = function (damage) {
 
 // -------------- MISC
 
-Caster.prototype.isOnTargetPos = function () {
-  return this.spriteHandler.isOnTargetPos();
+Caster.prototype.isAtTargetPos = function () {
+  return this.spriteHandler.isAtTargetPos();
 };
 
 Caster.prototype.isAtPos = function (pos) {

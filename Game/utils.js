@@ -125,14 +125,14 @@ function changeScreen(fromScreenId, toScreenId, isNewGame) {
   const fromScreen = document.getElementById(fromScreenId);
   const toScreen = document.getElementById(toScreenId);
 
-  if (fromScreenId === SCREENS.GAME) {
+  if (fromScreenId === SCREENS.screen_game) {
     Game.quitInstance();
   }
 
   switch (toScreenId) {
-    case SCREENS.MAIN:
+    case SCREENS.screen_main.id:
       break;
-    case SCREENS.MAP:
+    case SCREENS.screen_map.id:
       if (isNewGame) {
         Game.instance.profile = newProfile();
       }
@@ -171,9 +171,9 @@ function updateScreen(toScreenId) {
   const screen = document.getElementById(toScreenId);
 
   switch (toScreenId) {
-    case SCREENS.MAIN:
+    case SCREENS.screen_main:
       break;
-    case SCREENS.MAP:
+    case SCREENS.screen_map:
       const max = Game.instance.profile.level_progress;
       for (var i = 0; i < LEVELS.length; i++) {
         const levelBtn = getFromContainer(screen, "btn_level" + i);
@@ -196,12 +196,12 @@ function setToPreviousScreen(current) {
   var previous = null;
 
   switch (current) {
-    case SCREENS.GAME:
-      previous = SCREENS.MAP;
+    case SCREENS.screen_game:
+      previous = SCREENS.screen_map;
       break;
-    case SCREENS.MAP:
+    case SCREENS.screen_map:
     default:
-      previous = SCREENS.MAIN;
+      previous = SCREENS.screen_main;
   }
 
   setToScreen(previous);

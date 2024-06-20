@@ -4,16 +4,24 @@ function Player(saved, opponent) {
     Game.res.player,
     saved.stats,
     PLAYER.fx,
-    saved.spell_ids,
+    saved.spells,
     opponent
   );
 
-  this.mana = this.stats.mana;
-  this.manaRegen = this.stats.mana_regen_sec;
+  this.spells = [];
+  saved.spells.forEach(
+    function (id) {
+      this.spells.push(new Spell(id, this));
+    }.bind(this)
+  );
+
+  this.maxMana = this.mana = saved.stats.mana;
+  this.manaRegen = saved.stats.mana_regen_sec;
   this.regenDelay = 1;
 
   this.sequence = "";
   this.inputLocked = false;
+  // console.log(saved.spells, this.spells);
 }
 Player.prototype = Object.create(Caster.prototype);
 Player.prototype.constructor = Player;
@@ -33,7 +41,7 @@ Player.prototype.save = function (profile) {
   this.spells.forEach(function (spell) {
     spellIds.push(spell.getID());
   });
-  profile.spell_ids = spellIds;
+  profile.spells = spellIds;
 
   saveProfile(profile);
 };
@@ -43,12 +51,12 @@ Player.prototype.save = function (profile) {
 Player.prototype.update = function (deltaTime, value) {
   var state = this.spriteHandler.state;
 
-  if (!this.isOnTargetPos() || !this.opponent.isOnTargetPos()) {
+  if (!this.isAtTargetPos() || !this.opponent.isAtTargetPos()) {
     state = STATES.RUN;
   } else if (this.isDead()) {
     state = STATES.DEATH;
   } else {
-    // TODO: KEEP TO CAST IF
+    // TODO: KEEP TO CAST IF NOT AT LAST INDEX OF SPRITE
     state = STATES.IDLE;
 
     if (value && !this.inputLocked) {
@@ -143,7 +151,7 @@ Player.prototype.updateUI = function () {
   Caster.prototype.updateUI.call(this, "height");
   this.elements.health_text.textContent = Math.floor(this.health);
 
-  const manavalue = percentage(this.mana, this.stats.mana) + "%";
+  const manavalue = percentage(this.mana, this.maxMana) + "%";
   this.elements.mana_overlay.style.height = this.elements.mana.style.height =
     manavalue;
   this.elements.mana_text.textContent = Math.floor(this.mana);
@@ -160,7 +168,7 @@ Player.prototype.updateManaRegen = function (deltaTime) {
 
   if (this.regenDelay <= 0) {
     this.regenDelay = 1;
-    this.mana = Math.min(this.mana + this.manaRegen, this.stats.mana);
+    this.mana = Math.min(this.mana + this.manaRegen, this.maxMana);
   }
 };
 

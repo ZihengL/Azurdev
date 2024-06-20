@@ -12,13 +12,16 @@ const LOCALSTORAGE = {
     },
     gold: 100,
     level_progress: 0,
-    // spell_ids: ["0-0", "1-0", "2-0", "3-0"],
-    spellS: [1334, 3321, 2232, 4422],
+    spells: [1334, 3321, 2232, 4422],
   },
 };
 
 const KEYMAPS = {
   screen_game: {
+    ArrowUp: 1,
+    ArrowDown: 2,
+    ArrowLeft: 3,
+    ArrowRight: 4,
     1: ["1", "ArrowLeft", "a"],
     2: ["2", "ArrowUp", "w"],
     3: ["3", "ArrowDown", "s"],
@@ -28,6 +31,10 @@ const KEYMAPS = {
     EXIT: ["Escape", "461", "1001", "1009", "9"],
   },
   screen_map: {
+    ArrowUp: "MAP_SELECT_UP",
+    ArrowDown: "MAP_SELECT_DOWN",
+    ArrowLeft: "MAP_SELECT_LEFT",
+    ArrowRight: "MAP_SELECT_RIGHT",
     PLAY: ["1", "ArrowUp"],
     MAP_TO_MAIN: ["2", "ArrowDown", "Escape", "461", "1001", "1009"],
     MAP_TO_SHOP: ["3", "ArrowRight"],
@@ -38,6 +45,29 @@ const KEYMAPS = {
     CHANGE_LANGUAGE: ["3", "q"],
     CONTINUE_GAME: ["1", "ArrowUp"],
     NEW_GAME: ["2", "ArrowDown"],
+  },
+};
+
+const KEYS = {
+  IN_GAME: {
+    ArrowUp: 1,
+    ArrowDown: 2,
+    ArrowLeft: 3,
+    ArrowRight: 4,
+    Enter: "PAUSE",
+    1001: "PAUSE",
+    1009: "PAUSE",
+    backspace: "PAUSE",
+  },
+  MENUS: {
+    ArrowUp: "SELECT_UP",
+    ArrowDown: "SELECT_DOWN",
+    ArrowLeft: "SELECT_LEFT",
+    ArrowRight: "SELECT_RIGHT",
+    Enter: "PAUSE",
+    1001: "PAUSE",
+    1009: "PAUSE",
+    backspace: "PAUSE",
   },
 };
 
@@ -53,30 +83,34 @@ const SCREEN = {
 };
 
 const SCREENS = {
-  MAIN: "screen_main",
-  MAP: "screen_map",
-  GAME: "screen_game",
+  screen_main: { id: "screen_main", nav: "screen_main_btns" },
+  screen_map: {
+    id: "screen_map",
+    nav: "screen_map_btns",
+    horizontal_nav: "level_select_container",
+  },
+  screen_game: { id: "screen_game", nav: "screen_game_btns" },
 };
 
 const DISPLAY = {
   elements: {
     screen_main: {
       menu_title: { 1: "COMBO-MAGE", 2: "MÉMO-MAGE" },
-      btn_lang: { 1: "3 FR", 2: "3 EN" },
-      btn_map: { 1: "1 Continue", 2: "1 Continuer" },
-      btn_newgame: { 1: "2 New game", 2: "2 Nouveau Jeu" },
+      btn_lang: { 1: "FR", 2: "EN" },
+      btn_continue: { 1: "Continue", 2: "Continuer" },
+      btn_newgame: { 1: "New game", 2: "Nouveau Jeu" },
     },
     screen_map: {
       selected_level: {
         1: "Choose your adventure",
         2: "Choisissez votre aventure",
       },
-      btn_play: { 1: "1 Play", 2: "1 Jouer" },
-      btn_back: { 1: "2 Back", 2: "2 Retour" },
+      btn_play: { 1: "Play", 2: "Jouer" },
+      btn_back: { 1: "Back", 2: "Retour" },
     },
     screen_game: {
-      btn_quitLevel: { 1: "9 Back", 2: "9 Retour" },
-      btn_pauseLevel: { 1: "8 Pause", 2: "8 Pause" },
+      btn_quitLevel: { 1: "Back", 2: "9 Retour" },
+      btn_pauseLevel: { 1: "Pause", 2: "Pause" },
       status_paused: { 1: "PAUSED", 2: "PAUSE" },
       status_victory: { 1: "VICTORY", 2: "VICTOIRE" },
       status_defeat: { 1: "DEFEAT", 2: "DÉFAITE" },
@@ -306,58 +340,64 @@ const SKILLS = {
       affinity: "shock",
       cooldown: 1,
       damage: 1,
-      mana_cost: 5,
+      manacost: 5,
     },
   },
 };
 
+// 1:FIRE | 2:ICE | 3:POISON | 4:SHOCK
 const SPELLS = {
   // FIRE
   1334: {
     name: { 1: "Scorch", 2: "Feu Torride" },
+    sequence: 1334,
     affinity: 0,
-    cooldown: 1,
     damage: 1,
-    mana_cost: 5,
+    cooldown: 1,
+    manacost: 5,
     cost: 50,
     image: "",
   },
   2232: {
     name: { 1: "Fireball", 2: "Flamme Arcanique" },
+    sequence: 2232,
     affinity: 0,
-    cooldown: 1,
     damage: 3,
-    mana_cost: 5,
+    cooldown: 1,
+    manacost: 5,
     cost: 50,
     image: "",
   },
   // ICE
   3321: {
     name: { 1: "Hailstorm", 2: "Tempête Verglaçante" },
+    sequence: 3321,
     affinity: 1,
-    cooldown: 1,
     damage: 3,
-    mana_cost: 5,
+    cooldown: 1,
+    manacost: 5,
     cost: 50,
     image: "",
   },
   // POISON
   2232: {
     name: { 1: "Venom Spray", 2: "Pluie Venimeuse" },
+    sequence: 2232,
     affinity: 2,
-    cooldown: 1,
     damage: 3,
-    mana_cost: 5,
+    cooldown: 1,
+    manacost: 5,
     cost: 50,
     image: "",
   },
   // SHOCK
   4422: {
     name: { 1: "Electro Surge", 2: "Surge Électrique" },
+    sequence: 4422,
     affinity: 3,
-    cooldown: 1,
     damage: 3,
-    mana_cost: 5,
+    cooldown: 1,
+    manacost: 5,
     cost: 50,
     image: "",
   },
@@ -382,7 +422,6 @@ const PLAYER = {
   fx: {
     layer: "actors",
     spritesheet: "./public/Assets/player/player.png",
-    transition_property: "height",
     elements: {
       1: "1-img",
       2: "2-img",
@@ -431,7 +470,6 @@ const PLAYER = {
 
 const OPPONENT = {
   fx: {
-    transition_property: "width",
     elements: {
       ui: "o_ui",
       name: "o_name",
@@ -468,29 +506,45 @@ const OPPONENT = {
 };
 
 const OPPONENTS = [
+  // SKELETONS
   {
     name: { 1: "Skeleton", 2: "Skelette" },
-    spritesheet: "./public/Assets/player/player.png",
+    image: "player",
     rows: { run: 5, idle: 6, death: 4, cast: 3 },
-    gold_multiplier: 1,
+    spell: 1334,
+    health: 3,
     damage_multiplier: 0.5,
     health_multiplier: 0.5,
     cooldown_multiplier: 0.8,
   },
   {
-    name: { 1: "Orc", 2: "Orc" },
-    spritesheet: "./public/Assets/player/player.png",
+    name: { 1: "Skeleton", 2: "Skelette" },
+    image: "player",
     rows: { run: 5, idle: 6, death: 4, cast: 3 },
-    gold_multiplier: 1.5,
+    spell: 1334,
+    health: 5,
+    damage_multiplier: 0.5,
+    health_multiplier: 0.5,
+    cooldown_multiplier: 0.8,
+  },
+  // ORCS
+  {
+    name: { 1: "Orc", 2: "Orc" },
+    image: "player",
+    rows: { run: 5, idle: 6, death: 4, cast: 3 },
+    spell: 1334,
+    health: 10,
     damage_multiplier: 0.75,
     health_multiplier: 0.75,
     cooldown_multiplier: 1,
   },
+  // VAMPIRES
   {
     name: { 1: "Vampire", 2: "Vampire" },
-    spritesheet: "./public/Assets/player/player.png",
+    image: "player",
     rows: { run: 5, idle: 6, death: 4, cast: 3 },
-    gold_multiplier: 3,
+    spell: 1334,
+    health: 20,
     damage_multiplier: 1,
     health_multiplier: 1.5,
     cooldown_multiplier: 0.3,
@@ -513,14 +567,13 @@ const OPPONENT_NAMES = {
 
 const LEVELS = [
   {
+    scene: 0,
+    payout: 100,
     opponents: {
-      scene: 0,
       count: 5,
-      payout: 100,
       base: {
         health: 2,
         cooldown: 3,
-        gold: 2,
       },
       modifiers: {
         types: [0, 1],
@@ -530,10 +583,11 @@ const LEVELS = [
     },
   },
   {
+    scene: 0,
+    payout: 150,
     opponents: {
       scene: 0,
       count: 5,
-      payout: 150,
       base: {
         health: 2,
         cooldown: 3,
@@ -541,6 +595,7 @@ const LEVELS = [
       },
       modifiers: {
         types: [0, 1],
+        power: 0,
         strengths: [0, 0],
         affinities: [0],
       },

@@ -1,12 +1,11 @@
-function Projectile(target, damage, affinity, position, fx) {
+function Projectile(origin, target, damage, affinity, fx) {
+  this.pos = origin;
   this.target = target;
   this.damage = damage;
   this.affinity = affinity;
-  this.pos = position;
   this.fx = fx;
 
   this.velocity = new Vector2D(0, 0);
-
 }
 
 Projectile.prototype.getTargetCenter = function () {
