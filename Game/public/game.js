@@ -7,22 +7,22 @@
 
 // TODO: SKILL UPDATE/RENDER, PLAYER INTEGRATION, MOB SPAWNING, LEVEL COMPLETION
 
-function Game(lang, profile) {
+function Game(screen, lang) {
+  this.screen = screen;
   this.lang = lang || LANGS[0];
-  this.profile = profile || loadProfile();
-
-  this.lastUpdate = null;
-  this.lastKeyPressed = null;
 
   this.background = new Background(Game.res.background);
-  this.setLevel(this.profile.level_progress);
+  this.lastUpdate = null;
+  this.lastKeyPressed = null;
+  this.PAUSED = this.STOPPED = true;
+
+  Game.instance = this;
 }
 Game.instance = null;
-Game.selectedLevel = 0;
 Game.res = {};
 
-Game.STOPPED = false;
-Game.PAUSED = false;
+// Game.STOPPED = false;
+// Game.PAUSED = false;
 
 // -------------- STATIC
 
@@ -40,96 +40,45 @@ Game.load = function () {
   });
 };
 
-Game.setInstance = function (lang, level) {
-  const profile = loadProfile();
-  level = level || profile.level_progress;
-
-  if (!Game.instance || Game.instance.selectedLevel !== level) {
-    return Game.load().then(function () {
-      Game.instance = new Game(lang, profile);
-
-      return Game.instance;
-    });
-  } else {
-    return Game.instance;
-  }
+Game.setPause = function (paused) {
+  Game.PAUSED = paused !== undefined ? paused : !Game.PAUSED;
+  setVisibility(document.getElementById("screen_game_btns"), Game.PAUSED);
 };
 
-Game.input = function (value) {
-  if (!Game.STOPPED && !Game.isLevelEnded()) {
-    Game.instance.lastKeyPressed = value;
-  }
-};
-
-Game.quitInstance = function () {
-  const instance = Game.instance;
-
-  if (instance) {
-    Game.STOPPED = true;
-  }
-};
-
-Game.pauseInstance = function () {
-  if (Game.instance) {
-    Game.setPause(!Game.PAUSED);
-  }
-};
-
-Game.resetInstance = function () {
-  const instance = Game.instance;
-
-  if (instance) {
-    instance.setLevel(Game.selectedLevel);
-  }
-};
-
-Game.setLevel = function (level) {
-  Game.selectedLevel = level;
-  Game.instance.setLevel(level);
-};
-
-Game.setPause = function (toPause) {
-  Game.PAUSED = toPause || !Game.PAUSED;
-  setVisibility(document.getElementById("status_paused"), Game.PAUSED);
-};
-
-Game.setStop = function (toStop) {
-  Game.STOPPED = toStop || !Game.STOPPED;
-};
-
-Game.isLevelEnded = function () {
-  return Game.instance.isWon() || Game.instance.isLost();
+Game.setStop = function (stopped) {
+  Game.STOPPED = stopped !== undefined ? stopped : !Game.STOPPED;
 };
 
 // -------------- SETUP
 
-Game.prototype.setLevel = function (level) {
-  this.profile = loadProfile();
+Game.prototype.setPlayerProfile = function (profile) {
+  this.profile = profile;
+};
 
-  const options = LEVELS[level] || LEVELS[0];
-  this.options = options;
-  this.opponents = options.opponents;
-  this.sequences = options.sequence;
+Game.prototype.setLevel = function (level) {
+  console.log("level", level, LEVELS[level]);
+  this.level = level || 0;
+  this.options = LEVELS[this.level];
   this.killcount = 0;
 
-  this.player = new Player(this.profile, null);
-  this.opponent = this.getRandomOpponent();
-  this.player.opponent = this.opponent;
+  this.player = new Player(this.screen.profile, null);
+  this.opponent = this.generateMob();
 
+  this.lastKeyPressed = null;
   this.endDelay = null;
-  this.background.generate();
+
+  this.background.setScene(this.options.scene);
 };
 
 Game.prototype.play = function (tickrate) {
-  Game.STOPPED = false;
-  Game.PAUSED = false;
+  this.setStop(false);
+  this.setPause(false);
 
-  Game.setLevel(Game.selectedLevel);
   this.lastKeyPressed = null;
   this.lastUpdate = Date.now();
-  this.gameloop(tickrate);
-
   setGameStatusVisibility();
+
+  this.gameloop(tickrate);
 };
 
 Game.prototype.gameloop = function (tickrate) {
@@ -139,20 +88,21 @@ Game.prototype.gameloop = function (tickrate) {
       var deltaTime = (now - this.lastUpdate) / 1000;
       this.lastUpdate = now;
 
-      // ON WIN OR LOSE
-      if ((this.isWon() || this.isLost()) && this.updateLevelEnd(deltaTime)) {
-        Game.STOPPED = true;
-      }
+      if (!this.STOPPED) {
+        // ON WIN OR LOSE
+        if ((this.isWon() || this.isLost()) && this.updateLevelEnd(deltaTime)) {
+          this.STOPPED = true;
+        }
 
-      if (!Game.STOPPED) {
-        if (!Game.PAUSED) {
+        if (!this.PAUSED) {
           this.update(deltaTime);
         }
+
         this.render();
       } else {
-        this.player.save(this.profile);
+        this.saveProgress();
+        this.screen.setScreen("screen_map");
         clearInterval(gameID);
-        changeScreen(SCREENS.GAME, SCREENS.MAP);
       }
     }.bind(this),
     tickrate
@@ -161,18 +111,18 @@ Game.prototype.gameloop = function (tickrate) {
 
 // -------------- UPDATE
 
+// Game.prototype.input = function (key) {
+
+// };
+
 Game.prototype.update = function (deltaTime) {
   this.player.update(deltaTime, this.lastKeyPressed);
   this.opponent.update(deltaTime);
   this.background.update(this.player.getState());
 
-  if (this.opponent.isRemovable()) {
+  if (this.opponent.isAtEndPos()) {
     this.killcount++;
-    this.profile.gold += this.opponent.stats.gold;
-    if (!this.isWon()) {
-      this.opponent = this.getRandomOpponent();
-      this.player.opponent = this.opponent;
-    }
+    this.opponent = !this.isWon() ? this.generateMob() : null;
   }
 
   this.lastKeyPressed = null;
@@ -180,18 +130,16 @@ Game.prototype.update = function (deltaTime) {
 
 Game.prototype.updateLevelEnd = function (deltaTime) {
   if (!this.endDelay) {
-    this.endDelay = DISPLAY.other.delays.end_delay;
-    setGameStatusVisibility(this.isWon() ? "status_victory" : "status_defeat");
+    var gameStatus = "status_defeat";
 
     if (this.isWon()) {
+      gameStatus = "status_victory";
       this.player.setTargetPosition(this.player.positions.end);
-      this.profile.level_progress = Math.min(
-        this.profile.level_progress + 1,
-        LEVELS.length - 1
-      );
     }
 
-    return false;
+    setGameStatusVisibility(gameStatus);
+    this.endDelay = DISPLAY.other.delays.end_delay;
+    // return false;
   }
 
   this.endDelay -= deltaTime;
@@ -201,7 +149,7 @@ Game.prototype.updateLevelEnd = function (deltaTime) {
 // -------------- RENDER
 
 Game.prototype.render = function () {
-  surface.clear();
+  Surface.instance.clear();
   this.background.render();
   this.opponent.render();
   this.player.render();
@@ -209,25 +157,13 @@ Game.prototype.render = function () {
 
 // -------------- GETTERS / SETTERS
 
-Game.prototype.input = function (value) {
-  if (!Game.STOPPED && !Game.isLevelEnded()) {
-    this.lastKeyPressed = value;
-  }
+Game.prototype.setPause = function (paused) {
+  this.PAUSED = paused !== undefined ? paused : !this.PAUSED;
+  setVisibility(document.getElementById("screen_game_btns"), this.PAUSED);
 };
 
-Game.prototype.getRandomOpponent = function () {
-  return Opponent.generateInstance(
-    this.opponents.base,
-    this.opponents.modifiers,
-    this
-  );
-};
-
-Game.prototype.setOpponent = function () {
-  if (!this.opponent || this.opponent.isRemovable()) {
-    this.opponent = this.getRandomOpponent();
-    this.player.opponent = this.opponent;
-  }
+Game.prototype.setStop = function (stopped) {
+  this.STOPPED = stopped !== undefined ? stopped : !this.STOPPED;
 };
 
 Game.prototype.setStatus = function (elemId) {
@@ -238,22 +174,51 @@ Game.prototype.setStatus = function (elemId) {
   });
 };
 
+Game.prototype.generateMob = function () {
+  const id = getRandomValue(this.options.mob_types);
+  const config = OPPONENTS[id];
+
+  const image = Game.res.opponent[id];
+  const fx = Object.assign({}, OPPONENT.fx);
+  fx.sprites.rows = config.rows;
+
+  const stats = {
+    name: config.name,
+    health: config.health,
+    cooldown: config.cooldown,
+  };
+  const spellID = getRandomValue(this.options.mob_spells);
+  const spell = new Spell(spellID);
+
+  return new Opponent(image, fx, stats, spell, this.player);
+};
+
 // -------------- WIN / LOSE
 
 Game.prototype.isWon = function () {
-  return this.killcount >= this.opponents.count;
+  return this.killcount >= this.options.mob_count;
 };
 
 Game.prototype.isLost = function () {
-  return this.player.health === 0;
+  return this.player.isDead();
 };
 
 // If win/lose conditions met and subsequent animations are also complete.
 Game.prototype.isLevelComplete = function () {
-  return (
-    (this.player.isDead() || this.killcount >= this.opponents.count) &&
-    Game.STOPPED
-  );
+  return (this.isWon() || this.isLost()) && this.STOPPED;
+};
+
+Game.prototype.saveProgress = function () {
+  const profile = this.screen.profile;
+
+  if (this.level < profile.level_progress) {
+    profile.gold += this.options.payout * 0.1;
+  } else {
+    profile.gold += this.options.payout;
+    profile.level_progress = this.level + 1;
+  }
+
+  this.screen.setProfile(profile);
 };
 
 // -------------- MISC
@@ -273,6 +238,65 @@ Game.prototype.areInCombatPos = function () {
 Game.prototype.areInCombat = function () {
   return this.areAlive() && this.areInCombatPos();
 };
+
+// -------------- OLD
+
+// Game.prototype.input = function (value) {
+//   if (!Game.STOPPED && !Game.isLevelEnded()) {
+//     this.lastKeyPressed = value;
+//   }
+// };
+
+// Game.isLevelEnded = function () {
+//   return Game.instance.isWon() || Game.instance.isLost();
+// };
+
+// Game.setInstance = function (lang, level) {
+//   level = level || profile.level_progress;
+
+//   if (!Game.instance || Game.instance.selectedLevel !== level) {
+//     return Game.load().then(function () {
+//       Game.instance = new Game(lang, profile);
+
+//       return Game.instance;
+//     });
+//   } else {
+//     return Game.instance;
+//   }
+// };
+
+// Game.input = function (value) {
+//   if (!Game.STOPPED && !Game.isLevelEnded()) {
+//     Game.instance.lastKeyPressed = value;
+//   }
+// };
+
+// Game.quitInstance = function () {
+//   const instance = Game.instance;
+
+//   if (instance) {
+//     Game.STOPPED = true;
+//   }
+// };
+
+// Game.pauseInstance = function () {
+//   if (Game.instance) {
+//     Game.setPause(!Game.PAUSED);
+//   }
+// };
+
+// Game.resetInstance = function () {
+//   const instance = Game.instance;
+
+//   if (instance) {
+//     instance.setLevel(Game.selectedLevel);
+//   }
+// };
+
+// Game.setLevel = function (level) {
+//   Game.selectedLevel = level;
+//   Game.instance.setLevel(level);
+// };
 
 // Level.prototype.gameloop = function (tickrate) {
 //   const self = this;

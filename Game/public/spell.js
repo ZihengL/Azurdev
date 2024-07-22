@@ -1,8 +1,8 @@
 function Spell(id) {
   const options = SPELLS[id];
 
-  this.sequence = id;
-  this.name = options.name;
+  this.sequence = id.toString();
+  // this.name = options.name;
   this.affinity = options.affinity;
   this.damage = options.damage;
   this.cooldown = options.cooldown;
@@ -35,21 +35,15 @@ Spell.load = function () {
   });
 };
 
-Spell.getInstanceFromID = function (code, caster) {
-  const segments = code.split("-");
 
-  return new Spell(segments[0], segments[1], caster);
-};
 
 // -------------- MISC
 
-Spell.prototype.getID = function () {
-  return this.affinity + "-" + this.strength;
-};
+
 
 Spell.prototype.validateSequence = function (sequence) {
   const index = this.sequence.indexOf(sequence);
-  console.log(this.name, this.sequence, sequence, index);
+  console.log(this.sequence, sequence, index);
 
   return index === 0;
 };
@@ -68,10 +62,19 @@ Spell.prototype.createProjectile = function (origin, target) {
     target,
     this.damage,
     this.affinity,
-    this.caster.getBodyCenter(),
     this.fx
   );
 };
+
+// Spell.prototype.getID = function () {
+//   return this.affinity + "-" + this.strength;
+// };
+
+// Spell.getInstanceFromID = function (code, caster) {
+//   const segments = code.split("-");
+
+//   return new Spell(segments[0], segments[1], caster);
+// };
 
 // Spell.prototype.applyEffect = function (target) {
 //   const casterCenter = this.caster.pos.center(this.caster.size);

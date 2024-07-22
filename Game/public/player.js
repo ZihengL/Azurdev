@@ -1,31 +1,23 @@
-function Player(saved, opponent) {
-  Caster.call(
-    this,
-    Game.res.player,
-    saved.stats,
-    PLAYER.fx,
-    saved.spells,
-    opponent
-  );
+function Player(profile) {
+  Caster.call(this, Game.res.player, PLAYER.fx, profile.stats, null);
 
   this.spells = [];
-  saved.spells.forEach(
+  profile.spells.forEach(
     function (id) {
       this.spells.push(new Spell(id, this));
     }.bind(this)
   );
 
-  this.maxMana = this.mana = saved.stats.mana;
-  this.manaRegen = saved.stats.mana_regen_sec;
+  this.mana = profile.stats.mana;
+  this.manaRegen = profile.stats.mana_regen_sec;
   this.regenDelay = 1;
 
   this.sequence = "";
   this.inputLocked = false;
-  // console.log(saved.spells, this.spells);
 }
 Player.prototype = Object.create(Caster.prototype);
 Player.prototype.constructor = Player;
-Player.debug = true;
+Player.debug = true; // PLAYER INVINCIBLE IF TRUE
 
 // -------------- STATIC
 
@@ -35,16 +27,16 @@ Player.load = function () {
   });
 };
 
-Player.prototype.save = function (profile) {
-  const spellIds = [];
+// Player.prototype.save = function (profile) {
+//   const spellIds = [];
 
-  this.spells.forEach(function (spell) {
-    spellIds.push(spell.getID());
-  });
-  profile.spells = spellIds;
+//   this.spells.forEach(function (spell) {
+//     spellIds.push(spell.getID());
+//   });
+//   profile.spells = spellIds;
 
-  saveProfile(profile);
-};
+//   saveProfile(profile);
+// };
 
 // -------------- UPDATE
 
@@ -61,9 +53,10 @@ Player.prototype.update = function (deltaTime, value) {
 
     if (value && !this.inputLocked) {
       state = STATES.CAST;
+      this.sequence += value;
 
       const spell = this.checkSequence(value);
-      if (spell && this.isCastable(spell)) {
+      if (spell && spell.isEqualLength(this.sequence)) {
         this.castSpell(spell);
       }
     }
@@ -71,73 +64,6 @@ Player.prototype.update = function (deltaTime, value) {
 
   this.updateManaRegen(deltaTime);
   Caster.prototype.update.call(this, deltaTime, state);
-};
-
-// -------------- SPELLS
-
-Player.prototype.sequenceIndex = function () {
-  return this.sequence.length - 1;
-};
-
-Player.prototype.castSpell = function (spell) {
-  Caster.prototype.castSpell.call(this, spell);
-
-  this.mana -= spell.manacost;
-  this.resetSequence();
-};
-
-Player.prototype.checkSequence = function (value) {
-  this.sequence += value;
-  for (var i = 0; i < this.spells.length; i++) {
-    const spell = this.spells[i];
-
-    if (spell.validateSequence(this.sequence)) {
-      this.addToSequenceEffect(value, true);
-      return spell;
-    }
-  }
-
-  this.addToSequenceEffect(value, false);
-  this.resetSequence();
-  return null;
-};
-
-Player.prototype.resetSequence = function () {
-  this.inputLocked = true;
-  this.sequence = "";
-
-  setTimeout(
-    function () {
-      this.inputLocked = false;
-      this.resetSequenceEffect();
-    }.bind(this),
-    500
-  );
-};
-
-Player.prototype.resetSequenceEffect = function () {
-  const sequenceElement = this.elements.sequence;
-  const inputElement = this.elements.input;
-
-  sequenceElement.classList.add("spell-fade-out");
-  setTimeout(function () {
-    sequenceElement.classList.remove("spell-fade-out");
-    sequenceElement.textContent = inputElement.textContent = "";
-  }, 1500);
-};
-
-Player.prototype.addToSequenceEffect = function (value, valid) {
-  const validityEffect = (valid ? "" : "in") + "valid-glow";
-  const sequenceSub = document.createElement("img");
-  const inputSub = document.createElement("img");
-
-  sequenceSub.src = inputSub.src = this.elements[value].src;
-
-  sequenceSub.classList.add("spell-fade-in", validityEffect);
-  this.elements.sequence.appendChild(sequenceSub);
-
-  inputSub.classList.add("center", "flash-in-out", validityEffect);
-  this.elements.input.appendChild(inputSub);
 };
 
 // -------------- RENDER
@@ -151,24 +77,102 @@ Player.prototype.updateUI = function () {
   Caster.prototype.updateUI.call(this, "height");
   this.elements.health_text.textContent = Math.floor(this.health);
 
-  const manavalue = percentage(this.mana, this.maxMana) + "%";
+  const manavalue = percentage(this.mana, this.stats.mana) + "%";
   this.elements.mana_overlay.style.height = this.elements.mana.style.height =
     manavalue;
   this.elements.mana_text.textContent = Math.floor(this.mana);
 };
 
-// -------------- MISC
+// -------------- SPELLS
 
-Player.prototype.getAffinityElementByValue = function (value) {
-  return this.elements[value];
+Player.prototype.sequenceIndex = function () {
+  return this.sequence.length - 1;
 };
+
+Player.prototype.castSpell = function (spell) {
+  if (this.validateManaCost(spell)) {
+    Caster.prototype.castSpell.call(this, spell);
+    this.mana -= spell.manacost;
+  }
+
+  this.resetSequence();
+};
+
+Player.prototype.checkSequence = function (value) {
+  for (var i = 0; i < this.spells.length; i++) {
+    const spell = this.spells[i];
+    console.log("Checking spell:", this.sequence, "-", spell.sequence);
+
+    if (spell.validateSequence(this.sequence)) {
+      this.sequencingFX(value, true);
+      return spell;
+    }
+  }
+
+  this.sequencingFX(value, false);
+  this.resetSequence();
+  return null;
+};
+
+// const onAnimationEnd = function (element, classes) {
+//   classes.forEach(function (classname) {
+//     element.classList.remove(classname);
+//   });
+//   sequenceElem.classList.remove("spell-fade-out");
+//   sequenceElem.removeEventListener("animationend", onAnimationEnd);
+//   sequenceElem.textContent = inputElem.textContent = "";
+// };
+
+Player.prototype.sequencingFX = function (value, valid) {
+  const glowEffect = (valid ? "" : "in") + "valid-glow";
+
+  const sequenceImg = this.elements.sequence.children[this.sequenceIndex()];
+  const inputElem = this.elements.input;
+  sequenceImg.src = inputElem.src = this.elements[value].src;
+
+  sequenceImg.classList.add("spell-fade-in", glowEffect);
+  inputElem.classList.add("flash-in-out", glowEffect);
+
+  setTimeout(function () {
+    sequenceImg.classList.remove(glowEffect);
+    inputElem.classList.remove("flash-in-out", glowEffect);
+    inputElem.src = "";
+  }, 500);
+};
+
+Player.prototype.resetSequence = function () {
+  this.sequence = "";
+  this.inputLocked = true;
+  setTimeout(this.resetSequenceFX(), 500);
+};
+
+// SEQUENCEELEM = HTML CONTAINER FOR EACH PLAYER INPUT
+// INPUTELEM = BRIEFLY FLASHING ELEMENT
+Player.prototype.resetSequenceFX = function () {
+  const sequenceElem = this.elements.sequence;
+
+  sequenceElem.classList.add("spell-fade-out");
+  setTimeout(
+    function () {
+      sequenceElem.classList.remove("spell-fade-out");
+      for (const child of sequenceElem.children) {
+        child.src = "";
+      }
+
+      this.inputLocked = false;
+    }.bind(this),
+    500
+  );
+};
+
+// -------------- MISC
 
 Player.prototype.updateManaRegen = function (deltaTime) {
   this.regenDelay -= deltaTime;
 
   if (this.regenDelay <= 0) {
     this.regenDelay = 1;
-    this.mana = Math.min(this.mana + this.manaRegen, this.maxMana);
+    this.mana = Math.min(this.mana + this.manaRegen, this.stats.mana);
   }
 };
 
@@ -181,10 +185,6 @@ Player.prototype.validateManaCost = function (spell) {
   return true;
 };
 
-Player.prototype.isCastable = function (spell) {
-  return spell.isEqualLength(this.sequence) && this.validateManaCost(spell);
-};
-
 Player.prototype.applyEffect = function (damage) {
   if (Player.debug) {
     this.health = 100;
@@ -192,6 +192,16 @@ Player.prototype.applyEffect = function (damage) {
 
   Caster.prototype.applyEffect.call(this, damage);
 };
+
+// -------------- OLD
+
+// Player.prototype.getAffinityElementByValue = function (value) {
+//   return this.elements[value];
+// };
+
+// Player.prototype.isCastable = function (spell) {
+//   return spell.isEqualLength(this.sequence) && this.validateManaCost(spell);
+// };
 
 // Player.prototype.generateSequence = function () {
 //   for (var i = 0; i < this.sequences.length; i++) {
@@ -220,10 +230,6 @@ Player.prototype.applyEffect = function (damage) {
 //   ctx.fill();
 //   ctx.stroke();
 // };
-
-// -------------- EFFECTS
-
-// -------------- OLD
 
 // Player.prototype.updateSkills = function (deltaTime) {
 //   const inputValue = this.level.lastKeyPressed;

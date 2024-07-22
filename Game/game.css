@@ -1,0 +1,282 @@
+#game_status {
+  position: absolute;
+  top: 0;
+  left: 0;
+  text-align: center;
+  transition: opacity 0.3s ease;
+}
+
+/* UNIVERSAL OR LEVEL SCREEN BUTTONS */
+
+#btn_pause {
+  position: absolute;
+  top: 5%;
+  left: 5%;
+}
+
+#game_screen_btns {
+  display: flex;
+  flex-direction: row;
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
+.level-btns {
+  display: inline-block;
+  margin: 5px;
+  padding: 10px 20px;
+  border-radius: 10px;
+  background-color: #7997b8;
+  color: white;
+  border: none;
+  cursor: pointer;
+}
+
+.entity-center {
+  position: absolute;
+  font-size: 3em;
+  color: white;
+  opacity: 0;
+}
+/* SKILLS */
+
+#cast_effects {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+.cast-effect {
+  width: 100px;
+  height: auto;
+  opacity: 0;
+}
+
+#game_status {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+}
+
+.game-status {
+  position: absolute;
+  display: none;
+  font-size: 10em;
+  text-shadow: 2px 2px 4px #000000;
+}
+
+.game-status.paused {
+  color: rgb(253, 253, 202);
+}
+
+.game-status.victory {
+  color: rgb(129, 233, 129);
+}
+
+.game-status.defeat {
+  color: rgb(148, 0, 0);
+}
+
+.game-canvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
+/* HEALTH, MANA, CD */
+
+.ui-container {
+  background-color: rgba(255, 255, 255, 0.8);
+}
+
+.health {
+  background-color: rgb(155, 0, 0);
+}
+
+.overlay.health {
+  background-color: rgba(155, 0, 0, 0.5);
+}
+
+.mana {
+  background-color: rgb(37, 88, 184);
+}
+
+.overlay.mana {
+  background-color: rgba(37, 88, 184, 0.5);
+}
+
+.cooldown {
+  background-color: rgb(212, 170, 30);
+}
+
+.fill {
+  position: absolute;
+  overflow: hidden;
+  text-align: center;
+  transition-duration: 0.5s;
+  transition-timing-function: ease-in-out;
+}
+
+.fill.overlay {
+  transition-delay: 1s;
+  transition-duration: 1s;
+}
+
+.p.fill {
+  width: 100%;
+  bottom: 0;
+  transition-property: height;
+}
+
+.o.fill {
+  height: 100%;
+  top: 0;
+  transition-property: width;
+}
+
+.o.fill.cooldown {
+  transition: width linear;
+}
+
+.fill-img {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 3;
+  pointer-events: none;
+}
+
+.fill-img.back {
+  z-index: 0;
+}
+
+.fill-text {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: white;
+  font-size: 2em;
+  font-weight: bold;
+  z-index: 4;
+  pointer-events: none;
+}
+
+/* PLAYER */
+
+#p_sequence img {
+  width: 4vw;
+  opacity: 0;
+}
+
+#p_ui {
+  width: 100%;
+  height: 8vw;
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  text-align: center;
+}
+
+.p-fill-con {
+  width: 6vw;
+  height: 6vw;
+  border-radius: 50%;
+  text-align: center;
+  position: absolute;
+  bottom: 1vw;
+  overflow: hidden;
+}
+
+#p_health_container {
+  left: 1vw;
+}
+
+#p_mana_container {
+  right: 1vw;
+}
+
+#p_health_value {
+  border-style: dotted;
+  /* font-size: 2em; */
+}
+
+#p_skill_container {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  position: absolute;
+  bottom: 0;
+}
+
+.skill {
+  width: 6vw;
+  height: 6vw;
+  border: none;
+  background-color: transparent;
+  bottom: 2vw;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.skill-img {
+  width: 4vw;
+  height: 4vw;
+  display: block;
+}
+
+/* OPPONENT */
+
+#o_ui {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  position: absolute;
+  top: 0;
+  width: 100%;
+  padding-top: 10px;
+}
+
+#o_name {
+  font-size: 24px;
+  text-align: center;
+}
+
+#o_health_container {
+  width: 40%;
+  height: 20%;
+  margin: 0 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  top: 4.5vw;
+}
+
+#o_cooldown_container {
+  width: 20%;
+  height: 40%;
+  margin: 0 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  top: 6vw;
+}
+
+.o-fill-con {
+  border-radius: 25px;
+  position: absolute;
+  overflow: hidden;
+  text-align: center;
+}

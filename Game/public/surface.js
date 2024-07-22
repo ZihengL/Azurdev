@@ -18,7 +18,9 @@ function Surface() {
   );
 
   this.res = {};
+  Surface.instance = this;
 }
+Surface.instance = null;
 
 Surface.prototype.resetRes = function () {
   this.res = {};
@@ -107,7 +109,14 @@ Surface.prototype.drawTo = function (id, image, x, y, scale, width, height) {
   layer.ctx.drawImage(image, x, y, width * scale, height * scale);
 };
 
-Surface.prototype.drawActor = function (image, sPos, dPos, size, bleed, shadow) {
+Surface.prototype.drawActor = function (
+  image,
+  sPos,
+  dPos,
+  size,
+  bleed,
+  shadow
+) {
   const layer = this.layers.actors;
   bleed = bleed || 0;
 

@@ -1,9 +1,12 @@
-function Caster(image, options, fx, opponent) {
+function Caster(image, fx, stats, opponent) {
+  this.stats = stats;
   this.opponent = opponent;
-  this.maxHealth = this.health = options.health;
+
+  this.health = stats.health;
   this.projectiles = [];
 
   // POSITIONS
+  const surface = Surface.instance;
   this.positions = {
     start: surface.ratioPosition(fx.position.start),
     combat: surface.ratioPosition(fx.position.combat),
@@ -12,8 +15,8 @@ function Caster(image, options, fx, opponent) {
 
   // SPRITES
   this.spriteHandler = new SpriteHandler(
-    fx,
     image,
+    fx,
     this.positions.start,
     this.positions.combat
   );
@@ -32,9 +35,21 @@ function Caster(image, options, fx, opponent) {
 Caster.prototype.update = function (deltaTime, state) {
   this.spriteHandler.update(deltaTime, state);
 
-  this.projectiles = this.projectiles.filter(function (projectile) {
-    return !projectile.update(deltaTime);
-  });
+  // this.projectiles = this.projectiles.filter(function (projectile) {
+  //   return !projectile.update(deltaTime);
+  // });
+
+  var filtered = [];
+  for (var i = 0; i < this.projectiles.length; i++) {
+    if (this.projectiles[i].update(deltaTime)) {
+      filtered.push(i);
+    }
+  }
+
+  for (const index of filtered) {
+    this.projectiles[index] = null;
+    this.projectiles.splice(index, 1);
+  }
 };
 
 Caster.prototype.updatePosition = function () {
@@ -52,7 +67,7 @@ Caster.prototype.render = function () {
 };
 
 Caster.prototype.updateUI = function (axis) {
-  const healthValue = percentage(this.health, this.maxHealth) + "%";
+  const healthValue = percentage(this.health, this.stats.health) + "%";
   this.elements.health_overlay.style[axis] = this.elements.health.style[axis] =
     healthValue;
 };

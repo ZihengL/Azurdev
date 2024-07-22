@@ -6,29 +6,36 @@
     <title>Autobattler</title>
 
     <link rel="stylesheet" href="styles.css" />
+    <link rel="stylesheet" href="game.css" />
     <link rel="stylesheet" href="effects.css" />
   </head>
   <body>
     <div id="viewport">
       <!-- -----------------------  MAIN  ----------------------- -->
       <div id="screen_main" class="screen active">
-        <h1 id="menu_title"></h1>
+        <h1 id="menu_title" class="top-title"></h1>
 
-        <div id="screen_main_btns" class="nav">
-          <button id="btn_continue" onclick="changeScreen(SCREENS.MAIN.id, SCREENS.MAP.id);"></button>
-          <button id="btn_newgame" onclick="changeScreen(SCREENS.MAIN.id, SCREENS.MAP.id, true);"></button>
-          <button id="btn_lang" onclick="changeLanguage();"></button>
+        <div id="screen_main_btns" class="nav center">
+          <button id="btn_continue" onclick="Screen.instance.continue();"></button>
+          <button id="btn_newgame" onclick="Screen.instance.newgame();"></button>
+          <button id="btn_lang" onclick="Screen.instance.changeLanguage();"></button>
         </div>
       </div>
 
       <!-- -----------------------  MAP  ----------------------- -->
       <div id="screen_map" class="screen">
-        <h1 id="selected_level"></h1>
-        <div id="level_select_container" class="center"></div>
+        <h1 id="selected_level" class="top-title"></h1>
 
-        <div id="screen_map_btns" class="nav">
-          <button id="btn_play" onclick="changeScreen(SCREENS.MAP.id, SCREENS.GAME.id);"></button>
-          <button id="btn_back" onclick="changeScreen(SCREENS.MAP.id, SCREENS.MAIN.id);"></button>
+        <div id="level_navigation_btns" class="">
+          <button id="btn_decrement_level" onclick="Screen.instance.decrementLevel();"><</button>
+          <button id="btn_increment_level" onclick="Screen.instance.incrementLevel();">></button>
+        </div>
+
+        <div id="screen_map_btns" class="nav center">
+          <div id="level_select_container"></div>
+          <button id="btn_shop" onclick="Screen.instance.nextScreen();"></button>
+          <button id="btn_play" onclick="Screen.instance.playLevel();"></button>
+          <button id="btn_back" onclick="Screen.instance.previousScreen();"></button>
         </div>
       </div>
 
@@ -39,9 +46,10 @@
       <canvas id="effects" class="game-canvas"></canvas>
       <canvas id="ui" class="game-canvas"></canvas>
 
-      <div id="screen_game_btns" class="nav">
-        <button id="btn_pauseLevel" class="level-btns" onclick="Level.pauseInstance();"></button>
-        <button id="btn_quitLevel" class="level-btns" onclick="changeScreen(SCREENS.GAME.id, SCREENS.MAP.id);"></button>
+      <button id="btn_pause" class="level-btns" onclick="Game.instance.setPause();"></button>
+      <div id="screen_game_btns" class="nav center">
+        <button id="btn_unpause" class="level-btns" onclick="Game.instance.setPause();"></button>
+        <button id="btn_quitLevel" class="level-btns" onclick="Screen.instance.quitLevel();"></button>
       </div>
 
       <div id="p_damage" class="entity-center"></div>
@@ -78,9 +86,16 @@
         <h5 id="counter_killcount" class=""></h5>
       </div>
 
-      <div id="p_input"></div>
-      <!-- <img src="" id="p_input" class="center"></img> -->
-      <div id="p_sequence" class="center"></div>
+      <!-- <div id="p_input"></div> -->
+      <img src="" id="p_input" class="center"></img>
+      <div id="p_sequence" class="center">
+        <img src="" id="sequence_1"></img>
+        <img src="" id="sequence_2"></img>
+        <img src="" id="sequence_3"></img>
+        <img src="" id="sequence_4"></img>
+        <img src="" id="sequence_5"></img>
+        <img src="" id="sequence_6"></img>
+      </div>
 
       <div id="p_ui" class="player-ui">
         <div id="p_health_container" class="p-fill-con ui-container">
@@ -93,18 +108,10 @@
         </div>
 
         <div id="p_skill_container">
-          <!-- <button id="1" class="skill" onclick="Level.instance.input('1');"> -->
-            <img src="./public/Assets/skills/planet6.png" id="1-img" class="skill-img" onclick="Level.instance.input('1');">
-          <!-- </button> -->
-          <!-- <button id="2" class="skill" onclick="Level.instance.input('2');"> -->
-            <img src="./public/Assets/skills/planet2.png" id="2-img" class="skill-img" onclick="Level.instance.input('2');">
-          <!-- </button> -->
-          <!-- <button id="3" class="skill" onclick="Level.instance.input('3');"> -->
-            <img src="./public/Assets/skills/planet5.png" id="3-img" class="skill-img" onclick="Level.instance.input('3');">
-          <!-- </button> -->
-          <!-- <button id="4" class="skill" onclick="Level.instance.input('4');"> -->
-            <img src="./public/Assets/skills/planet20.png" id="4-img" class="skill-img" onclick="Level.instance.input('4');">
-          <!-- </button> -->
+            <img src="./public/Assets/skills/planet6.png" id="1-img" class="skill-img">
+            <img src="./public/Assets/skills/planet2.png" id="2-img" class="skill-img">
+            <img src="./public/Assets/skills/planet5.png" id="3-img" class="skill-img">
+            <img src="./public/Assets/skills/planet20.png" id="4-img" class="skill-img">
         </div>
 
         <div id="p_mana_container" class="p-fill-con ui-container">

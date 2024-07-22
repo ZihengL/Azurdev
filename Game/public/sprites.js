@@ -1,8 +1,8 @@
-function SpriteHandler(fx, image, pos, targetPos) {
+function SpriteHandler(image, fx, pos, targetPos) {
   this.fx = fx;
   this.image = image;
 
-  this.size = surface.ratioSizing(this.fx.sprites.frame);
+  this.size = Surface.instance.ratioSizing(this.fx.sprites.frame);
   this.pos = pos;
   this.targetPos = targetPos;
   this.center = new Vector2D(this.pos.x, this.pos.y - this.size.y / 2);
@@ -65,7 +65,7 @@ SpriteHandler.prototype.updatePosition = function () {
 SpriteHandler.prototype.render = function () {
   const sPos = this.getFrameCoordinates();
 
-  surface.drawActor(
+  Surface.instance.drawActor(
     this.image,
     sPos,
     this.pos,
@@ -78,7 +78,7 @@ SpriteHandler.prototype.render = function () {
 // -------------- POSITIONAL
 
 SpriteHandler.prototype.setTargetPos = function (position) {
-  this.targetPos = surface.ratioPosition(position);
+  this.targetPos = Surface.instance.ratioPosition(position);
 };
 
 SpriteHandler.prototype.frameX = function () {

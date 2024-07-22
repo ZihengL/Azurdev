@@ -44,117 +44,86 @@
 // MAKE LEVELS HARD ENOUGH SO THAT PLAYERS NEED TO PLAY A LEVEL MULTIPLE TIMES FOR ENOUGH MONEY TO GET STUFF FOR NEXT LEVEL
 // ON LOSE: NO REWARD AND GET LESS GOLD FROM BEATING SAME LEVEL MULTIPLE TIMES, 1/10 GOLD
 
-const jumptogame = false;
+// 086417
 
-function changeNavSelection(screenId, isIncrement) {}
-
-function inputAction(action, key, screenId) {
-  console.log(action, key);
-
-  switch (action) {
-    case "1":
-    case "2":
-    case "3":
-    case "4":
-      Game.input(action);
-      break;
-    case "PAUSE":
-      Game.pauseInstance();
-      break;
-    case "EXIT":
-      Game.quitInstance();
-      break;
-    case "PLAY":
-      changeScreen(SCREENS.screen_map.id, SCREENS.screen_game.id);
-      break;
-    case "MAP_TO_MAIN":
-      changeScreen(SCREENS.screen_map.id, SCREENS.screen_main.id);
-      break;
-    case "REDUCE_LEVEL":
-      updateLevelSelection(Game.selectedLevel - 1);
-      break;
-    case "RAISE_LEVEL":
-      updateLevelSelection(Game.selectedLevel + 1);
-      break;
-    case "CONTINUE_GAME":
-      changeScreen(SCREENS.screen_main.id, SCREENS.screen_map.id);
-      break;
-    case "NEW_GAME":
-      changeScreen(SCREENS.screen_main.id, SCREENS.screen_map.id, true);
-      break;
-    case "CHANGE_LANGUAGE":
-      changeLanguage();
-      break;
-    default:
-      console.log(
-        "Key '" + key + "' not mapped to command on screen id: " + screenId
-      );
-  }
-}
-
-// const keymap = KEYMAPS.PC;
-const surface = new Surface();
-
+var lang = 1;
 const fps = SCREEN.fps[1];
 const tickrate = 1000 / fps;
 
-var lang = 1;
+local_storage_lib.branch(LOCALSTORAGE.key, LOCALSTORAGE.defaults);
 
-const screen = new Screen(lang);
+Game.load().then(function () {
+  const screen = new Screen(lang, fps);
 
-Game.setInstance(lang).then(function (instance) {
-  var profile = instance.profile;
-
-  // CONTROLS EVENT LISTENER
+  // ARROW NAVIGATION
   document.addEventListener("keydown", function (event) {
-    const actives = document.querySelectorAll(".screen.active");
-    if (actives.length > 1) return;
-
-    const currentScreen = actives[0];
-    const keymap = KEYMAPS[currentScreen.id];
-    const key = event.key.toString();
-
-    console.log(key);
-
-    for (const action in keymap) {
-      const keyarray = keymap[action];
-
-      if (keyarray.map(String).indexOf(key) !== -1) {
-        inputAction(action, key, currentScreen.id);
-      }
-    }
-
-    const value = KEYMAPS[currentScreen.id][key];
-
-    if (value) {
-      if (currentScreen.id === "screen_game") {
-      } else {
-      }
-    }
+    screen.registerKey(event.key.toString());
   });
 
-  // MAP MENU
-  const container = document.getElementById("level_select_container");
-  for (var i = 0; i < LEVELS.length; i++) {
-    const levelBtn = document.createElement("button");
-
-    levelBtn.id = "btn_level" + i;
-    levelBtn.classList.add("btn-level");
-    levelBtn.textContent = i + 1;
-
-    levelBtn.onclick = (function (levelIndex) {
-      return function () {
-        updateLevelSelection(levelIndex);
+  const p_skill_btns = document.getElementById("p_skill_container").children;
+  for (var i = 0; i < p_skill_btns.length; i++) {
+    (function (index) {
+      p_skill_btns[index].onclick = function () {
+        console.log("CLICKED", index);
+        screen.registerKey((index + 1).toString());
       };
     })(i);
-
-    container.appendChild(levelBtn);
   }
 
-  updateLevelSelection(profile.level_progress);
-  changeLanguage();
-
+  const jumptogame = false;
   if (jumptogame) {
-    changeScreen(SCREENS.screen_main, SCREENS.screen_game);
+    screen.loadProfile();
+    screen.playLevel(fps);
   }
 });
+
+// MAIN SCREEN BUTTONS
+
+// document.getElementById("btn_newgame").onclick = function () {
+//   screen.newgame();
+// };
+
+// document.getElementById("btn_quitLevel").onclick = function () {
+//   screen.setScreen("screen_map");
+// };
+
+// document.getElementById("btn_lang").onclick = function () {
+//   screen.changeLanguage();
+// };
+
+// MAP BUTTONNS
+// document.getElementById("btn_decrement_level").onclick = function () {
+//   screen.decrementLevel();
+// };
+
+// document.getElementById("btn_increment_level").onclick = function () {
+//   screen.incrementLevel();
+// };
+
+// document.getElementById("btn_play").onclick = function () {
+//   screen.setScreen("screen_game");
+//   screen.playLevel(lang, fps);
+// };
+
+// document.getElementById("btn_back").onclick = function () {
+//   screen.previousScreen();
+// };
+
+// MAP MENU
+// const container = document.getElementById("level_select_container");
+// for (var i = 0; i < LEVELS.length; i++) {
+//   const levelBtn = document.createElement("button");
+
+//   levelBtn.id = "btn_level" + i;
+//   levelBtn.classList.add("btn-level");
+//   levelBtn.textContent = i + 1;
+
+//   levelBtn.onclick = (function (levelIndex) {
+//     return function () {
+//       screen.selectedLevel = levelIndex;
+//     };
+//   })(i);
+
+//   container.appendChild(levelBtn);
+// }
+// screen.updateLevelButtons();

@@ -1,13 +1,11 @@
 function Background(scenes) {
-  // this.skyColor = "aqua";
   this.scenes = scenes;
-  this.generate();
+  this.surface = Surface.instance;
 
   const x = 0;
-  const y = surface.ratioProportionY(0.75);
-  const w = surface.ratioProportionX(1);
-  const h = surface.ratioProportionY(1) - y;
-
+  const y = this.surface.ratioProportionY(0.75);
+  const w = this.surface.ratioProportionX(1);
+  const h = this.surface.ratioProportionY(1) - y;
   this.ground = { x, y, w, h };
 }
 
@@ -49,7 +47,7 @@ Background.prototype.update = function (state) {
     if (state === STATES.RUN || !layer.grounded) {
       pos.x -= layer.multiplier * velocity;
 
-      if (pos.x <= -surface.width) {
+      if (pos.x <= -this.surface.width) {
         pos.x = 0;
       }
     }
@@ -59,21 +57,24 @@ Background.prototype.update = function (state) {
 // -------------- RENDER
 
 Background.prototype.render = function () {
-  // surface.fillTo("backgrounds", this.skyColor);
-
   for (var i = 0; i < this.scene.length; i++) {
     const layer = this.scene[i];
     const pos = layer.position;
 
-    surface.drawTo("backgrounds", layer.image, pos.x, 0);
+    this.surface.drawTo("backgrounds", layer.image, pos.x, 0);
     if (layer.position.x < 0) {
-      surface.drawTo("backgrounds", layer.image, pos.x + surface.width, 0);
+      this.surface.drawTo(
+        "backgrounds",
+        layer.image,
+        pos.x + this.surface.width,
+        0
+      );
     }
   }
 
   const g = this.ground;
-  surface.layers.backgrounds.ctx.fillStyle = "#5C4033";
-  surface.layers.backgrounds.ctx.fillRect(g.x, g.y, g.w, g.h);
+  this.surface.layers.backgrounds.ctx.fillStyle = "#5C4033";
+  this.surface.layers.backgrounds.ctx.fillRect(g.x, g.y, g.w, g.h);
 };
 
 // -------------- OTHER
@@ -89,7 +90,7 @@ Background.prototype.setScene = function (key) {
       image: this.scenes[key][i],
       multiplier: options.multiplier,
       grounded: options.grounded,
-      position: surface.ratioPosition(options.position),
+      position: this.surface.ratioPosition(options.position),
     };
   }
 };
@@ -107,7 +108,7 @@ Background.prototype.generate = function () {
       image: this.scenes[key][i],
       multiplier: options.multiplier,
       grounded: options.grounded,
-      position: surface.ratioPosition(options.position),
+      position: this.surface.ratioPosition(options.position),
     };
   }
 };

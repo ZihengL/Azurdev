@@ -4,7 +4,6 @@ function Projectile(origin, target, damage, affinity, fx) {
   this.damage = damage;
   this.affinity = affinity;
   this.fx = fx;
-
   this.velocity = new Vector2D(0, 0);
 }
 
@@ -36,7 +35,7 @@ Projectile.prototype.update = function (deltaTime) {
 
 Projectile.prototype.render = function () {
   if (this.target && !this.target.isDead()) {
-    const ctx = surface.layers.effects.ctx;
+    const ctx = Surface.instance.layers.effects.ctx;
 
     ctx.beginPath();
     ctx.arc(this.pos.x, this.pos.y, this.fx.size, 0, 2 * Math.PI);
