@@ -48,21 +48,27 @@ SpriteHandler.prototype.updateState = function (state) {
 
 SpriteHandler.prototype.updatePosition = function () {
   const velocity = 2.5;
+  const x = this.pos.x;
+  const targetX = this.targetPos.x;
 
   if (this.pos.x > this.targetPos.x) {
-    this.pos.x = Math.max(this.pos.x - velocity, this.targetPos.x);
-  } else {
-    this.pos.x = Math.min(this.pos.x + velocity, this.targetPos.x);
+    this.pos.x = Math.max(x - velocity, targetX);
   }
 
-  this.center.x = this.pos.x;
-  this.center.y =
-    this.pos.y - this.size.y / 2 + this.fx.sprites.frame.bleed / 2;
+  if (this.pos.x < this.targetPos.x) {
+    this.pos.x = Math.min(x + velocity, targetX);
+  }
+
+  if (x !== this.pos.x) {
+    this.center.x = this.pos.x;
+    this.center.y =
+      this.pos.y - this.size.y / 2 + this.fx.sprites.frame.bleed / 2;
+  }
 };
 
 // -------------- RENDER
 
-SpriteHandler.prototype.render = function () {
+SpriteHandler.prototype.render = function (isDead) {
   const sPos = this.getFrameCoordinates();
 
   Surface.instance.drawActor(
@@ -71,7 +77,7 @@ SpriteHandler.prototype.render = function () {
     this.pos,
     this.size,
     this.fx.sprites.frame.bleed,
-    this.shadow
+    this.shadow && !isDead
   );
 };
 

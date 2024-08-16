@@ -1,5 +1,5 @@
-.t {
-  background-color: rgba(147, 206, 99, 0.226);
+.test {
+  border: 3px solid white;
 }
 
 :root {
@@ -11,42 +11,47 @@
   background-color: slategrey;
 }
 
-.screen {
+/* CENTER-PARENT */
+.CP {
   position: absolute;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
+}
+
+/* CENTER-CHILD */
+.CC {
+  position: relative;
+  display: block;
+  margin: 25px auto;
+}
+
+/* VERTICAL LIST */
+.VL {
+  display: block;
+  margin: 25px auto;
+}
+
+.VL > * {
+  display: block;
+}
+
+.screen {
   width: 1280px;
   height: 720px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  background-color: white;
   opacity: 0;
   visibility: hidden;
-  background-color: white;
   transition: opacity 0.5s ease-in-out, visibility 0.5s ease-in-out;
 }
 
-/* .hidden {
+.hidden {
   visibility: hidden;
-} */
+}
 
 .screen.active {
   opacity: 1;
   visibility: visible;
-}
-
-.nav {
-  /* position: absolute;
-  left: 50%;
-  top: 50%;
-  transform: translate(-50%, -50%); */
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  text-align: center;
-  border: 1px solid red;
 }
 
 .center {
@@ -56,18 +61,14 @@
   transform: translate(-50%, -50%);
 }
 
-.top-title {
-  position: absolute;
-  top: 10%;
-  text-align: center;
-}
-
 /* MAIN */
 
 #menu_title {
+  position: absolute;
+  left: 50%;
+  top: 20%;
+  transform: translate(-50%, -20%);
   font-weight: bold;
-  text-align: center;
-  margin-top: 20px;
   font-size: 5em;
 }
 
@@ -78,12 +79,20 @@
 
 /* MAP */
 
-#level_navigation_btns {
+#map_title {
+  width: 100%;
   position: absolute;
-  top: 32%;
+  left: 50%;
+  top: 10%;
+  transform: translate(-50%, -10%);
+  font-weight: bold;
+  font-size: 5em;
+  text-align: center;
+}
+
+#level_nav_parent {
   width: 100%;
   text-align: center;
-  display: flex;
   border: 1px solid blue;
   justify-content: space-evenly;
 }
@@ -92,16 +101,26 @@
   background-color: rgba(255, 255, 255, 0.3);
 }
 
-#screen_map_btns {
-  top: 60%;
+#btn_back {
+  position: absolute;
+  left: 5%;
+  top: 5%;
+  transform: translate(-5%, -5%);
+}
+
+#btn_shop {
+  position: absolute;
+  left: 5%;
+  top: 15%;
+  transform: translate(-5%, -15%);
 }
 
 /* LEVEL SELECT */
 
-#level_select_container {
-  display: flex;
-  flex-direction: row;
-  margin-bottom: 10vh;
+#level_select_container > * {
+  display: inline-block;
+  margin: 0 10px;
+  vertical-align: middle;
 }
 
 .btn-level {
@@ -169,7 +188,12 @@ button {
   cursor: pointer;
 }
 
-#btn_pause {
-  border: 2px solid red; /* Add a red border to visualize the clickable area */
-  background-color: rgba(255, 0, 0, 0.2); /* Add a semi-transparent background */
-}
+/* #btn_pause {
+  border: 2px solid red;
+  background-color: rgba(
+    255,
+    0,
+    0,
+    0.2
+  );
+} */

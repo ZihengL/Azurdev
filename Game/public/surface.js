@@ -109,18 +109,12 @@ Surface.prototype.drawTo = function (id, image, x, y, scale, width, height) {
   layer.ctx.drawImage(image, x, y, width * scale, height * scale);
 };
 
-Surface.prototype.drawActor = function (
-  image,
-  sPos,
-  dPos,
-  size,
-  bleed,
-  shadow
-) {
+Surface.prototype.drawActor = function (image, sPos, dPos, size, bleed, shadow) {
   const layer = this.layers.actors;
   bleed = bleed || 0;
 
   layer.ctx.save();
+
   if (shadow) {
     layer.ctx.shadowColor = "red";
     layer.ctx.shadowBlur = 20;
@@ -137,6 +131,13 @@ Surface.prototype.drawActor = function (
     size.x,
     size.y
   );
+  
+  if (shadow) {
+    layer.ctx.globalCompositeOperation = 'source-atop';
+    layer.ctx.fillStyle = "red";
+    layer.ctx.fillRect(0, 0, layer.cv.width, layer.cv.height);
+  }
+
   layer.ctx.restore();
 };
 

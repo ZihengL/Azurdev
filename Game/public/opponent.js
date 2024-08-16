@@ -5,8 +5,11 @@ function Opponent(image, fx, stats, spell, player) {
   this.cooldown = stats.cooldown;
 
   this.name = stats.name[lang];
-  this.elements.name.textContent = this.name[lang].toUpperCase();
+  this.elements.name.textContent = this.name;
   this.elements.ui.classList.add("hidden");
+
+  const affinityImage = Game.res.affinities[this.spell.affinity].src;
+  document.getElementById("opponent_affinity").src = affinityImage;
 
   player.opponent = this;
 }
@@ -91,15 +94,15 @@ Opponent.prototype.update = function (deltaTime) {
 };
 
 Opponent.prototype.updateCooldown = function (deltaTime) {
-  if (this.cooldown > 0) {
-    if (this.opponent.projectiles.length === 0) {
-      this.cooldown -= deltaTime;
-    }
-
-    return false;
+  if (this.cooldown <= 0) {
+    return true;
   }
 
-  return true;
+  if (this.opponent.projectiles.length === 0) {
+    this.cooldown -= deltaTime;
+  }
+
+  return false;
 };
 
 // -------------- RENDER
@@ -125,21 +128,24 @@ Opponent.prototype.updateUI = function () {
 
 // -------------- SPELLS
 
-Opponent.prototype.resetCooldown = function (effect) {
+Opponent.prototype.resetCooldown = function (effect, time) {
   this.cooldown = this.stats.cooldown;
-  triggerFX(this.elements.cooldown_container, effect);
+  triggerFX(this.elements.cooldown_container, effect, time);
 };
 
 Opponent.prototype.castSpell = function (spell) {
   Caster.prototype.castSpell.call(this, spell);
-  this.resetCooldown("bump");
+  this.resetCooldown("bump", 250);
 };
 
 Opponent.prototype.applyEffect = function (damage, affinity) {
-  if (affinity !== this.stats.affinity) {
-    Caster.prototype.applyEffect.call(this, damage);
-    this.resetCooldown("shake");
+  if (affinity === this.spell.affinity) {
+    damage = 0;
+  } else {
+    this.resetCooldown("shake", 500);
   }
+
+  Caster.prototype.applyEffect.call(this, damage);
 };
 
 // -------------- MISC

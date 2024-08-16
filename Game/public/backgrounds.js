@@ -57,18 +57,16 @@ Background.prototype.update = function (state) {
 // -------------- RENDER
 
 Background.prototype.render = function () {
+  const y = -this.ground.h;
+
   for (var i = 0; i < this.scene.length; i++) {
     const layer = this.scene[i];
     const pos = layer.position;
+    const img = layer.image;
 
-    this.surface.drawTo("backgrounds", layer.image, pos.x, 0);
+    this.surface.drawTo("backgrounds", img, pos.x, y);
     if (layer.position.x < 0) {
-      this.surface.drawTo(
-        "backgrounds",
-        layer.image,
-        pos.x + this.surface.width,
-        0
-      );
+      this.surface.drawTo("backgrounds", img, pos.x + this.surface.width, y);
     }
   }
 

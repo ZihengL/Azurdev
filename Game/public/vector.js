@@ -33,9 +33,10 @@ Vector2D.prototype.dot = function (vector) {
 };
 
 Vector2D.prototype.distance = function (vector) {
-  const difference = vector.subtract(this);
+  const dx = this.x - vector.x;
+  const dy = this.y - vector.y;
 
-  return difference.magnitude();
+  return Math.sqrt(dx * dx + dy * dy);
 };
 
 Vector2D.prototype.difference = function (vector) {

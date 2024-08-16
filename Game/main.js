@@ -46,11 +46,24 @@
 
 // 086417
 
+const JUMP_TO_GAME = true; // STRAIGHT TO INGAME
+const PLAYER_DEBUG = true; // PLAYER INVINCIBLE IF TRUE
+
 var lang = 1;
 const fps = SCREEN.fps[1];
 const tickrate = 1000 / fps;
 
-local_storage_lib.branch(LOCALSTORAGE.key, LOCALSTORAGE.defaults);
+// local_storage_lib.branch(LOCALSTORAGE.key, LOCALSTORAGE.defaults);
+
+const loadOrder = { affinities: {} };
+for (var i = 0; i < AFFINITIES.length; i++) {
+  const path = "./public/Assets/spells/affinities/" + i + ".png";
+
+  loadOrder.affinities[i] = path;
+}
+
+console.log(Spell.load());
+
 
 Game.load().then(function () {
   const screen = new Screen(lang, fps);
@@ -60,24 +73,22 @@ Game.load().then(function () {
     screen.registerKey(event.key.toString());
   });
 
-  const p_skill_btns = document.getElementById("p_skill_container").children;
-  for (var i = 0; i < p_skill_btns.length; i++) {
-    (function (index) {
-      p_skill_btns[index].onclick = function () {
-        console.log("CLICKED", index);
-        screen.registerKey((index + 1).toString());
-      };
-    })(i);
-  }
-
-  const jumptogame = false;
-  if (jumptogame) {
+  if (JUMP_TO_GAME) {
     screen.loadProfile();
-    screen.playLevel(fps);
+    screen.playLevel(0);
   }
 });
 
 // MAIN SCREEN BUTTONS
+
+// const p_skill_btns = document.getElementById("p_skill_container").children;
+// for (var i = 0; i < p_skill_btns.length; i++) {
+//   (function (index) {
+//     p_skill_btns[index].onclick = function () {
+//       screen.registerKey((index + 1).toString());
+//     };
+//   })(i);
+// }
 
 // document.getElementById("btn_newgame").onclick = function () {
 //   screen.newgame();

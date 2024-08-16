@@ -67,12 +67,21 @@ const SCREEN = {
 };
 
 const SCREENS = {
-  screen_main: { id: "screen_main", nav: "screen_main_btns" },
+  screen_main: {
+    id: "screen_main",
+    navs: ["btn_continue", "btn_newgame", "btn_lang"],
+    nav: "screen_main_btns",
+  },
   screen_map: {
     id: "screen_map",
+    navs: ["btn_back", "btn_shop", "level_select_btns"],
     nav: "screen_map_btns",
   },
-  screen_game: { id: "screen_game", nav: "screen_game_btns" },
+  screen_game: {
+    id: "screen_game",
+    navs: ["btn_unpause", "btn_quitLevel"],
+    nav: "screen_game_btns",
+  },
 };
 
 const DISPLAY = {
@@ -84,26 +93,25 @@ const DISPLAY = {
       btn_newgame: { 1: "New game", 2: "Nouveau Jeu" },
     },
     screen_map: {
-      selected_level: {
+      map_title: {
         1: "Choose your adventure",
         2: "Choisissez votre aventure",
       },
       btn_shop: { 1: "Shop", 2: "Magasin" },
-      btn_play: { 1: "Play", 2: "Jouer" },
+      // btn_play: { 1: "Play", 2: "Jouer" },
       btn_back: { 1: "Back", 2: "Retour" },
     },
     screen_game: {
       btn_quitLevel: { 1: "Back", 2: "9 Retour" },
       btn_unpause: { 1: "Unpause", 2: "Démarrer" },
       btn_pause: { 1: "Pause", 2: "Pause" },
-      status_paused: { 1: "PAUSED", 2: "PAUSE" },
+      status_pause: { 1: "PAUSED", 2: "PAUSE" },
       status_victory: { 1: "VICTORY", 2: "VICTOIRE" },
       status_defeat: { 1: "DEFEAT", 2: "DÉFAITE" },
     },
   },
   other: {
-    game_status: ["status_paused", "status_victory", "status_defeat"],
-
+    game_status: ["status_pause", "status_victory", "status_defeat"],
     delays: {
       end_delay: 5,
     },
@@ -219,22 +227,18 @@ const AFFINITIES = [
   {
     name: { 1: "fire", 2: "feux" },
     color: "red",
-    cast_effect: "cast_fire",
   },
   {
     name: { 1: "ice", 2: "glace" },
     color: "blue",
-    cast_effect: "cast_ice",
   },
   {
     name: { 1: "poison", 2: "poison" },
     color: "green",
-    cast_effect: "cast_poison",
   },
   {
     name: { 1: "shock", 2: "électrique" },
     color: "blue",
-    cast_effect: "cast_shock",
   },
 ];
 
@@ -245,59 +249,49 @@ const SKILL_FX = {
 };
 
 const SPELLS = {
-  // FIRE
+  // 0 FIRE
   1334: {
     name: { 1: "Scorch", 2: "Feu Torride" },
-    sequence: 1334,
     affinity: 0,
     damage: 1,
     cooldown: 1,
     manacost: 5,
     cost: 50,
-    image: "",
   },
   2232: {
     name: { 1: "Fireball", 2: "Flamme Arcanique" },
-    sequence: 2232,
     affinity: 0,
     damage: 3,
     cooldown: 1,
     manacost: 5,
     cost: 50,
-    image: "",
   },
-  // ICE
+  // 1 ICE
   3321: {
     name: { 1: "Hailstorm", 2: "Tempête Verglaçante" },
-    sequence: 3321,
     affinity: 1,
     damage: 3,
     cooldown: 1,
     manacost: 5,
     cost: 50,
-    image: "",
   },
-  // POISON
-  2232: {
+  // 2 POISON
+  2231: {
     name: { 1: "Venom Spray", 2: "Pluie Venimeuse" },
-    sequence: 2232,
     affinity: 2,
     damage: 3,
     cooldown: 1,
     manacost: 5,
     cost: 50,
-    image: "",
   },
-  // SHOCK
+  // 3 SHOCK
   4422: {
     name: { 1: "Electro Surge", 2: "Surge Électrique" },
-    sequence: 4422,
     affinity: 3,
     damage: 3,
     cooldown: 1,
     manacost: 5,
     cost: 50,
-    image: "",
   },
 };
 
@@ -337,21 +331,23 @@ const PLAYER = {
     layer: "actors",
     spritesheet: "./public/Assets/player/player.png",
     elements: {
-      1: "1-img",
-      2: "2-img",
-      3: "3-img",
-      4: "4-img",
-      health_container: "p_health_container",
-      health_text: "p_health_text",
-      health_overlay: "p_health_fill_overlay",
-      health: "p_health_fill",
-      mana_container: "p_mana_container",
-      mana_text: "p_mana_text",
-      mana_overlay: "p_mana_fill_overlay",
-      mana: "p_mana_fill",
-      damage: "p_damage",
-      sequence: "p_sequence",
-      input: "p_input",
+      // 1: "1-img",
+      // 2: "2-img",
+      // 3: "3-img",
+      // 4: "4-img",
+      health_container: "player_health_container",
+      health_text: "player_health_text",
+      health_overlay: "player_health_fill_overlay",
+      health: "player_health_fill",
+      mana_container: "player_mana_container",
+      mana_text: "player_mana_text",
+      mana_overlay: "player_mana_fill_overlay",
+      mana: "player_mana_fill",
+      damage: "player_damage",
+      sequence: "player_sequence",
+      input: "player_input",
+      buttons: "player_btns_container",
+      spell_icon: "player_spell_icon",
     },
     sprites: {
       scale: 1,
@@ -366,15 +362,15 @@ const PLAYER = {
       velocity: 2,
       start: {
         x: -0.5,
-        y: 0.75,
+        y: 0.85,
       },
       combat: {
         x: 0.2,
-        y: 0.75,
+        y: 0.85,
       },
       end: {
         x: 3,
-        y: 0.75,
+        y: 0.85,
       },
     },
     bar_width: 5,
@@ -385,27 +381,27 @@ const PLAYER = {
 const OPPONENT = {
   fx: {
     elements: {
-      ui: "o_ui",
-      name: "o_name",
-      damage: "o_damage",
-      health_container: "o_health_container",
-      health_overlay: "o_health_fill_overlay",
-      health: "o_health_fill",
-      cooldown_container: "o_cooldown_container",
-      cooldown: "o_cooldown_fill",
+      ui: "opponent_ui",
+      name: "opponent_name",
+      damage: "opponent_damage",
+      health_container: "opponent_health_container",
+      health_overlay: "opponent_health_fill_overlay",
+      health: "opponent_health_fill",
+      cooldown_container: "opponent_cooldown_container",
+      cooldown: "opponent_cooldown_fill",
     },
     position: {
       start: {
         x: 1.5,
-        y: 0.75,
+        y: 0.85,
       },
       combat: {
         x: 0.8,
-        y: 0.75,
+        y: 0.85,
       },
       end: {
         x: -0.5,
-        y: 0.75,
+        y: 0.85,
       },
     },
     sprites: {

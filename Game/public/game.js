@@ -21,9 +21,6 @@ function Game(screen, lang) {
 Game.instance = null;
 Game.res = {};
 
-// Game.STOPPED = false;
-// Game.PAUSED = false;
-
 // -------------- STATIC
 
 Game.load = function () {
@@ -35,18 +32,17 @@ Game.load = function () {
 
       return Opponent.load().then(function (res) {
         Game.res.opponent = res;
+
+        return Spell.loadAffinities().then(function (res) {
+          Game.res.affinities = res;
+
+          return Spell.loadIcons().then(function (res) {
+            Game.res.spellicons = res;
+          })
+        });
       });
     });
   });
-};
-
-Game.setPause = function (paused) {
-  Game.PAUSED = paused !== undefined ? paused : !Game.PAUSED;
-  setVisibility(document.getElementById("screen_game_btns"), Game.PAUSED);
-};
-
-Game.setStop = function (stopped) {
-  Game.STOPPED = stopped !== undefined ? stopped : !Game.STOPPED;
 };
 
 // -------------- SETUP
@@ -73,10 +69,10 @@ Game.prototype.setLevel = function (level) {
 Game.prototype.play = function (tickrate) {
   this.setStop(false);
   this.setPause(false);
+  this.setStatus(false);
 
   this.lastKeyPressed = null;
   this.lastUpdate = Date.now();
-  setGameStatusVisibility();
 
   this.gameloop(tickrate);
 };
@@ -111,9 +107,9 @@ Game.prototype.gameloop = function (tickrate) {
 
 // -------------- UPDATE
 
-// Game.prototype.input = function (key) {
-
-// };
+Game.prototype.setKey = function (value) {
+  this.lastKeyPressed = value;
+};
 
 Game.prototype.update = function (deltaTime) {
   this.player.update(deltaTime, this.lastKeyPressed);
@@ -130,16 +126,14 @@ Game.prototype.update = function (deltaTime) {
 
 Game.prototype.updateLevelEnd = function (deltaTime) {
   if (!this.endDelay) {
-    var gameStatus = "status_defeat";
+    const isWon = this.isWon();
 
-    if (this.isWon()) {
-      gameStatus = "status_victory";
+    if (this.isWon) {
       this.player.setTargetPosition(this.player.positions.end);
     }
 
-    setGameStatusVisibility(gameStatus);
-    this.endDelay = DISPLAY.other.delays.end_delay;
-    // return false;
+    this.setStatus(true, isWon);
+    this.endDelay = 5; // 5 SECONDS DELAY AFTER END OF LEVEL FOR OUTRO
   }
 
   this.endDelay -= deltaTime;
@@ -157,21 +151,26 @@ Game.prototype.render = function () {
 
 // -------------- GETTERS / SETTERS
 
+Game.prototype.setStatus = function (visible, isWon) {
+  if (isWon !== undefined) {
+    const id = "status_" + (isWon ? "victory" : "defeat");
+
+    setVisibility(document.getElementById(id), visible);
+  } else {
+    setVisibility(document.getElementById("status_victory"), visible);
+    setVisibility(document.getElementById("status_defeat"), visible);
+  }
+};
+
 Game.prototype.setPause = function (paused) {
   this.PAUSED = paused !== undefined ? paused : !this.PAUSED;
+
   setVisibility(document.getElementById("screen_game_btns"), this.PAUSED);
+  setVisibility(document.getElementById("status_pause"), this.PAUSED);
 };
 
 Game.prototype.setStop = function (stopped) {
   this.STOPPED = stopped !== undefined ? stopped : !this.STOPPED;
-};
-
-Game.prototype.setStatus = function (elemId) {
-  DISPLAY.other.game_status.forEach(function (id) {
-    const element = document.getElementById(id);
-
-    setVisibility(element, element.id === elemId);
-  });
 };
 
 Game.prototype.generateMob = function () {

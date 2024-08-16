@@ -35,21 +35,17 @@ function Caster(image, fx, stats, opponent) {
 Caster.prototype.update = function (deltaTime, state) {
   this.spriteHandler.update(deltaTime, state);
 
-  // this.projectiles = this.projectiles.filter(function (projectile) {
-  //   return !projectile.update(deltaTime);
-  // });
+  this.projectiles = this.projectiles.filter(
+    function (projectile) {
+      if (projectile.update(deltaTime)) {
+        this.opponent.applyEffect(projectile.damage, projectile.affinity);
 
-  var filtered = [];
-  for (var i = 0; i < this.projectiles.length; i++) {
-    if (this.projectiles[i].update(deltaTime)) {
-      filtered.push(i);
-    }
-  }
+        return false;
+      }
 
-  for (const index of filtered) {
-    this.projectiles[index] = null;
-    this.projectiles.splice(index, 1);
-  }
+      return true;
+    }.bind(this)
+  );
 };
 
 Caster.prototype.updatePosition = function () {
@@ -59,7 +55,7 @@ Caster.prototype.updatePosition = function () {
 // -------------- RENDER
 
 Caster.prototype.render = function () {
-  this.spriteHandler.render();
+  this.spriteHandler.render(this.isDead());
 
   this.projectiles.forEach(function (projectile) {
     projectile.render();
@@ -83,15 +79,20 @@ Caster.prototype.getBodyCenter = function () {
 };
 
 Caster.prototype.setTargetPosition = function (targetPos) {
-  this.spriteHandler.targetPos = targetPos;
+  if (targetPos) {
+    this.spriteHandler.targetPos = targetPos;
+  }
 };
 
 // -------------- STATUS EFFECTS
 
 Caster.prototype.castSpell = function (spell) {
-  this.projectiles.push(
-    spell.createProjectile(this.getBodyCenter(), this.opponent)
+  const projectile = spell.createProjectile(
+    this.getBodyCenter(),
+    this.opponent.getBodyCenter()
   );
+
+  this.projectiles.push(projectile);
 };
 
 Caster.prototype.applyEffect = function (damage) {
@@ -106,9 +107,17 @@ Caster.prototype.triggerDamageEffects = function (damage) {
   dmgElement.innerText = damage;
   dmgElement.style.left = pos.x + "px";
   dmgElement.style.top = pos.y + "px";
-  triggerFX(dmgElement, "dmg-fade");
-  triggerFX(this.elements.health_container, "shake");
+  triggerFX(dmgElement, "dmg-fade", 750);
+  triggerFX(this.elements.health_container, "shake", 500);
   this.spriteHandler.triggerDamageGlow(this.isDead());
+};
+
+Caster.prototype.hasNoProjectiles = function () {
+  return this.projectiles.length === 0;
+};
+
+Caster.prototype.showMessage = function (message) {
+  // TODO: CONTAINER DISPLAYING MESSAGE FOR TIME
 };
 
 // -------------- MISC

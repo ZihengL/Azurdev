@@ -1,6 +1,7 @@
 function Screen(lang, fps) {
+  Screen.lang = lang;
   this.setDisplayLanguage(lang);
-  this.fps = fps;
+  this.tickrate = 60 / fps;
 
   this.surface = new Surface();
   this.game = new Game(this, lang);
@@ -15,6 +16,7 @@ function Screen(lang, fps) {
   this.loadProfile();
   this.setScreen(this.currentScreen.id);
 
+  // GETTING ELEMENTS TAGGED AS SCREENS
   this.screens = {};
   for (const screen in DISPLAY.elements) {
     this.screens[screen] = document.getElementById(screen);
@@ -22,6 +24,7 @@ function Screen(lang, fps) {
   Screen.instance = this;
 }
 Screen.instance = null;
+Screen.lang = 1;
 
 // -------------- PROFILE & GAME
 
@@ -83,10 +86,6 @@ Screen.prototype.setDisplayLanguage = function (lang) {
   }
 };
 
-Screen.prototype.getScreenId = function (index) {
-  return this.screenIds[index];
-};
-
 Screen.prototype.getSelectedButton = function () {
   return this.navContainer.children[this.navsIdx];
 };
@@ -110,9 +109,12 @@ Screen.prototype.updateScreen = function () {
     case "screen_map":
       this.updateLevelButtons();
       break;
+    case "screen_shop":
+      break;
     default:
       console.log("Screen ID not recognized:", id);
   }
+
   this.setScreen(id);
 };
 
@@ -125,12 +127,10 @@ Screen.prototype.setScreen = function (screenId) {
     this.currentScreen = document.getElementById(screenId);
     this.currentScreen.classList.add("active", "current-screen");
 
-    this.navs = {};
-    this.navsIdx = 0;
-
-    const container = document.getElementById(options.nav);
-    for (var i = 0; i < container.children.length; i++) {
-      const element = container.children[i];
+    // SETTING NAVIGATION FOR CURRENT SCREEN
+    this.navs = [];
+    for (var i = 0; i < options.navs.length; i++) {
+      const element = document.getElementById(options.navs[i]);
 
       this.navs[i] = {
         element: element,
@@ -139,7 +139,7 @@ Screen.prototype.setScreen = function (screenId) {
       };
     }
 
-    this.setNav(this.navsIdx);
+    this.setNav(0);
   }
 };
 
@@ -211,6 +211,7 @@ Screen.prototype.registerKey = function (key) {
   if (this.currentScreen.id === "screen_game" && !this.game.PAUSED) {
     switch (key) {
       case "Enter":
+      case "Escape":
         this.game.setPause();
         break;
       case "1":
@@ -221,7 +222,7 @@ Screen.prototype.registerKey = function (key) {
       case "ArrowUp":
       case "ArrowDown":
       case "ArrowRight":
-        this.game.lastKeyPressed = key;
+        this.game.setKey(key);
         break;
       default:
         console.log("Unrecognized key in-game:", key);
@@ -259,7 +260,7 @@ Screen.prototype.isWithinPlayerProgress = function (level) {
 };
 
 Screen.prototype.updateLevelButtons = function () {
-  const container = document.getElementById("level_select_container");
+  const container = document.getElementById("level_select_btns");
 
   for (var i = 0; i < LEVELS.length; i++) {
     const element = document.getElementById("btn_level" + i);
@@ -277,8 +278,14 @@ Screen.prototype.createLevelButton = function (level) {
 
   button.id = "btn_level" + level;
   button.textContent = level + 1;
+  // ---------------- SETTING ONCLICK TO PLAY LEVEL DIRECTLY
+  // ---------------- SETTING ONCLICK TO PLAY LEVEL DIRECTLY
+  // ---------------- SETTING ONCLICK TO PLAY LEVEL DIRECTLY
+  // button.onclick = function () {
+  // this.setSelectedLevel(level);
+  // }.bind(this);
   button.onclick = function () {
-    this.setSelectedLevel(level);
+    this.playLevel(level);
   }.bind(this);
 
   return this.setBtnLevelClass(button, level);
@@ -298,6 +305,21 @@ Screen.prototype.setBtnLevelClass = function (button, level) {
 
   button.className = "btn-level " + classname;
   return button;
+};
+
+Screen.prototype.playLevel = function (level) {
+  level = level || this.getSelectedLevel();
+
+  console.log("SELECTED LEVEL:", level);
+  this.game.setLevel(level, this.profile);
+  this.game.play(this.tickrate);
+
+  this.setScreen("screen_game");
+};
+
+Screen.prototype.quitLevel = function () {
+  this.game.setStop(true);
+  this.setScreen("screen_map");
 };
 
 Screen.prototype.incrementLevel = function () {
@@ -322,17 +344,4 @@ Screen.prototype.getSelectedLevel = function () {
   const nav = this.navs[0];
 
   return nav.index;
-};
-
-Screen.prototype.playLevel = function (fps) {
-  this.setScreen("screen_game");
-
-  console.log("SELECTED LEVEL:", this.getSelectedLevel());
-  this.game.setLevel(this.getSelectedLevel(), this.profile);
-  this.game.play(fps);
-};
-
-Screen.prototype.quitLevel = function () {
-  this.game.setStopped(true);
-  this.setScreen("screen_map");
 };

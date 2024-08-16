@@ -1,9 +1,12 @@
 #game_status {
+  width: 100%;
+  height: 100%;
   position: absolute;
   top: 0;
   left: 0;
   text-align: center;
   transition: opacity 0.3s ease;
+  border: 3px solid #ce7d7d;
 }
 
 /* UNIVERSAL OR LEVEL SCREEN BUTTONS */
@@ -12,14 +15,6 @@
   position: absolute;
   top: 5%;
   left: 5%;
-}
-
-#game_screen_btns {
-  display: flex;
-  flex-direction: row;
-  position: absolute;
-  top: 0;
-  left: 0;
 }
 
 .level-btns {
@@ -33,20 +28,13 @@
   cursor: pointer;
 }
 
-.entity-center {
+.caster-text {
   position: absolute;
-  font-size: 3em;
+  font-size: 50px;
   color: white;
   opacity: 0;
 }
 /* SKILLS */
-
-#cast_effects {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
-}
 
 .cast-effect {
   width: 100px;
@@ -54,7 +42,7 @@
   opacity: 0;
 }
 
-#game_status {
+.game_status {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -120,7 +108,6 @@
 .fill {
   position: absolute;
   overflow: hidden;
-  text-align: center;
   transition-duration: 0.5s;
   transition-timing-function: ease-in-out;
 }
@@ -128,22 +115,6 @@
 .fill.overlay {
   transition-delay: 1s;
   transition-duration: 1s;
-}
-
-.p.fill {
-  width: 100%;
-  bottom: 0;
-  transition-property: height;
-}
-
-.o.fill {
-  height: 100%;
-  top: 0;
-  transition-property: width;
-}
-
-.o.fill.cooldown {
-  transition: width linear;
 }
 
 .fill-img {
@@ -166,117 +137,177 @@
   left: 50%;
   transform: translate(-50%, -50%);
   color: white;
-  font-size: 2em;
+  font-size: 40px;
   font-weight: bold;
   z-index: 4;
   pointer-events: none;
 }
 
 /* PLAYER */
+/* PLAYER */
+/* PLAYER */
 
-#p_sequence img {
-  width: 4vw;
+.player.fill {
+  width: 100%;
+  bottom: 0;
+  transition-property: height;
+}
+
+.player-fill {
+  width: 125px;
+  height: 125px;
+  border-radius: 50%;
+  position: absolute;
+  bottom: 30px;
+  overflow: hidden;
+  text-align: center;
+}
+
+#player_health_container {
+  left: 30px;
+}
+
+#player_mana_container {
+  right: 30px;
+}
+
+#player_btns_container {
+  width: 100%;
+  display: inline-block;
+  vertical-align: middle;
+  text-align: center;
+  margin: 0 auto;
+  position: absolute;
+  left: 50%;
+  top: 95%;
+  transform: translate(-50%, -95%);
+}
+
+#player_btns_container > img {
+  width: 120px;
+  margin: 0 20px;
+}
+
+.grayscale-overlay > img {
+  filter: grayscale(100%);
+  transition: filter 0.3s ease-in-out;
+}
+
+#player_sequence {
+  width: 100%;
+  height: 100%;
+  display: inline-block;
+  vertical-align: middle;
+  align-content: center;
+  text-align: center;
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+}
+
+#player_sequence > img {
+  width: 100px;
+}
+
+#player_input > img {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  -webkit-animation: flashInOut 0.5s linear;
+  animation: flashInOut 0.5s linear;
   opacity: 0;
 }
 
-#p_ui {
-  width: 100%;
-  height: 8vw;
+#player_spell_icon {
   position: absolute;
-  left: 0;
-  bottom: 0;
-  text-align: center;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
 }
 
-.p-fill-con {
-  width: 6vw;
-  height: 6vw;
+#player_spell_icon > img {
+  width: 120px;
   border-radius: 50%;
-  text-align: center;
   position: absolute;
-  bottom: 1vw;
-  overflow: hidden;
-}
-
-#p_health_container {
-  left: 1vw;
-}
-
-#p_mana_container {
-  right: 1vw;
-}
-
-#p_health_value {
-  border-style: dotted;
-  /* font-size: 2em; */
-}
-
-#p_skill_container {
-  width: 100%;
-  display: flex;
-  justify-content: center;
-  gap: 10px;
-  position: absolute;
-  bottom: 0;
-}
-
-.skill {
-  width: 6vw;
-  height: 6vw;
-  border: none;
-  background-color: transparent;
-  bottom: 2vw;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
-.skill-img {
-  width: 4vw;
-  height: 4vw;
-  display: block;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  -webkit-animation: spellcast 2s ease-in-out;
+  animation: spellcast 2s ease-in-out;
 }
 
 /* OPPONENT */
+/* OPPONENT */
+/* OPPONENT */
 
-#o_ui {
-  display: flex;
-  justify-content: center;
-  align-items: flex-start;
-  position: absolute;
+.opponent.fill {
+  height: 100%;
   top: 0;
+  transition-property: width;
+  align-self: center;
+  justify-self: center;
+}
+
+#opponent_ui {
   width: 100%;
-  padding-top: 10px;
+  height: 150px;
+  display: grid;
+  justify-items: center;
+  margin-top: 20px;
+  position: absolute;
 }
 
-#o_name {
-  font-size: 24px;
-  text-align: center;
+#opponent_name {
+  font-size: 30px;
+  position: relative;
+  justify-self: center;
+  align-self: center;
+  color: white;
+  margin: 0 auto;
 }
 
-#o_health_container {
-  width: 40%;
-  height: 20%;
+#opponent_health_container {
+  display: grid;
+  width: 600px;
+  height: 30px;
   margin: 0 10px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  top: 4.5vw;
+  border: 5px solid rgb(155, 0, 0);
+  background-color: rgb(53, 53, 53);
 }
 
-#o_cooldown_container {
-  width: 20%;
-  height: 40%;
-  margin: 0 10px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  top: 6vw;
+#opponent_health_fill {
+  align-self: center;
+  justify-self: center;
 }
 
-.o-fill-con {
-  border-radius: 25px;
+#opponent_cooldown_fill {
+  background-color: rgb(212, 170, 30);
+  transition: width linear;
+}
+
+#opponent_cooldown_container {
+  display: grid;
+  width: 400px;
+  height: 10px;
+  margin-top: 50px;
+  align-items: center;
+  justify-content: center;
+  border: 5px solid rgb(212, 170, 30);
+  background-color: rgb(53, 53, 53);
+}
+
+#opponent_affinity {
+  width: 50px;
+  height: 50px;
+  margin: 0 auto;
+  margin-top: 120px;
+}
+
+.opponent-fill {
+  border-radius: 30px;
   position: absolute;
   overflow: hidden;
-  text-align: center;
+  background-color: rgba(255, 255, 255, 0.8);
 }

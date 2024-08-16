@@ -12,118 +12,121 @@
   <body>
     <div id="viewport">
       <!-- -----------------------  MAIN  ----------------------- -->
-      <div id="screen_main" class="screen active">
-        <h1 id="menu_title" class="top-title"></h1>
+      <!-- -----------------------  MAIN  ----------------------- -->
+      <!-- -----------------------  MAIN  ----------------------- -->
+      <div id="screen_main" class="CP screen active">
+        <h1 id="menu_title" class="CP"></h1>
 
-        <div id="screen_main_btns" class="nav center">
-          <button id="btn_continue" onclick="Screen.instance.continue();"></button>
-          <button id="btn_newgame" onclick="Screen.instance.newgame();"></button>
-          <button id="btn_lang" onclick="Screen.instance.changeLanguage();"></button>
+        <div id="screen_main_btns" class="CP">
+          <button id="btn_continue" class="CC" onclick="Screen.instance.continue();"></button>
+          <button id="btn_newgame" class="CC" onclick="Screen.instance.newgame();"></button>
+          <button id="btn_lang" class="CC" onclick="Screen.instance.changeLanguage();"></button>
         </div>
       </div>
 
       <!-- -----------------------  MAP  ----------------------- -->
-      <div id="screen_map" class="screen">
-        <h1 id="selected_level" class="top-title"></h1>
+      <!-- -----------------------  MAP  ----------------------- -->
+      <!-- -----------------------  MAP  ----------------------- -->
+      <div id="screen_map" class="CP screen">
+        <h1 id="map_title"></h1>
 
-        <div id="level_navigation_btns" class="">
-          <button id="btn_decrement_level" onclick="Screen.instance.decrementLevel();"><</button>
-          <button id="btn_increment_level" onclick="Screen.instance.incrementLevel();">></button>
+        <button id="btn_back" class="CC" onclick="Screen.instance.previousScreen();"></button>
+
+        <div id="level_select_container" class="CP">
+          <button id="btn_decrement_level" class="CC level_nav_btn" onclick="Screen.instance.decrementLevel();"><</button>
+          <div id="level_select_btns"></div>
+          <button id="btn_increment_level" class="CC level_nav_btn" onclick="Screen.instance.incrementLevel();">></button>
         </div>
 
-        <div id="screen_map_btns" class="nav center">
-          <div id="level_select_container"></div>
-          <button id="btn_shop" onclick="Screen.instance.nextScreen();"></button>
-          <button id="btn_play" onclick="Screen.instance.playLevel();"></button>
-          <button id="btn_back" onclick="Screen.instance.previousScreen();"></button>
-        </div>
+        <button id="btn_shop" class="CC" onclick="Screen.instance.nextScreen();"></button>
       </div>
 
-    <!-- -----------------------  GAME  ----------------------- -->
-    <div id="screen_game" class="screen">
-      <canvas id="backgrounds" class="game-canvas"></canvas>
-      <canvas id="actors" class="game-canvas"></canvas>
-      <canvas id="effects" class="game-canvas"></canvas>
-      <canvas id="ui" class="game-canvas"></canvas>
+      <!-- -----------------------  SHOP  ----------------------- -->
+      <!-- -----------------------  SHOP  ----------------------- -->
+      <!-- -----------------------  SHOP  ----------------------- -->
+       <div id="screen_shop">
 
-      <button id="btn_pause" class="level-btns" onclick="Game.instance.setPause();"></button>
-      <div id="screen_game_btns" class="nav center">
-        <button id="btn_unpause" class="level-btns" onclick="Game.instance.setPause();"></button>
-        <button id="btn_quitLevel" class="level-btns" onclick="Screen.instance.quitLevel();"></button>
-      </div>
+       </div>
 
-      <div id="p_damage" class="entity-center"></div>
-      <div id="o_damage" class="entity-center"></div>
+      <!-- -----------------------  GAME  ----------------------- -->
+      <!-- -----------------------  GAME  ----------------------- -->
+      <!-- -----------------------  GAME  ----------------------- -->
+      <div id="screen_game" class="CP screen">
+        <canvas id="backgrounds" class="game-canvas"></canvas>
+        <canvas id="actors" class="game-canvas"></canvas>
+        <canvas id="effects" class="game-canvas"></canvas>
+        <canvas id="ui" class="game-canvas"></canvas>
 
-      <div id="o_ui">
-        <h2 id="o_name"></h2>
-
-        <div id="o_health_container" class="o-fill-con ui-container">
-          <div id="o_health_fill_overlay" class="o fill overlay health"></div>
-          <div id="o_health_fill" class="o fill health"></div>
+        <button id="btn_pause" class="level-btns" onclick="Game.instance.setPause();"></button>
+        <div id="screen_game_btns" class="nav center">
+          <button id="btn_unpause" class="level-btns" onclick="Game.instance.setPause();"></button>
+          <button id="btn_quitLevel" class="level-btns" onclick="Screen.instance.quitLevel();"></button>
         </div>
 
-        <div id="o_cooldown_container" class="o-fill-con ui-container">
-          <div id="o_cooldown_fill" class="o fill cooldown"></div>
+        <h2 id="status_pause" class="CP game-status"></h2>
+        <h2 id="status_victory" class="CP game-status"></h2>
+        <h2 id="status_defeat" class="CP game-status"></h2>
+
+        <!-- OPPONENT -->
+        <!-- OPPONENT -->
+        <div id="opponent_damage" class="caster-text"></div>
+
+        <div id="opponent_ui">
+          <div id="opponent_health_container" class="opponent-fill">
+            <div id="opponent_health_fill_overlay" class="opponent fill overlay health"></div>
+            <div id="opponent_health_fill" class="opponent fill health"></div>
+            <h2 id="opponent_name"></h2>
+          </div>
+
+          <div id="opponent_cooldown_container" class="opponent-fill">
+            <div id="opponent_cooldown_fill" class="opponent fill cooldown"></div>
+          </div>
+
+          <img id="opponent_affinity">
         </div>
-      </div>
 
-      <div id="game_status" class="center">
-        <h2 id="status_paused" class="game-status paused"></h2>
-        <h2 id="status_victory" class="game-status victory"></h2>
-        <h2 id="status_defeat" class="game-status defeat"></h2>
-      </div>
+        <!-- PLAYER -->
+        <!-- PLAYER -->
+        <div id="player_counters">
+          <h5 id="counter_killcount"></h5>
+        </div>
 
-      <div id="cast_effects" class="game-ui center">
-        <img src="./public/Assets/effects/fire1.png" id="cast_fire" class="cast-effect"></img>
-        <img src="" id="cast_ice" class="game-status cast"></img>
-        <img src="" id="cast_poison" class="game-status cast"></img>
-        <img src="" id="cast_shock" class="game-status cast"></img>
-      </div>
+        <div id="player_damage" class="caster-text"></div>
+        <div id="player_input" class="CP"></div>
+        <div id="player_sequence"></div>
+        <div id="player_spell_icon"></div>
 
-      <div id="p_counters" class="">
-        <h5 id="counter_gold" class=""></h5>
-        <h5 id="counter_killcount" class=""></h5>
-      </div>
+        <div id="hidden_assets" class="hidden">
+          <img id="spell_fail" src="./public/Assets/spells/icons/fail.png">
+        </div>
 
-      <!-- <div id="p_input"></div> -->
-      <img src="" id="p_input" class="center"></img>
-      <div id="p_sequence" class="center">
-        <img src="" id="sequence_1"></img>
-        <img src="" id="sequence_2"></img>
-        <img src="" id="sequence_3"></img>
-        <img src="" id="sequence_4"></img>
-        <img src="" id="sequence_5"></img>
-        <img src="" id="sequence_6"></img>
-      </div>
+        <div id="player_btns_container">
+            <img src="./public/Assets/runes/1.png" id="1-img" onclick="Game.instance.setKey('1')">
+            <img src="./public/Assets/runes/2.png" id="2-img" onclick="Game.instance.setKey('2')">
+            <img src="./public/Assets/runes/3.png" id="3-img" onclick="Game.instance.setKey('3')">
+            <img src="./public/Assets/runes/4.png" id="4-img" onclick="Game.instance.setKey('4')">
+        </div>
 
-      <div id="p_ui" class="player-ui">
-        <div id="p_health_container" class="p-fill-con ui-container">
+        <div id="player_health_container" class="player-fill">
           <img id="fill_highlight_health" class="fill-img" src="./public/Assets/player/fill_highlight.png">
           <img id="fill_border_health" class="fill-img" src="./public/Assets/player/fill_border.png"> 
           <img id="fill_back_health" class="fill-img back" src="./public/Assets/player/fill_back.png"> 
-          <div id="p_health_fill_overlay" class="p fill overlay health"></div>
-          <div id="p_health_fill" class="p fill health"></div>
-          <div id="p_health_text" class="fill-text"></div>
+          <div id="player_health_fill_overlay" class="player fill overlay health"></div>
+          <div id="player_health_fill" class="player fill health"></div>
+          <div id="player_health_text" class="fill-text"></div>
         </div>
 
-        <div id="p_skill_container">
-            <img src="./public/Assets/skills/planet6.png" id="1-img" class="skill-img">
-            <img src="./public/Assets/skills/planet2.png" id="2-img" class="skill-img">
-            <img src="./public/Assets/skills/planet5.png" id="3-img" class="skill-img">
-            <img src="./public/Assets/skills/planet20.png" id="4-img" class="skill-img">
-        </div>
-
-        <div id="p_mana_container" class="p-fill-con ui-container">
+        <div id="player_mana_container" class="player-fill">
           <img id="fill_highlight_mana" class="fill-img" src="./public/Assets/player/fill_highlight.png">
           <img id="fill_border_mana" class="fill-img" src="./public/Assets/player/fill_border.png">
           <img id="fill_back_mana" class="fill-img back" src="./public/Assets/player/fill_back.png"> 
-          <div id="p_mana_fill_overlay" class="p fill overlay mana"></div>
-          <div id="p_mana_fill" class="p fill mana"></div>
-          <div id="p_mana_text" class="fill-text"></div>
+          <div id="player_mana_fill_overlay" class="player fill overlay mana"></div>
+          <div id="player_mana_fill" class="player fill mana"></div>
+          <div id="player_mana_text" class="fill-text"></div>
         </div>
-    </div>
 
+    <!-- -----------------------  JS  ----------------------- -->
+    <!-- -----------------------  JS  ----------------------- -->
     <!-- -----------------------  JS  ----------------------- -->
     <script src="./localstorage.js"></script>
     <script src="./config.js"></script>

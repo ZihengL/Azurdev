@@ -17,7 +17,6 @@ function Player(profile) {
 }
 Player.prototype = Object.create(Caster.prototype);
 Player.prototype.constructor = Player;
-Player.debug = true; // PLAYER INVINCIBLE IF TRUE
 
 // -------------- STATIC
 
@@ -26,17 +25,6 @@ Player.load = function () {
     return image;
   });
 };
-
-// Player.prototype.save = function (profile) {
-//   const spellIds = [];
-
-//   this.spells.forEach(function (spell) {
-//     spellIds.push(spell.getID());
-//   });
-//   profile.spells = spellIds;
-
-//   saveProfile(profile);
-// };
 
 // -------------- UPDATE
 
@@ -54,11 +42,20 @@ Player.prototype.update = function (deltaTime, value) {
     if (value && !this.inputLocked) {
       state = STATES.CAST;
       this.sequence += value;
+      this.sequencingFX(value);
 
       const spell = this.checkSequence(value);
-      if (spell && spell.isEqualLength(this.sequence)) {
-        this.castSpell(spell);
+      if (!spell) {
+        this.resetSequence();
+      } else {
+        if (spell.isEqualLength(this.sequence)) {
+          this.castSpell(spell);
+        }
       }
+
+      // if (spell && spell.isEqualLength(this.sequence)) {
+      //   this.castSpell(spell);
+      // }
     }
   }
 
@@ -90,79 +87,81 @@ Player.prototype.sequenceIndex = function () {
 };
 
 Player.prototype.castSpell = function (spell) {
-  if (this.validateManaCost(spell)) {
-    Caster.prototype.castSpell.call(this, spell);
-    this.mana -= spell.manacost;
-  }
+  // var animation = "sequence-out";
 
-  this.resetSequence();
+  if (this.validateManaCost(spell)) {
+    // animation = "runecast-" + spell.sequence.length;
+    this.mana -= spell.manacost;
+    this.elements.spell_icon.src = spell.affinityIcon.src;
+    this.resetSequence(spell);
+
+    Caster.prototype.castSpell.call(this, spell);
+  } else {
+    this.resetSequence();
+  }
 };
 
 Player.prototype.checkSequence = function (value) {
-  for (var i = 0; i < this.spells.length; i++) {
-    const spell = this.spells[i];
-    console.log("Checking spell:", this.sequence, "-", spell.sequence);
+  console.log("SEQUENCE", this.sequence);
+  for (const spell of this.spells) {
+    console.log(spell.name, spell.sequence);
 
     if (spell.validateSequence(this.sequence)) {
-      this.sequencingFX(value, true);
+      // this.sequencingFX(value, true);
       return spell;
     }
   }
 
-  this.sequencingFX(value, false);
-  this.resetSequence();
+  // this.sequencingFX(value, false);
+  setTimeout(this.resetSequence, 500);
   return null;
 };
 
-// const onAnimationEnd = function (element, classes) {
-//   classes.forEach(function (classname) {
-//     element.classList.remove(classname);
-//   });
-//   sequenceElem.classList.remove("spell-fade-out");
-//   sequenceElem.removeEventListener("animationend", onAnimationEnd);
-//   sequenceElem.textContent = inputElem.textContent = "";
-// };
-
 Player.prototype.sequencingFX = function (value, valid) {
-  const glowEffect = (valid ? "" : "in") + "valid-glow";
+  const sequenceImage = new Image();
+  const inputImage = new Image();
+  const buttons = this.elements.buttons.children;
 
-  const sequenceImg = this.elements.sequence.children[this.sequenceIndex()];
-  const inputElem = this.elements.input;
-  sequenceImg.src = inputElem.src = this.elements[value].src;
+  sequenceImage.src = inputImage.src = buttons[value - 1].src;
+  sequenceImage.classList.add("sequence-in");
 
-  sequenceImg.classList.add("spell-fade-in", glowEffect);
-  inputElem.classList.add("flash-in-out", glowEffect);
-
-  setTimeout(function () {
-    sequenceImg.classList.remove(glowEffect);
-    inputElem.classList.remove("flash-in-out", glowEffect);
-    inputElem.src = "";
-  }, 500);
+  this.elements.sequence.append(sequenceImage);
+  this.elements.input.append(inputImage);
 };
 
-Player.prototype.resetSequence = function () {
+Player.prototype.resetSequence = function (spell) {
+  var seqAnim, iconImg;
+  if (spell) {
+    seqAnim = "runecast-" + spell.sequence.length;
+    iconImg = spell.icon;
+  } else {
+    seqAnim = "sequence-out";
+    iconImg = document.getElementById("spell_fail");
+  }
+
+  const sequence = this.elements.sequence;
+  const buttons = this.elements.buttons;
+  const icon = this.elements.spell_icon;
+  const onTimeout = function () {
+    // sequence.classList.remove(animation);
+    buttons.classList.remove("grayscale-overlay");
+    sequence.classList.remove(seqAnim);
+    iconImg.remove();
+
+    sequence.innerHTML = this.elements.input.innerHTML = "";
+    this.inputLocked = false;
+  }.bind(this);
+
   this.sequence = "";
   this.inputLocked = true;
-  setTimeout(this.resetSequenceFX(), 500);
-};
 
-// SEQUENCEELEM = HTML CONTAINER FOR EACH PLAYER INPUT
-// INPUTELEM = BRIEFLY FLASHING ELEMENT
-Player.prototype.resetSequenceFX = function () {
-  const sequenceElem = this.elements.sequence;
+  buttons.classList.add("grayscale-overlay");
+  sequence.classList.add(seqAnim);
+  icon.appendChild(iconImg);
+  console.log(iconImg, icon);
+  // icon.classList.add("spellcast");
 
-  sequenceElem.classList.add("spell-fade-out");
-  setTimeout(
-    function () {
-      sequenceElem.classList.remove("spell-fade-out");
-      for (const child of sequenceElem.children) {
-        child.src = "";
-      }
-
-      this.inputLocked = false;
-    }.bind(this),
-    500
-  );
+  setTimeout(onTimeout, 2000);
 };
 
 // -------------- MISC
@@ -178,7 +177,7 @@ Player.prototype.updateManaRegen = function (deltaTime) {
 
 Player.prototype.validateManaCost = function (spell) {
   if (this.mana < spell.manacost) {
-    triggerShakeFX(this.elements.mana_container);
+    triggerFX(this.elements.mana_container, "shake", 500);
     return false;
   }
 
@@ -186,7 +185,7 @@ Player.prototype.validateManaCost = function (spell) {
 };
 
 Player.prototype.applyEffect = function (damage) {
-  if (Player.debug) {
+  if (PLAYER_DEBUG) {
     this.health = 100;
   }
 
@@ -194,6 +193,41 @@ Player.prototype.applyEffect = function (damage) {
 };
 
 // -------------- OLD
+
+// Player.prototype.resetSequenceFX = function () {
+//   const sequence = this.elements.sequence;
+
+//   sequence.classList.add("child-spell-fade-out");
+//   setTimeout(
+//     function () {
+//       sequence.classList.remove("child-spell-fade-out");
+//       sequence.innerHTML = this.elements.input.innerHTML = "";
+
+//       this.inputLocked = false;
+//     }.bind(this),
+//     1000
+//   );
+// };
+
+// const onAnimationEnd = function (element, classes) {
+//   classes.forEach(function (classname) {
+//     element.classList.remove(classname);
+//   });
+//   sequenceElem.classList.remove("spell-fade-out");
+//   sequenceElem.removeEventListener("animationend", onAnimationEnd);
+//   sequenceElem.textContent = inputElem.textContent = "";
+// };
+
+// Player.prototype.save = function (profile) {
+//   const spellIds = [];
+
+//   this.spells.forEach(function (spell) {
+//     spellIds.push(spell.getID());
+//   });
+//   profile.spells = spellIds;
+
+//   saveProfile(profile);
+// };
 
 // Player.prototype.getAffinityElementByValue = function (value) {
 //   return this.elements[value];

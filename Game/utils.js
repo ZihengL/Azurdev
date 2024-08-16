@@ -268,22 +268,32 @@ function triggerTimedFX(element, classname, time) {
   element.classList.remove(classname);
   element.classList.add(classname);
 
+  console.log("START");
   setTimeout(function () {
     element.classList.remove(classname);
+    console.log("END");
   }, time);
 }
 
-function triggerFX(element, classname, callback) {
+function triggerFX(element, classname, time) {
   element.classList.add(classname);
 
-  element.addEventListener("animationend", function handleAnimationEnd() {
-    element.classList.remove(classname);
-    element.removeEventListener("animationend", handleAnimationEnd);
+  // element.addEventListener("animationend", function handleAnimationEnd() {
+  //   element.classList.remove(classname);
+  //   element.removeEventListener("animationend", handleAnimationEnd);
 
-    if (callback) {
-      callback();
-    }
-  });
+  //   if (callback) {
+  //     callback();
+  //   }
+  // });
+
+  setTimeout(function () {
+    element.classList.remove(classname);
+
+    // if (callback) {
+    //   callback();
+    // }
+  }, time);
 }
 
 function triggerFlashFX(affinity) {
@@ -295,5 +305,5 @@ function triggerFlashFX(affinity) {
 function triggerShakeFX(id) {
   const element = document.getElementById(id);
 
-  triggerFX(element, "shake");
+  triggerTimedFX(element, "shake", 500);
 }

@@ -2,30 +2,74 @@ function Spell(id) {
   const options = SPELLS[id];
 
   this.sequence = id.toString();
-  // this.name = options.name;
+  this.name = options.name[Screen.lang];
   this.affinity = options.affinity;
   this.damage = options.damage;
   this.cooldown = options.cooldown;
   this.manacost = options.manacost;
 
+  this.affinityIcon = Game.res.affinities[this.affinity];
+  this.icon = Game.res.spellicons[this.sequence];
   this.fx = SKILL_FX;
 }
 
 // -------------- STATIC
 
 Spell.load = function () {
+  const images = {};
+  var sequence = Promise.resolve();
+
+  const loadOrder = Spell.getLoadOrder();
+  for (const key in loadOrder) {
+    images[key] = {};
+
+    for (const subkey in loadOrder[key]) {
+      const path = loadOrder[key][subkey];
+
+      sequence = sequence.then(function () {
+        return loadImage(path).then(function (image) {
+          images[key][subkey] = image;
+        });
+      });
+    }
+  }
+
+  return sequence.then(function () {
+    return images;
+  });
+};
+
+Spell.loadAffinities = function () {
+  const affinities = {};
+  var sequence = Promise.resolve();
+
+  for (var i = 0; i < AFFINITIES.length; i++) {
+    (function (index) {
+      const path = "./public/Assets/spells/affinities/" + index + ".png";
+
+      sequence = sequence.then(function () {
+        return loadImage(path).then(function (image) {
+          affinities[index] = image;
+        });
+      });
+    })(i);
+  }
+
+  return sequence.then(function () {
+    return affinities;
+  });
+};
+
+Spell.loadIcons = function () {
   const spells = {};
   var sequence = Promise.resolve();
 
-  for (var key in SPELLS) {
-    const spell = SPELLS[key];
-    const path = spell.effect.cast;
+  for (const seq in SPELLS) {
+    const path = "./public/Assets/spells/icons/" + seq + ".jpg";
 
     sequence = sequence.then(function () {
       return loadImage(path).then(function (image) {
-        spells[key] = {
-          effect: image,
-        };
+        spells[seq] = image;
       });
     });
   }
@@ -35,15 +79,24 @@ Spell.load = function () {
   });
 };
 
+Spell.getLoadOrder = function () {
+  const loadOrder = { affinities: {}, icons: {} };
 
+  for (var i = 0; i < AFFINITIES.length; i++) {
+    loadOrder.affinities[i] = "./public/Assets/spells/affinities/" + i + ".png";
+  }
+
+  for (const seq in SPELLS) {
+    loadOrder.icons[seq] = "./public/Assets/spells/icons/" + seq + ".jpg";
+  }
+
+  return loadOrder;
+};
 
 // -------------- MISC
 
-
-
 Spell.prototype.validateSequence = function (sequence) {
   const index = this.sequence.indexOf(sequence);
-  console.log(this.sequence, sequence, index);
 
   return index === 0;
 };
@@ -57,13 +110,7 @@ Spell.prototype.isCastable = function (player) {
 };
 
 Spell.prototype.createProjectile = function (origin, target) {
-  return new Projectile(
-    origin,
-    target,
-    this.damage,
-    this.affinity,
-    this.fx
-  );
+  return new Projectile(origin, target, this.damage, this.affinity, this.fx);
 };
 
 // Spell.prototype.getID = function () {

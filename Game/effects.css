@@ -199,66 +199,80 @@
 }
 
 /* SPELL ANIMATION */
-@-webkit-keyframes spellFadeIn {
+@-webkit-keyframes sequenceIn {
   0% {
     opacity: 0;
-    -webkit-transform: translate(-50%, -50%) scaleX(0) scaleY(10);
-    transform: translate(-50%, -50%) scaleX(0) scaleY(10);
+    /* -webkit-transform: translate(-50%, -50%) scaleX(0) scaleY(10);
+    transform: translate(-50%, -50%) scaleX(0) scaleY(10); */
+    -webkit-transform: scaleX(0) scaleY(10);
+    transform: scaleX(0) scaleY(10);
   }
   100% {
     opacity: 1;
-    -webkit-transform: translate(-50%, -50%) scaleX(1) scaleY(1);
-    transform: translate(-50%, -50%) scaleX(1) scaleY(1);
+    /* -webkit-transform: translate(-50%, -50%) scaleX(1) scaleY(1); */
+    /* transform: translate(-50%, -50%) scaleX(1) scaleY(1); */
+    -webkit-transform: scaleX(1) scaleY(1);
+    transform: scaleX(1) scaleY(1);
   }
 }
 
-@keyframes spellFadeIn {
+@keyframes sequenceIn {
   0% {
     opacity: 0;
-    -webkit-transform: translate(-50%, -50%) scaleX(0) scaleY(10);
-    transform: translate(-50%, -50%) scaleX(0) scaleY(10);
+    -webkit-transform: scaleX(0) scaleY(10);
+    transform: scaleX(0) scaleY(10);
   }
   100% {
     opacity: 1;
-    -webkit-transform: translate(-50%, -50%) scaleX(1) scaleY(1);
-    transform: translate(-50%, -50%) scaleX(1) scaleY(1);
+    -webkit-transform: scaleX(1) scaleY(1);
+    transform: scaleX(1) scaleY(1);
   }
 }
 
-.spell-fade-in {
-  -webkit-animation: spellFadeIn 0.5s forwards;
-  animation: spellFadeIn 0.5s forwards;
+.sequence-in {
+  -webkit-animation: sequenceIn 0.5s forwards;
+  animation: sequenceIn 0.5s forwards;
 }
 
-@-webkit-keyframes spellFadeOut {
+@-webkit-keyframes sequenceOut {
   0% {
     opacity: 1;
-    -webkit-transform: translate(-50%, -50%) scaleX(1) scaleY(1);
-    transform: translate(-50%, -50%) scaleX(1) scaleY(1);
+    -webkit-transform: scaleX(1) scaleY(1);
+    transform: scaleX(1) scaleY(1);
+  }
+  50% {
+    opacity: 1;
+    -webkit-transform: scaleX(1) scaleY(1);
+    transform: scaleX(1) scaleY(1);
   }
   100% {
     opacity: 0;
-    -webkit-transform: translate(-50%, -50%) scaleX(0) scaleY(0);
-    transform: translate(-50%, -50%) scaleX(0) scaleY(0);
+    -webkit-transform: scaleX(0) scaleY(0);
+    transform: scaleX(0) scaleY(0);
   }
 }
 
-@keyframes spellFadeOut {
+@keyframes sequenceOut {
   0% {
     opacity: 1;
-    -webkit-transform: translate(-50%, -50%) scaleX(1) scaleY(1);
-    transform: translate(-50%, -50%) scaleX(1) scaleY(1);
+    -webkit-transform: scaleX(1) scaleY(1);
+    transform: scaleX(1) scaleY(1);
+  }
+  50% {
+    opacity: 1;
+    -webkit-transform: scaleX(1) scaleY(1);
+    transform: scaleX(1) scaleY(1);
   }
   100% {
     opacity: 0;
-    -webkit-transform: translate(-50%, -50%) scaleX(0) scaleY(0);
-    transform: translate(-50%, -50%) scaleX(0) scaleY(0);
+    -webkit-transform: scaleX(0) scaleY(0);
+    transform: scaleX(0) scaleY(0);
   }
 }
 
-.spell-fade-out {
-  -webkit-animation: spellFadeOut 1.5s forwards;
-  animation: spellFadeOut 1.5s forwards;
+.sequence-out > img {
+  -webkit-animation: sequenceOut 1s forwards;
+  animation: sequenceOut 1s forwards;
   -webkit-animation-iteration-count: 1;
   animation-iteration-count: 1;
 }
@@ -267,45 +281,45 @@
 @-webkit-keyframes flashInOut {
   0% {
     opacity: 0;
-    -webkit-animation: translate(-50%, -50%) scaleX(2) scaleY(2);
-    transform: translate(-50%, -50%) scaleX(2) scaleY(2);
+    -webkit-animation: translate(-50%, -50%) scale(2.5, 2.5);
+    transform: translate(-50%, -50%) scale(2.5, 2.5);
   }
   50% {
     opacity: 0.5;
-    -webkit-animation: translate(-50%, -50%) scaleX(2.5) scaleY(2.5);
-    transform: translate(-50%, -50%) scaleX(2.5) scaleY(2.5);
+    -webkit-animation: translate(-50%, -50%) scale(3, 3);
+    transform: translate(-50%, -50%) scale(3, 3);
   }
   100% {
     opacity: 0;
-    -webkit-animation: translate(-50%, -50%) scaleX(3) scaleY(3);
-    transform: translate(-50%, -50%) scaleX(3) scaleY(3);
+    -webkit-animation: translate(-50%, -50%) scale(3.5, 3.5);
+    transform: translate(-50%, -50%) scale(3.5, 3.5);
   }
 }
 
 @keyframes flashInOut {
   0% {
     opacity: 0;
-    -webkit-animation: translate(-50%, -50%) scaleX(2) scaleY(2);
-    transform: translate(-50%, -50%) scaleX(2) scaleY(2);
+    -webkit-animation: translate(-50%, -50%) scale(2.5, 2.5);
+    transform: translate(-50%, -50%) scale(2.5, 2.5);
   }
   50% {
-    opacity: 0.25;
-    -webkit-animation: translate(-50%, -50%) scaleX(2.5) scaleY(2.5);
-    transform: translate(-50%, -50%) scaleX(2.5) scaleY(2.5);
+    opacity: 0.5;
+    -webkit-animation: translate(-50%, -50%) scale(3, 3);
+    transform: translate(-50%, -50%) scale(3, 3);
   }
   100% {
     opacity: 0;
-    -webkit-animation: translate(-50%, -50%) scaleX(3) scaleY(3);
-    transform: translate(-50%, -50%) scaleX(3) scaleY(3);
+    -webkit-animation: translate(-50%, -50%) scale(3.5, 3.5);
+    transform: translate(-50%, -50%) scale(3.5, 3.5);
   }
 }
 
 .flash-in-out {
-  -webkit-animation: flashInOut 0.5s linear;
-  animation: flashInOut 0.5s linear;
   opacity: 0;
-  /* -webkit-animation-iteration-count: 1;
-    animation-iteration-count: 1; */
+  -webkit-animation: flashInOut 0.75s ease-in-out;
+  animation: flashInOut 0.75s ease-in-out;
+  -webkit-animation-iteration-count: 1;
+  animation-iteration-count: 1;
 }
 
 /* BUMP ANIMATION */
@@ -335,4 +349,191 @@
   animation: bumpdown 0.25s forwards;
   -webkit-animation-iteration-count: 1;
   animation-iteration-count: 1;
+}
+
+/* SPELLCAST ANIMATION */
+@-webkit-keyframes spellcast {
+  0% {
+    -webkit-animation: translate(-50%, -50%) scale(2, 2);
+    transform: translate(-50%, -50%) scale(2, 2);
+    opacity: 0;
+  }
+  30% {
+    -webkit-animation: translate(-50%, -50%) scale(2, 2);
+    transform: translate(-50%, -50%) scale(2, 2);
+    opacity: 0;
+  }
+  50% {
+    -webkit-animation: translate(-50%, -50%) scale(1, 1);
+    transform: translate(-50%, -50%) scale(1, 1);
+    opacity: 1;
+  }
+  80% {
+    -webkit-animation: translate(-50%, -50%) scale(1, 1);
+    transform: translate(-50%, -50%) scale(1, 1);
+    opacity: 1;
+  }
+  100% {
+    -webkit-animation: translate(-50%, -50%) scale(1, 1);
+    transform: translate(-50%, -50%) scale(1, 1);
+    opacity: 0;
+  }
+}
+
+@keyframes spellcast {
+  0% {
+    -webkit-animation: translate(-50%, -50%) scale(2, 2);
+    transform: translate(-50%, -50%) scale(2, 2);
+    opacity: 0;
+  }
+  30% {
+    -webkit-animation: translate(-50%, -50%) scale(2, 2);
+    transform: translate(-50%, -50%) scale(2, 2);
+    opacity: 0;
+  }
+  50% {
+    -webkit-animation: translate(-50%, -50%) scale(1, 1);
+    transform: translate(-50%, -50%) scale(1, 1);
+    opacity: 1;
+  }
+  80% {
+    -webkit-animation: translate(-50%, -50%) scale(1, 1);
+    transform: translate(-50%, -50%) scale(1, 1);
+    opacity: 1;
+  }
+  100% {
+    -webkit-animation: translate(-50%, -50%) scale(1, 1);
+    transform: translate(-50%, -50%) scale(1, 1);
+    opacity: 0;
+  }
+}
+
+.spellcast {
+  -webkit-animation: spellcast 2s forwards;
+  animation: spellcast 2s forwards;
+}
+
+/* RUNES ANIMATION */
+@-webkit-keyframes runes4cast1 {
+  50% {
+    -webkit-animation: translate(-50px, 0);
+    transform: translate(-50px, 0);
+    opacity: 1;
+  }
+  100% {
+    -webkit-animation: translate(-50px, 0);
+    transform: translate(-50px, 0);
+    opacity: 0;
+  }
+}
+
+@keyframes runes4cast1 {
+  50% {
+    -webkit-animation: translate(-50px, 0);
+    transform: translate(-50px, 0);
+    opacity: 1;
+  }
+  100% {
+    -webkit-animation: translate(-50px, 0);
+    transform: translate(-50px, 0);
+    opacity: 0;
+  }
+}
+
+@-webkit-keyframes runes4cast2 {
+  50% {
+    -webkit-animation: translate(50px, -125px);
+    transform: translate(50px, -125px);
+    opacity: 1;
+  }
+  100% {
+    -webkit-animation: translate(50px, -125px);
+    transform: translate(50px, -125px);
+    opacity: 0;
+  }
+}
+
+@keyframes runes4cast2 {
+  50% {
+    -webkit-animation: translate(50px, -125px);
+    transform: translate(50px, -125px);
+    opacity: 1;
+  }
+  100% {
+    -webkit-animation: translate(50px, -125px);
+    transform: translate(50px, -125px);
+    opacity: 0;
+  }
+}
+
+@-webkit-keyframes runes4cast3 {
+  50% {
+    -webkit-animation: translate(-50px, 125px);
+    transform: translate(-50px, 125px);
+    opacity: 1;
+  }
+  100% {
+    -webkit-animation: translate(-50px, 125px);
+    transform: translate(-50px, 125px);
+    opacity: 0;
+  }
+}
+
+@keyframes runes4cast3 {
+  50% {
+    -webkit-animation: translate(-50px, 125px);
+    transform: translate(-50px, 125px);
+    opacity: 1;
+  }
+  100% {
+    -webkit-animation: translate(-50px, 125px);
+    transform: translate(-50px, 125px);
+    opacity: 0;
+  }
+}
+
+@-webkit-keyframes runes4cast4 {
+  50% {
+    -webkit-animation: translate(50px, 0);
+    transform: translate(50px, 0);
+    opacity: 1;
+  }
+  100% {
+    -webkit-animation: translate(50px, 0);
+    transform: translate(50px, 0);
+    opacity: 0;
+  }
+}
+
+@keyframes runes4cast4 {
+  50% {
+    -webkit-animation: translate(50px, 0);
+    transform: translate(50px, 0);
+    opacity: 1;
+  }
+  100% {
+    -webkit-animation: translate(50px, 0);
+    transform: translate(50px, 0);
+    opacity: 0;
+  }
+}
+
+.runecast-4 img:nth-child(1) {
+  -webkit-animation: runes4cast1 2s forwards;
+  animation: runes4cast1 2s forwards;
+}
+
+.runecast-4 img:nth-child(2) {
+  -webkit-animation: runes4cast2 2s forwards;
+  animation: runes4cast2 2s forwards;
+}
+
+.runecast-4 img:nth-child(3) {
+  -webkit-animation: runes4cast3 2s forwards;
+  animation: runes4cast3 2s forwards;
+}
+
+.runecast-4 img:nth-child(4) {
+  -webkit-animation: runes4cast4 2s forwards;
+  animation: runes4cast4 2s forwards;
 }
